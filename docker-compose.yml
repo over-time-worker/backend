@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:latest
+    networks:
+      - overtime_network
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+
+networks:
+  overtime_network:
+    driver: bridge
