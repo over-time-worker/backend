@@ -1,4 +1,4 @@
-package com.owlexpress.product.domain;
+package com.owlexpress.product.domain.entity;
 
 import com.owlexpress.product.common.BaseEntity;
 import jakarta.persistence.*;
