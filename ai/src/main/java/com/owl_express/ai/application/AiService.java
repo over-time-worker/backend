@@ -57,6 +57,26 @@ public class AiService {
         return MessageCreateResponseDto.builder().message(responseMessage).build();
     }
 
+    public MessageCreateResponseDto createMessageForCompanyDeliver(
+            MessageCreateRequestDto messageCreateRequestDto
+    ) {
+        String requestMessage = createRequestMessage(messageCreateRequestDto);
+        String responseMessage = callApi(requestMessage);
+
+        Ai aiMessage = Ai.builder()
+                .consumerDeliverId(messageCreateRequestDto.getDeliverId())
+                .consumerDeliverPlatformId(messageCreateRequestDto.getDeliverPlatformId())
+                .request(requestMessage)
+                .response(responseMessage)
+                .build();
+
+        // TODO : user 정보로 교체
+        aiMessage.createdEntity(1L);
+        aiRepository.save(aiMessage);
+
+        return MessageCreateResponseDto.builder().message(responseMessage).build();
+    }
+
     private String createRequestMessage(MessageCreateRequestDto messageCreateRequestDto) {
 
         return requestFormat
@@ -64,7 +84,7 @@ public class AiService {
                 .replace("{ordererName}", messageCreateRequestDto.getOrdererName())
                 .replace("{productInfo}", messageCreateRequestDto.getProductInfo())
                 .replace("{start}", messageCreateRequestDto.getStartHub())
-                .replace("{destination}", messageCreateRequestDto.getEndHub())
+                .replace("{destination}", messageCreateRequestDto.getDestination())
                 .replace("{deliverName}", messageCreateRequestDto.getDeliverName())
                 .replace("{orderDescription}", messageCreateRequestDto.getOrderDescription())
                 .replace("{departureDeadline}", messageCreateRequestDto.getDepartureDeadline());

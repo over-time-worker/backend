@@ -15,7 +15,7 @@ public class MessageCreateRequestDto {
     private String ordererName;
     private String productInfo;
     private String startHub;
-    private String endHub;
+    private String destination;
     private UUID deliverId;
     private String deliverName;
     private String deliverPlatformId;

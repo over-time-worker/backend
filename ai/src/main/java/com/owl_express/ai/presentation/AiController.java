@@ -32,4 +32,19 @@ public class AiController {
                         .data(responseDto)
                         .build());
     }
+
+    @PostMapping("/messages/company")
+    public ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForCompanyDeliver(
+            @RequestBody MessageCreateRequestDto requestDto
+    ) {
+        MessageCreateResponseDto responseDto = aiService.createMessageForCompanyDeliver(requestDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                CommonDto.<MessageCreateResponseDto>builder()
+                        .status(HttpStatus.CREATED)
+                        .message("메세지 생성 완료")
+                        .code(HttpStatus.CREATED.value())
+                        .data(responseDto)
+                        .build());
+    }
 }

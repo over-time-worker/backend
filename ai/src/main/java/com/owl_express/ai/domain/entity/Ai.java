@@ -17,28 +17,29 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "p_ai")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class Ai extends BaseEntity {
 
     @Id
-    @Column(length = 50)
+    @Column(name = "ai_id", length = 50)
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "request", columnDefinition = "TEXT", nullable = false)
     private String request;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "response", columnDefinition = "TEXT", nullable = false)
     private String response;
 
+    @Column(name = "hub_deliver_id")
     private UUID hubDeliverId;
 
-    private String consumerDeliverId;
+    @Column(name = "consumer_deliver_id")
+    private UUID consumerDeliverId;
 
-    @Column(length = 50)
+    @Column(name = "hub_deliver_platform_id", length = 50)
     private String hubDeliverPlatformId;
 
-    @Column(length = 50)
+    @Column(name = "consumer_deliver_platform_id", length = 50)
     private String consumerDeliverPlatformId;
 
     @Builder
@@ -46,7 +47,7 @@ public class Ai extends BaseEntity {
             String request,
             String response,
             UUID hubDeliverId,
-            String consumerDeliverId,
+            UUID consumerDeliverId,
             String hubDeliverPlatformId,
             String consumerDeliverPlatformId
     ) {
