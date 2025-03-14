@@ -4,6 +4,7 @@ import com.owlexpress.product.common.CommonDto;
 import com.owlexpress.product.domain.service.ProductDomainService;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<CommonDto> create(
 //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @RequestBody CreateProductRequestDto createProductRequestDto
+            @Valid @RequestBody CreateProductRequestDto createProductRequestDto
     ) {
         productDomainService.createProduct(createProductRequestDto);
 
@@ -36,7 +37,7 @@ public class ProductController {
     @PutMapping("/{productsId}")
     public ResponseEntity<CommonDto> update(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @RequestBody UpdateProductDto updateProductDto,
+            @Valid @RequestBody UpdateProductDto updateProductDto,
             @PathVariable UUID productsId
     ){
 
