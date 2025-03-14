@@ -4,6 +4,7 @@ import com.owlexpress.product.common.CommonDto;
 import com.owlexpress.product.domain.service.ProductDomainService;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
+import com.owlexpress.product.presentation.dto.response.FindProductResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,23 @@ public class ProductController {
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
                 .message("상품 수정 성공")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+    }
+
+    @GetMapping("/{productsId}")
+    public ResponseEntity<CommonDto<FindProductResponse>> get(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @PathVariable UUID productsId
+    ){
+        FindProductResponse findProductResponse= productDomainService.find(productsId);
+
+        CommonDto<FindProductResponse> commonDto = CommonDto.<FindProductResponse>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .message("상품 조회 성공")
+                .data(findProductResponse)
                 .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
