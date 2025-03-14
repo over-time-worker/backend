@@ -22,7 +22,7 @@ public class Ai extends BaseEntity {
     @Id
     @Column(name = "ai_id", length = 50)
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     @Column(name = "request", columnDefinition = "TEXT", nullable = false)
     private String request;

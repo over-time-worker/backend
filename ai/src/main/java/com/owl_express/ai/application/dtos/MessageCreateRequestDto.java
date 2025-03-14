@@ -1,6 +1,7 @@
 package com.owl_express.ai.application.dtos;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class MessageCreateRequestDto {
 
     @Size(min = 1, max = 50, message = "[size:orderId]")
-    private UUID orderId;
+    private String orderId;
     @Size(min = 1, max = 50, message = "[size:ordererName]")
     private String ordererName;
     @NotBlank(message = "[notBlank:productInfo]")
@@ -23,7 +24,7 @@ public class MessageCreateRequestDto {
     private String startHub;
     @Size(min = 1, max = 255, message = "[size:destination]")
     private String destination;
-    @Size(min = 1, max = 50, message = "[size:deliverId]")
+    @NotNull(message = "[notBlank:deliverId]")
     private UUID deliverId;
     @Size(min = 1, max = 50, message = "[size:deliverName]")
     private String deliverName;

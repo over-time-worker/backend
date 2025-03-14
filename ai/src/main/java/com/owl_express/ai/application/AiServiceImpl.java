@@ -2,8 +2,12 @@ package com.owl_express.ai.application;
 
 import com.owl_express.ai.application.dtos.MessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.MessageCreateResponseDto;
+import com.owl_express.ai.application.dtos.MessageFindResponseDto;
+import com.owl_express.ai.application.exceptions.AiException;
+import com.owl_express.ai.application.exceptions.AiException.MessageNotFoundException;
 import com.owl_express.ai.domain.entity.Ai;
 import com.owl_express.ai.domain.repository.AiRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -35,6 +39,7 @@ public class AiServiceImpl implements AiService{
 
     private static final String CONTENT_TYPE = "Content-Type";
 
+    @Override
     public MessageCreateResponseDto createMessageForHubDeliver(
             MessageCreateRequestDto messageCreateRequestDto
     ) {
@@ -55,6 +60,7 @@ public class AiServiceImpl implements AiService{
         return MessageCreateResponseDto.builder().message(responseMessage).build();
     }
 
+    @Override
     public MessageCreateResponseDto createMessageForCompanyDeliver(
             MessageCreateRequestDto messageCreateRequestDto
     ) {
@@ -68,11 +74,22 @@ public class AiServiceImpl implements AiService{
                 .response(responseMessage)
                 .build();
 
+        //얘 도메인 로직으로 넣기
         // TODO : user 정보로 교체
         aiMessage.createdEntity(1L);
         aiRepository.save(aiMessage);
 
         return MessageCreateResponseDto.builder().message(responseMessage).build();
+    }
+
+    @Override
+    public MessageFindResponseDto findMessage(UUID aiId) {
+
+        Ai ai = aiRepository.findById(aiId).orElseThrow(
+                () -> new AiException.MessageNotFoundException("Not Found Message"));
+
+        return MessageFindResponseDto.form(ai);
+
     }
 
     private String createRequestMessage(MessageCreateRequestDto messageCreateRequestDto) {
