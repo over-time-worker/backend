@@ -1,8 +1,8 @@
-package com.owl_express.ai.application;
+package com.owl_express.ai.application.service;
 
-import com.owl_express.ai.application.dtos.MessageCreateRequestDto;
-import com.owl_express.ai.application.dtos.MessageCreateResponseDto;
-import com.owl_express.ai.application.dtos.MessageFindResponseDto;
+import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
+import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import java.util.UUID;
 
 public interface AiService {

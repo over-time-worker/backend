@@ -1,10 +1,10 @@
 package com.owl_express.ai.presentation;
 
-import com.owl_express.ai.application.AiService;
+import com.owl_express.ai.application.service.AiService;
 import com.owl_express.ai.application.dtos.CommonDto;
-import com.owl_express.ai.application.dtos.MessageCreateRequestDto;
-import com.owl_express.ai.application.dtos.MessageCreateResponseDto;
-import com.owl_express.ai.application.dtos.MessageFindResponseDto;
+import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
+import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.owl_express.ai.application.dtos;
+package com.owl_express.ai.application.dtos.response;
 
 import lombok.AccessLevel;
 import lombok.Builder;
