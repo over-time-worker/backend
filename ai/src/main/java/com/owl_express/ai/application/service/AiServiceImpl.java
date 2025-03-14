@@ -1,10 +1,9 @@
-package com.owl_express.ai.application;
+package com.owl_express.ai.application.service;
 
-import com.owl_express.ai.application.dtos.MessageCreateRequestDto;
-import com.owl_express.ai.application.dtos.MessageCreateResponseDto;
-import com.owl_express.ai.application.dtos.MessageFindResponseDto;
+import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
+import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import com.owl_express.ai.application.exceptions.AiException;
-import com.owl_express.ai.application.exceptions.AiException.MessageNotFoundException;
 import com.owl_express.ai.domain.entity.Ai;
 import com.owl_express.ai.domain.repository.AiRepository;
 import java.util.UUID;
@@ -20,7 +19,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AiServiceImpl implements AiService{
+public class AiServiceImpl implements AiService {
 
     private final AiRepository aiRepository;
     private final WebClient webClient;

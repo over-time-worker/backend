@@ -1,4 +1,4 @@
-package com.owl_express.ai.application.dtos;
+package com.owl_express.ai.application.dtos.response;
 
 import com.owl_express.ai.common.util.CommonUtil;
 import com.owl_express.ai.domain.entity.Ai;
