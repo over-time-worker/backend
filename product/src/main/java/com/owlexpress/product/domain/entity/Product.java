@@ -1,4 +1,4 @@
-package com.owlexpress.product.domain;
+package com.owlexpress.product.domain.entity;
 
 import com.owlexpress.product.common.BaseEntity;
 import com.owlexpress.product.domain.constant.ProductType;
@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Builder
 @Getter
 @Setter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -37,5 +36,12 @@ public class Product extends BaseEntity {
 
     @OneToMany(mappedBy = "product")
     public Set<HubInfo> hubInfo;
+
+    @Builder
+    public Product(String productName, BigDecimal productPrice, ProductType productType) {
+       this.productName = productName;
+       this.productPrice = productPrice;
+       this.productType = productType;
+    }
 
 }
