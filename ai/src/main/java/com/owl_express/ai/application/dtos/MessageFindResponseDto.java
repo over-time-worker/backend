@@ -23,7 +23,7 @@ public class MessageFindResponseDto {
         this.createdAt = createdAt;
     }
 
-    public static MessageFindResponseDto form(Ai ai) {
+    public static MessageFindResponseDto toDto(Ai ai) {
         return MessageFindResponseDto.builder()
                 .messageId(ai.getId())
                 .message(ai.getResponse())

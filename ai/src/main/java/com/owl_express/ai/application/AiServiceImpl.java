@@ -74,7 +74,6 @@ public class AiServiceImpl implements AiService{
                 .response(responseMessage)
                 .build();
 
-        //얘 도메인 로직으로 넣기
         // TODO : user 정보로 교체
         aiMessage.createdEntity(1L);
         aiRepository.save(aiMessage);
