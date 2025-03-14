@@ -4,6 +4,7 @@ import com.owl_express.ai.application.AiService;
 import com.owl_express.ai.application.dtos.CommonDto;
 import com.owl_express.ai.application.dtos.MessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.MessageCreateResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class AiController {
 
     @PostMapping("/messages/hub")
     public ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForHubDeliver(
-            @RequestBody MessageCreateRequestDto requestDto
+            @Valid @RequestBody MessageCreateRequestDto requestDto
     ) {
         MessageCreateResponseDto responseDto = aiService.createMessageForHubDeliver(requestDto);
 
@@ -35,7 +36,7 @@ public class AiController {
 
     @PostMapping("/messages/company")
     public ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForCompanyDeliver(
-            @RequestBody MessageCreateRequestDto requestDto
+            @Valid @RequestBody MessageCreateRequestDto requestDto
     ) {
         MessageCreateResponseDto responseDto = aiService.createMessageForCompanyDeliver(requestDto);
 
