@@ -1,4 +1,4 @@
-package user;
+package com.owlexpress.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
