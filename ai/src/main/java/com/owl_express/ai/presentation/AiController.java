@@ -1,0 +1,35 @@
+package com.owl_express.ai.presentation;
+
+import com.owl_express.ai.application.AiService;
+import com.owl_express.ai.application.dtos.CommonDto;
+import com.owl_express.ai.application.dtos.MessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.MessageCreateResponseDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/ai")
+@RequiredArgsConstructor
+public class AiController {
+    private final AiService aiService;
+
+    @PostMapping("/messages/hub")
+    public ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForHubDeliver(
+            @RequestBody MessageCreateRequestDto requestDto
+    ) {
+        MessageCreateResponseDto responseDto = aiService.createMessageForHubDeliver(requestDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                CommonDto.<MessageCreateResponseDto>builder()
+                        .status(HttpStatus.CREATED)
+                        .message("메세지 생성 완료")
+                        .code(HttpStatus.CREATED.value())
+                        .data(responseDto)
+                        .build());
+    }
+}
