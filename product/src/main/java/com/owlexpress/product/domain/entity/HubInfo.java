@@ -17,13 +17,13 @@ public class HubInfo extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "hub_info_id")
+    @Column(name = "hub_info_id", updatable = false, nullable = false)
     private UUID hubInfoId;
 
-    @Column(name = "hub_id")
+    @Column(name = "hub_id", nullable = false)
     private UUID hubId;
 
-    @Column(name = "hub_product_quantity")
+    @Column(name = "hub_product_quantity", nullable = false)
     private Integer hubProductQuantity;
 
     @ManyToOne
