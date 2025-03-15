@@ -18,13 +18,14 @@ public class ProductDomainServiceImpl implements ProductDomainService {
     @Override
     public void createProduct(CreateProductRequestDto createProductRequestDto) {
 
-        Product product = Product.builder()
-                .productName(createProductRequestDto.getProductName())
-                .productPrice(createProductRequestDto.getProductPrice())
-                .productType(createProductRequestDto.getProductType())
-                .build();
+        //상품 중복검사
+        validateProductName(createProductRequestDto);
 
-        //TODO:: 상품명 중복 검사
+        Product product = CreateProductRequestDto.toEntity(createProductRequestDto);
+
+        //TODO :: AuditAware 추가 후 제거
+        product.updateCreateData(1L);
+
 
         productRepository.save(product);
     }
@@ -34,9 +35,16 @@ public class ProductDomainServiceImpl implements ProductDomainService {
     public void updateProduct(UpdateProductDto updateProductDto, UUID productsId) {
         //제품 정보 수정
         Product product = getProduct(productsId);
+
         product.setProductName(updateProductDto.getProductName());
         product.setProductPrice(updateProductDto.getProductPrice());
         product.setProductType(updateProductDto.getProductType());
+        product.setProducerId(updateProductDto.getProducerId());
+        product.setProducerName(updateProductDto.getProducerName());
+        product.setProducerAddress(updateProductDto.getProducerAddress());
+
+        //TODO :: AuditAware 추가 후 제거
+        product.updateModifiedData(1L);
 
         //TODO :: 제품 정보 수정 이벤트 전파(FeignClient)
         // 변경된 상품 정보를 연결된 허브로 FeignClient 요청을 날려서 이 제품을 포함한 허브 수정 API 발동!
@@ -47,6 +55,14 @@ public class ProductDomainServiceImpl implements ProductDomainService {
     private Product getProduct(UUID productsId) {
         return productRepository.findById(productsId).orElseThrow(
                 () -> new IllegalArgumentException("찾는 회원이 없습니다.")
+        );
+    }
+
+    private void validateProductName(CreateProductRequestDto createProductRequestDto) {
+        productRepository.findByProductName(createProductRequestDto.getProductName()).ifPresent(
+                product -> {
+                    throw new IllegalArgumentException("Product already exists");
+                }
         );
     }
 }

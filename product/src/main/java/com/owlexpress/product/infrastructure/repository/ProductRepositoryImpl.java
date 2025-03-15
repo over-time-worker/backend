@@ -1,7 +1,7 @@
 package com.owlexpress.product.infrastructure.repository;
 
-import com.owlexpress.product.domain.repository.ProductRepository;
 import com.owlexpress.product.domain.entity.Product;
+import com.owlexpress.product.domain.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,5 +29,10 @@ public class ProductRepositoryImpl implements ProductRepository{
     @Override
     public Page<Product> searchProducts(String q, String sort, String orderBy, PageRequest pageRequest) {
         return productQueryDslRepository.searchProducts(q, sort, orderBy,pageRequest);
+    }
+
+    @Override
+    public Optional<Product> findByProductName(String productName) {
+        return productJpaRepository.findByProductName(productName);
     }
 }

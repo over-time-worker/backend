@@ -1,9 +1,10 @@
 package com.owlexpress.product.application;
 
-import com.owlexpress.product.domain.entity.Product;
-import com.owlexpress.product.domain.repository.ProductRepository;
 import com.owlexpress.product.application.dto.response.FindProductResponse;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
+import com.owlexpress.product.domain.entity.Product;
+import com.owlexpress.product.domain.repository.ProductRepository;
+import com.owlexpress.product.infrastructure.config.ProductSearchConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,12 +15,13 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 @Service
 @RequiredArgsConstructor
 public class ProductHubUsecase {
 
     private final ProductRepository productRepository;
+    private final ProductSearchConfig productSearchConfig; // 설정 클래스 주입
+
 
     public FindProductResponse find(UUID productsId) {
         Product product = getProduct(productsId);
@@ -35,6 +37,16 @@ public class ProductHubUsecase {
     }
 
     public PagedModel<SearchProductResponseDto> search(int page, int size, String sort, String q, String orderBy) {
+        // 페이지 크기 제한 적용
+        if (!productSearchConfig.getAllowedPageSizes().contains(size)) {
+            size = productSearchConfig.getDefaultPageSize();
+        }
+
+        // 정렬 기준 제한 적용
+        if (!productSearchConfig.getAllowedSorts().contains(sort)) {
+            sort = productSearchConfig.getDefaultSort();
+        }
+
         Sort.Direction direction = orderBy.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sort));
 
