@@ -1,6 +1,6 @@
 package com.owlexpress.product.application;
 
-import com.owlexpress.product.application.dto.response.FindProductResponse;
+import com.owlexpress.product.application.dto.response.FindProductResponseDto;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.entity.Product;
@@ -24,7 +24,7 @@ public class ProductHubUsecase {
     private final ProductSearchConfig productSearchConfig; // 설정 클래스 주입
 
 
-    public FindProductResponse find(UUID productsId) {
+    public FindProductResponseDto find(UUID productsId) {
         Product product = getProduct(productsId);
 
         AtomicInteger totalQuantity = new AtomicInteger(1000);
@@ -34,7 +34,7 @@ public class ProductHubUsecase {
                         //TODO :: Hub에 재고조회 API 날려서 각 재고 모아오기
                         totalQuantity.addAndGet(hubInfo.getHubProductQuantity())
         );
-        return FindProductResponse.toDTO(product, totalQuantity);
+        return FindProductResponseDto.toDTO(product, totalQuantity);
     }
 
     public PagedModel<SearchProductResponseDto> search(int page, int size, String sort, String q, String orderBy) {

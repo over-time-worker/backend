@@ -5,7 +5,7 @@ import com.owlexpress.product.common.CommonDto;
 import com.owlexpress.product.domain.service.ProductDomainService;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
-import com.owlexpress.product.application.dto.response.FindProductResponse;
+import com.owlexpress.product.application.dto.response.FindProductResponseDto;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,17 +58,17 @@ public class ProductController {
     }
 
     @GetMapping("/{productsId}")
-    public ResponseEntity<CommonDto<FindProductResponse>> get(
+    public ResponseEntity<CommonDto<FindProductResponseDto>> get(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID productsId
     ){
-        FindProductResponse findProductResponse= productHubUsecase.find(productsId);
+        FindProductResponseDto findProductResponseDto = productHubUsecase.find(productsId);
 
-        CommonDto<FindProductResponse> commonDto = CommonDto.<FindProductResponse>builder()
+        CommonDto<FindProductResponseDto> commonDto = CommonDto.<FindProductResponseDto>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
                 .message("상품 조회 성공")
-                .data(findProductResponse)
+                .data(findProductResponseDto)
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(commonDto);
@@ -76,11 +76,11 @@ public class ProductController {
 
     @GetMapping("/search")
     public ResponseEntity<CommonDto<PagedModel<SearchProductResponseDto>>> search(
-            @RequestParam(name = "page",required = false) Integer page,
-            @RequestParam(name = "size",required = false) Integer size,
+            @RequestParam(name = "page",defaultValue = "0") Integer page,
+            @RequestParam(name = "size",defaultValue = "10") Integer size,
             @RequestParam(name = "sort",required = false,defaultValue = "desc") String sort,
-            @RequestParam(name = "q") String q,
-            @RequestParam(name = "orderBy",required = false) String orderBy
+            @RequestParam(name = "q", defaultValue = "") String q,
+            @RequestParam(name = "orderBy",defaultValue = "createdAt") String orderBy
     ) {
         PagedModel<SearchProductResponseDto> searchResult = productHubUsecase.search(page,size,sort, q,orderBy);
 

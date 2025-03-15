@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FindProductResponse {
+public class FindProductResponseDto {
     private UUID productId;
     private String productName;
     private BigDecimal productPrice;
@@ -25,7 +25,7 @@ public class FindProductResponse {
 
 
     @Builder
-    public FindProductResponse(
+    public FindProductResponseDto(
             UUID productId,
             String productName,
             BigDecimal productPrice,
@@ -47,8 +47,8 @@ public class FindProductResponse {
     }
 
 
-    public static FindProductResponse toDTO(Product product, AtomicInteger totalQuantity) {
-        return FindProductResponse.builder()
+    public static FindProductResponseDto toDTO(Product product, AtomicInteger totalQuantity) {
+        return FindProductResponseDto.builder()
                 .productName(product.getProductName())
                 .productId(product.getProductId())
                 .productType(product.getProductType())
