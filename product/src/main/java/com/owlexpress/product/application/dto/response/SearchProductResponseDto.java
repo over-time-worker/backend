@@ -19,6 +19,9 @@ public class SearchProductResponseDto {
     private BigDecimal productPrice;
     private ProductType productType;
     private int totalQuantity;
+    private UUID producerId;
+    private String producerName;
+    private String producerAddress;
 
     @Builder
     public SearchProductResponseDto(
@@ -26,7 +29,10 @@ public class SearchProductResponseDto {
             String productName,
             BigDecimal productPrice,
             ProductType productType,
-            int totalQuantity
+            int totalQuantity,
+            UUID producerId,
+            String producerName,
+            String producerAddress
     )
     {
         this.productId = productId;
@@ -34,6 +40,9 @@ public class SearchProductResponseDto {
         this.productPrice = productPrice;
         this.productType = productType;
         this.totalQuantity = totalQuantity;
+        this.producerId = producerId;
+        this.producerName = producerName;
+        this.producerAddress = producerAddress;
     }
 
     public static SearchProductResponseDto toDTO(Product product, AtomicInteger totalQuantity) {
@@ -43,6 +52,9 @@ public class SearchProductResponseDto {
                 .productType(product.getProductType())
                 .productPrice(product.getProductPrice())
                 .totalQuantity(totalQuantity.get())
+                .producerId(product.getProducerId())
+                .producerName(product.getProducerName())
+                .producerAddress(product.getProducerAddress())
                 .build();
     }
 
