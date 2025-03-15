@@ -15,4 +15,6 @@ public interface HubInfoService {
             UUID hubInfoId,
             @Valid UpdateHubInfoRequestDto updateHubInfoRequestDto
     );
+
+    void delete(UUID hubInfoId);
 }

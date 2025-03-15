@@ -48,9 +48,26 @@ public class HubInfoController {
         hubInfoService.update(hubInfoId, updateHubInfoRequestDto);
 
         CommonDto<Object> commonDto = CommonDto.builder()
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
+                .status(HttpStatus.ACCEPTED)
+                .code(HttpStatus.ACCEPTED.value())
                 .message("상품 수정 성공")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+    }
+
+    @DeleteMapping("/{hubInfoId}")
+    public ResponseEntity<CommonDto<Object>> delete(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @PathVariable UUID hubInfoId
+    ) {
+
+        hubInfoService.delete(hubInfoId);
+
+        CommonDto<Object> commonDto = CommonDto.builder()
+                .status(HttpStatus.ACCEPTED)
+                .code(HttpStatus.ACCEPTED.value())
+                .message("상품 삭제 성공")
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);

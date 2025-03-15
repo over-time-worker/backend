@@ -87,6 +87,7 @@ public class ProductHubUsecase {
         Product product = getProduct(createHubInfoRequestDto.getProductId());
         product.getHubInfo().add(hubInfo);
         product  = productRepository.save(product);
+        log.info(product.getHubInfo().toString());
         product.updateModifiedData(1L); //TODO :: AUdit설정후 삭제
 
         hubInfo.setProduct(product);
@@ -97,5 +98,13 @@ public class ProductHubUsecase {
         return productRepository.findById(productsId).orElseThrow(
                 () -> new ProductException.ProductNotFoundException("찾는 상품이 없습니다")
         );
+    }
+
+    @Transactional
+    public void disConnect(HubInfo hubInfo) {
+        Product product = hubInfo.getProduct();
+        product.getHubInfo().remove(hubInfo);
+        hubInfo.setProduct(null);
+        productRepository.save(product);
     }
 }

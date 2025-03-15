@@ -1,5 +1,6 @@
 package com.owlexpress.product.domain.service;
 
+import com.owlexpress.product.application.ProductHubUsecase;
 import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.entity.HubInfo;
 import com.owlexpress.product.domain.repository.HubInfoRepository;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class HubInfoServiceImpl implements HubInfoService {
 
     private final HubInfoRepository hubInfoRepository;
+    private final ProductHubUsecase productHubUsecase;
 
     @Override
     @Transactional
@@ -37,6 +39,16 @@ public class HubInfoServiceImpl implements HubInfoService {
         hubInfo.setHubProductQuantity(updateHubInfoRequestDto.getHubProductQuantity());
 
         hubInfo.updateModifiedData(1L); //TODO:: AuditAware 적용 후 삭제
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID hubInfoId) {
+        HubInfo hubInfo = getHubInfo(hubInfoId);
+
+        hubInfo.updateModifiedData(1L);
+        hubInfo.softDeleteData(1L);
+        productHubUsecase.disConnect(hubInfo);
     }
 
     private HubInfo getHubInfo(UUID hubInfoId) {
