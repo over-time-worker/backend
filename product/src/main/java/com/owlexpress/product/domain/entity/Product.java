@@ -4,6 +4,7 @@ import com.owlexpress.product.common.BaseEntity;
 import com.owlexpress.product.domain.constant.ProductType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -13,7 +14,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_product")
 public class Product extends BaseEntity {
@@ -24,6 +24,7 @@ public class Product extends BaseEntity {
     private UUID productId;
 
     @Column(name = "product_name", nullable = false)
+    @Size(max = 50)
     private String productName;
 
     @Column(name = "product_price", nullable = false)

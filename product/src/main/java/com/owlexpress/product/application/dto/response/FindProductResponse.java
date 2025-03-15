@@ -1,4 +1,4 @@
-package com.owlexpress.product.presentation.dto.response;
+package com.owlexpress.product.application.dto.response;
 
 import com.owlexpress.product.domain.constant.ProductType;
 import com.owlexpress.product.domain.entity.Product;
