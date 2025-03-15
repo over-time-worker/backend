@@ -21,4 +21,9 @@ public class HubInfoRepositoryImpl implements HubInfoRepository {
     public HubInfo save(HubInfo hubInfo) {
         return jpaRepository.save(hubInfo);
     }
+
+    @Override
+    public Optional<HubInfo> findById(UUID hubInfoId) {
+        return jpaRepository.findById(hubInfoId);
+    }
 }
