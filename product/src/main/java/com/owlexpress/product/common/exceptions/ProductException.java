@@ -14,4 +14,7 @@ public class ProductException extends RuntimeException {
         }
     }
 
+    public static class HubInfoNotFoundException extends RuntimeException {
+        public HubInfoNotFoundException(String message) { super(message); }
+    }
 }
