@@ -10,4 +10,5 @@ public interface ProductDomainService {
 
     void updateProduct(UpdateProductDto mockingData, UUID productsId);
 
+    void delete(UUID productsId);
 }

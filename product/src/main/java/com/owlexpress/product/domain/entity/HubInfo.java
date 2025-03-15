@@ -3,6 +3,7 @@ package com.owlexpress.product.domain.entity;
 import com.owlexpress.product.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_hub_info")
+@SQLRestriction("deleted_at is null")
 public class HubInfo extends BaseEntity {
 
     @Id

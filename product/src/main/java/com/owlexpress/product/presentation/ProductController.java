@@ -88,10 +88,27 @@ public class ProductController {
                 <PagedModel<SearchProductResponseDto>>builder().
                 status(HttpStatus.OK).
                 code(HttpStatus.OK.value()).
+                message("상품 검색 성공").
                 data(searchResult).
                 build();
 
         return ResponseEntity.status(HttpStatus.OK).body(commonDto);
+    }
+
+    @DeleteMapping("/{productsId}")
+    public ResponseEntity<CommonDto<Object>> delete(
+            @PathVariable UUID productsId
+    ){
+
+        productDomainService.delete(productsId);
+
+        CommonDto<Object> commonDto = CommonDto.builder()
+                .status(HttpStatus.ACCEPTED)
+                .code(HttpStatus.ACCEPTED.value())
+                .message("상품 삭제 성공")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
     }
 
 }

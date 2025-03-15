@@ -16,6 +16,7 @@ public class ProductDomainServiceImpl implements ProductDomainService {
     private final ProductRepository productRepository;
 
     @Override
+    @Transactional
     public void createProduct(CreateProductRequestDto createProductRequestDto) {
 
         //상품 중복검사
@@ -51,18 +52,30 @@ public class ProductDomainServiceImpl implements ProductDomainService {
         // (업데이트 시키는 동안 유저가 조회하지 못하게 막아야함)
     }
 
+    @Override
+    @Transactional
+    public void delete(UUID productsId) {
+        Product product = getProduct(productsId);
 
-    private Product getProduct(UUID productsId) {
-        return productRepository.findById(productsId).orElseThrow(
-                () -> new IllegalArgumentException("찾는 회원이 없습니다.")
+        product.softDeleteData(1L);
+        product.getHubInfo().forEach(
+                hubInfo -> hubInfo.softDeleteData(1L)
         );
+
     }
+
 
     private void validateProductName(CreateProductRequestDto createProductRequestDto) {
         productRepository.findByProductName(createProductRequestDto.getProductName()).ifPresent(
                 product -> {
                     throw new IllegalArgumentException("Product already exists");
                 }
+        );
+    }
+
+    private Product getProduct(UUID productsId) {
+        return productRepository.findById(productsId).orElseThrow(
+                () -> new IllegalArgumentException("찾는 회원이 없습니다.")
         );
     }
 }
