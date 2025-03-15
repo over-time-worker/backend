@@ -21,19 +21,36 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven {
+        url = "https://repo.spring.io/release"
+    }
 }
 
+
+ext.springCloudVersion = "2024.0.0"
+
+
 dependencies {
+    //health check
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // ORM
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    //validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    //web
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    //lombok
     compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
+
+    //DB
+    runtimeOnly 'org.postgresql:postgresql'
+
+
+    //test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-//    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     //QueryDSL
     implementation "com.querydsl:querydsl-jpa:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
@@ -50,8 +67,14 @@ tasks.named('test') {
 }
 
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 // Querydsl 설정부
-def generated = 'build/generated'
+def generated = "${buildDir}/generated" // product 모듈 내부의 build/generated로 설정
 
 // querydsl QClass 파일 생성 위치를 지정
 tasks.withType(JavaCompile).configureEach {

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-//TODO :: @EnableFeignClients연결
 public class ProductApplication {
 
     public static void main(String[] args) {
