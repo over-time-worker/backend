@@ -2,15 +2,18 @@ package com.owlexpress.product.presentation.dto.response;
 
 import com.owlexpress.product.domain.constant.ProductType;
 import com.owlexpress.product.domain.entity.Product;
+import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Data
-public class FindProductResponse {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class SearchProductResponseDto {
     private UUID productId;
     private String productName;
     private BigDecimal productPrice;
@@ -18,7 +21,7 @@ public class FindProductResponse {
     private int totalQuantity;
 
     @Builder
-    public FindProductResponse(
+    public SearchProductResponseDto(
             UUID productId,
             String productName,
             BigDecimal productPrice,
@@ -33,8 +36,8 @@ public class FindProductResponse {
         this.totalQuantity = totalQuantity;
     }
 
-    public static FindProductResponse toDTO(Product product, AtomicInteger totalQuantity) {
-        return FindProductResponse.builder()
+    public static SearchProductResponseDto toDTO(Product product, AtomicInteger totalQuantity) {
+        return SearchProductResponseDto.builder()
                 .productName(product.getProductName())
                 .productId(product.getProductId())
                 .productType(product.getProductType())
@@ -42,4 +45,5 @@ public class FindProductResponse {
                 .totalQuantity(totalQuantity.get())
                 .build();
     }
+
 }

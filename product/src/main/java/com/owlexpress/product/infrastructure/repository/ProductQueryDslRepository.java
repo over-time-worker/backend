@@ -1,16 +1,9 @@
-package com.owlexpress.product.domain.repository;
+package com.owlexpress.product.infrastructure.repository;
 
 import com.owlexpress.product.domain.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.Optional;
-import java.util.UUID;
-
-public interface ProductRepository {
-    Product save(Product product);
-
-    Optional<Product> findById(UUID productsId);
-
+public interface ProductQueryDslRepository {
     Page<Product> searchProducts(String q, String sort, String orderBy, PageRequest pageRequest);
 }

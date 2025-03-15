@@ -5,12 +5,15 @@ import com.owlexpress.product.domain.service.ProductDomainService;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
 import com.owlexpress.product.presentation.dto.response.FindProductResponse;
+import com.owlexpress.product.presentation.dto.response.SearchProductResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -20,7 +23,7 @@ public class ProductController {
     private final ProductDomainService productDomainService;
 
     @PostMapping
-    public ResponseEntity<CommonDto> create(
+    public ResponseEntity<CommonDto<Object>> create(
 //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody CreateProductRequestDto createProductRequestDto
     ) {
@@ -67,7 +70,27 @@ public class ProductController {
                 .data(findProductResponse)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.OK).body(commonDto);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<CommonDto<PagedModel<SearchProductResponseDto>>> search(
+            @RequestParam(name = "page",required = false) Optional<Integer> page,
+            @RequestParam(name = "size",required = false) Optional<Integer> size,
+            @RequestParam(name = "sort",required = false,defaultValue = "desc") String sort,
+            @RequestParam(name = "q") String q,
+            @RequestParam(name = "orderBy",required = false) String orderBy
+    ) {
+        PagedModel<SearchProductResponseDto> searchResult = productDomainService.search(page,size,sort, q,orderBy);
+
+        CommonDto<PagedModel<SearchProductResponseDto>> commonDto = CommonDto.
+                <PagedModel<SearchProductResponseDto>>builder().
+                status(HttpStatus.OK).
+                code(HttpStatus.OK.value()).
+                data(searchResult).
+                build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(commonDto);
     }
 
 }
