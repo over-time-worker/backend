@@ -2,6 +2,7 @@ package com.owlexpress.product.application;
 
 import com.owlexpress.product.application.dto.response.FindProductResponse;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
+import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.entity.Product;
 import com.owlexpress.product.domain.repository.ProductRepository;
 import com.owlexpress.product.infrastructure.config.ProductSearchConfig;
@@ -61,13 +62,12 @@ public class ProductHubUsecase {
             return SearchProductResponseDto.toDTO(product, totalQuantity);
         });
 
-        // dtoPage를 PagedModel로 변환
         return new PagedModel<>(dtoPage);
     }
 
     private Product getProduct(UUID productsId) {
         return productRepository.findById(productsId).orElseThrow(
-                () -> new IllegalArgumentException("찾는 회원이 없습니다.")
+                () -> new ProductException.ProductNotFoundException("찾는 상품이 없습니다")
         );
     }
 }

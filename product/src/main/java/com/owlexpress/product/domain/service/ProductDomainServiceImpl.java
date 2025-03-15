@@ -1,5 +1,6 @@
 package com.owlexpress.product.domain.service;
 
+import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.entity.Product;
 import com.owlexpress.product.domain.repository.ProductRepository;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
@@ -68,14 +69,14 @@ public class ProductDomainServiceImpl implements ProductDomainService {
     private void validateProductName(CreateProductRequestDto createProductRequestDto) {
         productRepository.findByProductName(createProductRequestDto.getProductName()).ifPresent(
                 product -> {
-                    throw new IllegalArgumentException("Product already exists");
+                    throw new ProductException.ProductNameDuplicateExceptoin("해당 상품명이 이미 존재합니다.");
                 }
         );
     }
 
     private Product getProduct(UUID productsId) {
         return productRepository.findById(productsId).orElseThrow(
-                () -> new IllegalArgumentException("찾는 회원이 없습니다.")
+                () -> new ProductException.ProductNotFoundException("찾는 회원이 없습니다.")
         );
     }
 }
