@@ -20,8 +20,9 @@ public class AuthController {
     // TODO : 리프레시 토큰도 같이 발급.
 
     @PostMapping("/sign-in")
-    public ResponseEntity<TokenResponseDto> signIn(LoginRequestDto requestDto) {
-        return ResponseEntity.ok(
-                new TokenResponseDto(authService.signIn(requestDto.toUserLoginRequestDto())));
+    public ResponseEntity<TokenResponseDto> signIn(LoginRequestDto requestDto, HttpServletResponse response) {
+        response.setHeader("Authorization", authService.signIn(requestDto.toUserLoginRequestDto()));
+
+        return ResponseEntity.ok().build();
     }
 }
