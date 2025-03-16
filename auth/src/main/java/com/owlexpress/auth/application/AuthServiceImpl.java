@@ -1,0 +1,22 @@
+package com.owlexpress.auth.application;
+
+import com.owlexpress.auth.application.dto.request.UserLoginRequestDto;
+import com.owlexpress.auth.application.dto.response.UserInfoResponseDto;
+import com.owlexpress.auth.common.TokenProvider;
+import com.owlexpress.auth.infrastructure.UserClient;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class AuthServiceImpl implements AuthService {
+
+    private final UserClient userClient;
+    private final TokenProvider provider;
+
+    @Override
+    public String signIn(UserLoginRequestDto userLoginRequestDto) {
+//        UserInfoResponseDto responseDto = userClient.sigIn(userLoginRequestDto);
+        return provider.generateAccessToken(1L, "MASTER");
+    }
+}
