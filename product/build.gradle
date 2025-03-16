@@ -29,6 +29,11 @@ repositories {
 
 ext.springCloudVersion = "2024.0.0"
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
 
 dependencies {
     //health check
@@ -60,6 +65,10 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
+    //Cloud
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
 }
 
 tasks.named('test') {
@@ -67,11 +76,6 @@ tasks.named('test') {
 }
 
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
-}
 
 // Querydsl 설정부
 def generated = "${buildDir}/generated" // product 모듈 내부의 build/generated로 설정

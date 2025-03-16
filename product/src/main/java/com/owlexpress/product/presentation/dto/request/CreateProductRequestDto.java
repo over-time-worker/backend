@@ -50,8 +50,8 @@ public class CreateProductRequestDto {
                 .productPrice(createProductRequestDto.getProductPrice())
                 .productType(createProductRequestDto.getProductType())
                 .producerId(createProductRequestDto.getProducerId())
-                .producerName(createProductRequestDto.getProducerName())
-                .producerAddress(createProductRequestDto.getProducerAddress())
+                .producerName(createProductRequestDto.getProducerName()) //TODO:: Clinet 연결 후 필드 삭제
+                .producerAddress(createProductRequestDto.getProducerAddress()) //TODO:: Clinet 연결 후 필드 삭제
                 .build();
     }
 
