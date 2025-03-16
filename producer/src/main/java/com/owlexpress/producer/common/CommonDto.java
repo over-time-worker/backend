@@ -16,7 +16,12 @@ public class CommonDto<T> {
     private T data;
 
     @Builder
-    public CommonDto(HttpStatus status, Integer code, String message, T data) {
+    public CommonDto(
+            HttpStatus status,
+            Integer code,
+            String message,
+            T data
+    ) {
         this.status = status;
         this.code = code;
         this.message = message;

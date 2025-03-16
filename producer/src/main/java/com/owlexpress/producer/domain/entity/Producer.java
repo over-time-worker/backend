@@ -41,9 +41,9 @@ public class Producer extends BaseEntity {
     @Column(name = "user_phone_number")
     @Size(min = 1, max = 15)
     private String userPhoneNumber;
-    @Column(name = "bussiness_number")
+    @Column(name = "business_number")
     @Size(min = 1, max = 20)
-    private String bussinessNumber;
+    private String businessNumber;
     /**
      * 등록할 Company 값
      */
@@ -68,7 +68,7 @@ public class Producer extends BaseEntity {
     public Producer(
             String userName,
             String userPhoneNumber,
-            String bussinessNumber,
+            String businessNumber,
             String companyName,
             CompanyType companyType,
             String companyAddress,
@@ -79,7 +79,7 @@ public class Producer extends BaseEntity {
     ) {
         this.userName = userName;
         this.userPhoneNumber = userPhoneNumber;
-        this.bussinessNumber = bussinessNumber;
+        this.businessNumber = businessNumber;
         this.companyName = companyName;
         this.companyType = companyType;
         this.companyAddress = companyAddress;
