@@ -1,4 +1,4 @@
-package com.owl_express.alarm.infrastructure;
+package com.owl_express.alarm.infrastructure.repository;
 
 import org.springframework.stereotype.Repository;
 
