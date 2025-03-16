@@ -1,5 +1,6 @@
 package com.owlexpress.producer.application.usecase;
 
+import com.owlexpress.producer.common.exception.ProducerException;
 import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.repository.ProducerRepository;
 import com.owlexpress.producer.infrastructure.feignClient.HubFeignClient;
@@ -27,6 +28,11 @@ public class ProducerUsecase {
 
         //TODO:: client 통신 이후 코드 수정하기, 매개변수에 findUserResponseDto,GetUserResponseDto넣고 통신
         //TODO :: 각 dto는 필요한 데이터를 가져오는 API를 생성해야 하나? 아니면 기존의 API 사용?
+        producerRepository.findByCompanyName(createProducerRequestDto.getCompanyName()).ifPresent(
+                producer -> {
+                    throw new ProducerException.ProducerNameDuplicateExceptoin("이미 존재하는 업체명입니다.");
+                }
+        );
         Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto);
         producer.updateCreateData(1L);
 

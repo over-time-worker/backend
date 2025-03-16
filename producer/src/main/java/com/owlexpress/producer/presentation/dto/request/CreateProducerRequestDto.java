@@ -56,7 +56,7 @@ public class CreateProducerRequestDto {
     public static Producer toEntity(CreateProducerRequestDto createProducerRequestDto) {
 
         return Producer.builder()
-                .bussinessNumber(createProducerRequestDto.getBusinessNumber())
+                .businessNumber(createProducerRequestDto.getBusinessNumber())
                 .companyName(createProducerRequestDto.getCompanyName())
                 .companyType(createProducerRequestDto.getCompanyType())
                 .companyAddress(createProducerRequestDto.getCompanyAddress())
