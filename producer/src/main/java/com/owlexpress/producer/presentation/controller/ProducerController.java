@@ -2,15 +2,15 @@ package com.owlexpress.producer.presentation.controller;
 
 import com.owlexpress.producer.application.usecase.ProducerUsecase;
 import com.owlexpress.producer.common.CommonDto;
-import com.owlexpress.producer.presentation.dto.request.CreateProducerRequestDto;
+import com.owlexpress.producer.common.dto.request.CreateProducerRequestDto;
+import com.owlexpress.producer.common.dto.request.UpdateProductRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,12 +26,32 @@ public class ProducerController {
         producerUsecase.create(createProducerRequestDto);
 
         CommonDto<Object> commonDto = CommonDto.builder()
-                .status(HttpStatus.ACCEPTED)
-                .code(HttpStatus.ACCEPTED.value())
-                .message("생성업체 등록 성공")
-                .build();
+                                               .status(HttpStatus.ACCEPTED)
+                                               .code(HttpStatus.ACCEPTED.value())
+                                               .message("생성업체 등록 성공")
+                                               .build();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(commonDto);
+    }
+
+    @PutMapping("/{producerId}")
+    public ResponseEntity<CommonDto<Object>> update(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @Valid @RequestBody UpdateProductRequestDto updateProductRequestDto,
+            @PathVariable UUID producerId
+
+    ) {
+        producerUsecase.update(updateProductRequestDto,producerId);
+        CommonDto<Object> commonDto = CommonDto.builder()
+                                               .status(HttpStatus.ACCEPTED)
+                                               .code(HttpStatus.ACCEPTED.value())
+                                               .message("생성업체 수정 성공")
+                                               .build();
+
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(commonDto);
     }
 
 
