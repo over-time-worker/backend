@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +45,27 @@ public class Notification extends BaseEntity {
     @Column(name = "is_send", nullable = false)
     private Boolean isSend = false;
 
-    @Column(name = "ai_id")
+    @Column(name = "ai_id", length = 50, nullable = false)
     private UUID aiId;
+
+    @Builder
+    public Notification(
+            Long userId,
+            String userPlatformId,
+            PlatformType platformType,
+            String message,
+            LocalDateTime sendAt,
+            Boolean isSend,
+            UUID aiId
+    ) {
+        this.userId = userId;
+        this.userPlatformId = userPlatformId;
+        this.platformType = platformType;
+        this.message = message;
+        this.sendAt = sendAt;
+        this.isSend = isSend;
+        this.aiId = aiId;
+    }
 
     @RequiredArgsConstructor
     public enum PlatformType{
