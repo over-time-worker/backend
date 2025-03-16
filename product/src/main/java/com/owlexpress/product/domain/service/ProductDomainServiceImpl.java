@@ -76,7 +76,7 @@ public class ProductDomainServiceImpl implements ProductDomainService {
 
     private Product getProduct(UUID productsId) {
         return productRepository.findById(productsId).orElseThrow(
-                () -> new ProductException.ProductNotFoundException("찾는 회원이 없습니다.")
+                () -> new ProductException.ProductNotFoundException("찾는 상품이 없습니다.")
         );
     }
 }
