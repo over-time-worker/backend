@@ -28,6 +28,16 @@ ext {
 }
 
 dependencies {
+
+	// ✅ webclient
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.json:json:20230227'
+
+	// ✅ jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	// ✅ querydsl
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
