@@ -1,8 +1,9 @@
 package com.owlexpress.user.domain.entity;
 
 import com.owlexpress.user.common.BaseEntity;
-import com.owlexpress.user.domain.vo.PlatformType;
-import com.owlexpress.user.domain.vo.Role;
+import com.owlexpress.user.domain.constant.ApprovalStatus;
+import com.owlexpress.user.domain.constant.PlatformType;
+import com.owlexpress.user.domain.constant.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -42,10 +43,13 @@ public class User extends BaseEntity {
     @Column(name = "role", nullable = false)
     private Role role;
 
+    @Column(name = "approval_status", nullable = false)
+    private ApprovalStatus accountStatus;
+
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic;
 
-    @Builder
+    @Builder(builderMethodName = "userBuilder")
     public User(
             String accountId,
             String password,
@@ -62,6 +66,7 @@ public class User extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.platformId = platformId;
         this.platformType = platformType;
+        this.accountStatus = ApprovalStatus.PENDING;
         this.role = role;
         this.isPublic = isPublic;
         super.createdEntity(-1L);
