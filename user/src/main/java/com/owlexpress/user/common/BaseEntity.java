@@ -2,10 +2,8 @@ package com.owlexpress.user.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
+import lombok.Getter;
 
 // TODO : @EntityListeners(AuditingEntityListener.class) setting
 @MappedSuperclass
@@ -28,7 +26,6 @@ public abstract class BaseEntity {
     @Column(name = "deleted_by")
     private Long deletedBy;
 
-    @Setter
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
