@@ -4,6 +4,7 @@ import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import com.owl_express.ai.application.exceptions.AiException;
+import com.owl_express.ai.common.util.PageUtil;
 import com.owl_express.ai.domain.entity.Ai;
 import com.owl_express.ai.domain.repository.AiRepository;
 import java.util.UUID;
@@ -11,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -86,14 +91,21 @@ public class AiServiceImpl implements AiService {
         Ai ai = aiRepository.findById(aiId).orElseThrow(
                 () -> new AiException.MessageNotFoundException("Not Found Message"));
 
-        return MessageFindResponseDto.form(ai);
+        return MessageFindResponseDto.toDto(ai);
 
+    }
+
+    @Override
+    public PagedModel<MessageFindResponseDto> searchMessages(int page, int size, String sort, String orderBy, UUID keyword) {
+        Pageable pageable = PageUtil.getPageable(page, size, sort, orderBy);
+        Page<MessageFindResponseDto> paged = aiRepository.searchMessages(pageable, keyword);
+        return new PagedModel<>(paged);
     }
 
     private String createRequestMessage(MessageCreateRequestDto messageCreateRequestDto) {
 
         return requestFormat
-                .replace("{orderId}", messageCreateRequestDto.getOrderId().toString())
+                .replace("{orderId}", messageCreateRequestDto.getOrderId())
                 .replace("{ordererName}", messageCreateRequestDto.getOrdererName())
                 .replace("{productInfo}", messageCreateRequestDto.getProductInfo())
                 .replace("{start}", messageCreateRequestDto.getStartHub())
