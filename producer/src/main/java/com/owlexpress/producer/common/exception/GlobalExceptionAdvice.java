@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.owlexpress.producer.common.exception.ProducerException.*;
+import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateExceptoin;
+import static com.owlexpress.producer.common.exception.ProducerException.ProducerNotFoundException;
 
 @ControllerAdvice
 @RestController
