@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -59,9 +58,9 @@ public class AiServiceImpl implements AiService {
 
         // TODO : user 정보로 교체
         aiMessage.createdEntity(1L);
-        aiRepository.save(aiMessage);
+        Ai savedAiMessage = aiRepository.save(aiMessage);
 
-        return MessageCreateResponseDto.builder().message(responseMessage).build();
+        return MessageCreateResponseDto.toDto(savedAiMessage);
     }
 
     @Override
@@ -80,9 +79,9 @@ public class AiServiceImpl implements AiService {
 
         // TODO : user 정보로 교체
         aiMessage.createdEntity(1L);
-        aiRepository.save(aiMessage);
+        Ai savedAiMessage = aiRepository.save(aiMessage);
 
-        return MessageCreateResponseDto.builder().message(responseMessage).build();
+        return MessageCreateResponseDto.toDto(savedAiMessage);
     }
 
     @Override
