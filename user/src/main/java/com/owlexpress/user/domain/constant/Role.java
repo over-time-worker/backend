@@ -1,4 +1,4 @@
-package com.owlexpress.user.domain.vo;
+package com.owlexpress.user.domain.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
