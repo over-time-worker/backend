@@ -15,7 +15,7 @@ public class QueryUtil {
         Sort.Order order = pageable.getSort()
                     .stream()
                     .findFirst()
-                    .orElse(Sort.Order.by("createAt").with(Direction.DESC));
+                    .orElse(Sort.Order.by("createdAt").with(Direction.DESC));
 
         Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
         Path<?> fieldPath = Expressions.path(path.getType(), path, order.getProperty());
