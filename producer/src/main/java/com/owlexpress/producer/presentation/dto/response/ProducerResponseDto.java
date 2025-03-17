@@ -24,6 +24,8 @@ public class ProducerResponseDto {
 
     private String businessNumber;
 
+    private String companyName;
+
     private CompanyType companyType;
 
     private String companyAddress;
@@ -44,6 +46,7 @@ public class ProducerResponseDto {
             String userPhoneNumber,
             String businessNumber,
             CompanyType companyType,
+            String companyName,
             String companyAddress,
             Double longitude,
             Double latitude,
@@ -61,22 +64,26 @@ public class ProducerResponseDto {
         this.longitude = longitude;
         this.latitude = latitude;
         this.hubAddress = hubAddress;
+        this.companyName = companyName;
     }
 
     public static ProducerResponseDto fromEntity(Producer producer) {
         return ProducerResponseDto.builder()
-                           .hubId(producer.getHubId())
-                           .hubManagerId(producer.getHubManagerId())
-                           .hubAddress(producer.getHubAddress())
-                           .producerId(producer.getProducerId())
-                           .userId(producer.getUserId())
-                           .userName(producer.getUserName())
-                           .userPhoneNumber(producer.getUserPhoneNumber())
-                           .businessNumber(producer.getBusinessNumber())
-                           .companyType(producer.getCompanyType())
-                           .companyAddress(producer.getCompanyAddress())
-                           .latitude(producer.getLocation().getX())
-                           .longitude(producer.getLocation().getY())
-                           .build();
+                                  .hubId(producer.getHubId())
+                                  .hubManagerId(producer.getHubManagerId())
+                                  .hubAddress(producer.getHubAddress())
+                                  .producerId(producer.getProducerId())
+                                  .userId(producer.getUserId())
+                                  .userName(producer.getUserName())
+                                  .userPhoneNumber(producer.getUserPhoneNumber())
+                                  .businessNumber(producer.getBusinessNumber())
+                                  .companyType(producer.getCompanyType())
+                                  .companyName(producer.getCompanyName())
+                                  .companyAddress(producer.getCompanyAddress())
+                                  .latitude(producer.getLocation()
+                                                    .getX())
+                                  .longitude(producer.getLocation()
+                                                     .getY())
+                                  .build();
     }
 }
