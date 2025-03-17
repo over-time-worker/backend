@@ -1,6 +1,6 @@
 package com.owl_express.alarm.application.dtos.response;
 
-import com.owl_express.alarm.domain.entity.Notification;
+import com.owl_express.alarm.domain.entity.Alarm;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,13 +26,13 @@ public class AlarmCreateResponseDto {
     }
 
     public static AlarmCreateResponseDto toDto(
-            Notification notification,
+            Alarm alarm,
             String platformMessageId
     ) {
         return AlarmCreateResponseDto.builder()
                 .platformMessageId(platformMessageId)
-                .alarmId(notification.getId())
-                .message(notification.getMessage())
+                .alarmId(alarm.getId())
+                .message(alarm.getMessage())
                 .build();
     }
 }
