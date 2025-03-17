@@ -3,14 +3,14 @@ package com.owlexpress.producer.presentation.controller;
 import com.owlexpress.producer.common.CommonDto;
 import com.owlexpress.producer.domain.service.ProductInfoService;
 import com.owlexpress.producer.presentation.dto.request.CreateProductInfoRequestDto;
+import com.owlexpress.producer.presentation.dto.request.UpdateProductInfoRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,4 +34,23 @@ public class ProductInfoController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
     }
+
+    @PutMapping("/{productId}")
+    public ResponseEntity<CommonDto<Void>> update(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @PathVariable UUID productId,
+            @Valid @RequestBody UpdateProductInfoRequestDto updateProductInfoRequestDto
+    ){
+        productInfoService.update(productId,updateProductInfoRequestDto);
+
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
+                                             .status(HttpStatus.ACCEPTED)
+                                             .code(HttpStatus.ACCEPTED.value())
+                                             .message("상품 정보 수정 성공")
+                                             .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+
+    }
+
 }
