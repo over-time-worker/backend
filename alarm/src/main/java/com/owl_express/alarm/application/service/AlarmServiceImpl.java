@@ -6,22 +6,23 @@ import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
+import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
 import com.owl_express.alarm.common.util.CommonUtil;
-import com.owl_express.alarm.domain.entity.Notification;
-import com.owl_express.alarm.domain.entity.Notification.MessageType;
-import com.owl_express.alarm.domain.entity.Notification.PlatformType;
+import com.owl_express.alarm.domain.entity.Alarm;
+import com.owl_express.alarm.domain.entity.Alarm.MessageType;
+import com.owl_express.alarm.domain.entity.Alarm.PlatformType;
 import com.owl_express.alarm.domain.repository.AlarmRepository;
 import com.owl_express.alarm.infrastructure.feignClient.AiClient;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.response.chat.ChatDeleteScheduledMessageResponse;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import com.slack.api.methods.response.chat.ChatScheduleMessageResponse;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -67,7 +68,7 @@ public class AlarmServiceImpl implements AlarmService {
             String gmtDate = chatPostMessageResponse.getHttpResponseHeaders().get("date").get(0);
 
             //alarm 생성
-            Notification notification = Notification.builder()
+            Alarm alarm = Alarm.builder()
                     .aiId(messageCreateResponseDto.getAiId())
                     .userId(requestDto.getUserId())
                     .userPlatformId(requestDto.getDeliverPlatformId())
@@ -79,8 +80,8 @@ public class AlarmServiceImpl implements AlarmService {
                     .build();
 
             // TODO : UserId 넣어주기
-            notification.createdEntity(1L);
-            alarmRepository.save(notification);
+            alarm.createdEntity(1L);
+            alarmRepository.save(alarm);
         }
     }
 
@@ -109,7 +110,7 @@ public class AlarmServiceImpl implements AlarmService {
             String gmtDate = chatScheduleMessageResponse.getHttpResponseHeaders().get("date").get(0);
 
             //alarm 생성
-            Notification notification = Notification.builder()
+            Alarm alarm = Alarm.builder()
                     .aiId(messageCreateResponseDto.getAiId())
                     .userId(requestDto.getUserId())
                     .userPlatformId(requestDto.getDeliverPlatformId())
@@ -122,12 +123,24 @@ public class AlarmServiceImpl implements AlarmService {
                     .build();
 
             // TODO : UserId 넣어주기
-            notification.createdEntity(1L);
-            alarmRepository.save(notification);
+            alarm.createdEntity(1L);
+            alarmRepository.save(alarm);
 
-            return AlarmCreateResponseDto.toDto(notification, platformMessageId);
+            return AlarmCreateResponseDto.toDto(alarm, platformMessageId);
         }
         return AlarmCreateResponseDto.builder().build();
+    }
+
+    @Override
+    public void deleteAlarm(String channelId, String messageId) {
+        deleteMessage(channelId, messageId);
+
+        Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
+                () -> new AlarmNotFoundException("일치 하는 알림 정보가 없습니다."));
+
+        // TODO : UserId 넣어주기
+        alarm.deleteEntity(1L);
+        alarmRepository.save(alarm);
     }
 
     private MessageCreateResponseDto getMessageFromAi(AlarmCreateRequestDto requestDto, String productInfo) {
@@ -202,6 +215,25 @@ public class AlarmServiceImpl implements AlarmService {
         } else {
             throw new SlackException("메세지 예약에 실패했습니다.");
         }
+    }
+
+    private void deleteMessage(String channelId, String messageId) {
+        ChatDeleteScheduledMessageResponse response;
+
+        try {
+            response = Slack.getInstance().methods(slackBotToken)
+                    .chatDeleteScheduledMessage(r -> r.scheduledMessageId(messageId)
+                            .channel(channelId));
+
+            log.info(response.toString());
+        } catch (IOException | SlackApiException e) {
+            throw new SlackException("예약 메세지 삭제에 실패했습니다.");
+        }
+
+        if(!response.isOk() && response.getError().equals("invalid_scheduled_message_id")) {
+            throw new SlackException("존재하지 않거나 이미 전송된 메세지 입니다.");
+        }
+
     }
 
 }

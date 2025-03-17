@@ -2,6 +2,7 @@ package com.owl_express.alarm.common.advice;
 
 import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
+import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedMessageTypeException;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
 import com.owl_express.alarm.application.exceptions.AlarmException.OrderNotFoundException;
@@ -12,10 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
-@RestController
+@RestControllerAdvice
 public class GlobalExceptionAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -66,6 +67,20 @@ public class GlobalExceptionAdvice {
     public CommonDto<Object> handleOrderNotFoundException(OrderNotFoundException e) {
 
         log.error("handleOrderNotFoundException : {}", e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(AlarmNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handleAlarmNotFoundException(AlarmNotFoundException e) {
+
+        log.error("handleAlarmNotFoundException : {}", e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)

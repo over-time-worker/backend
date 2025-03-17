@@ -7,5 +7,8 @@ import org.springframework.stereotype.Service;
 @Service
 public interface AlarmService {
     void createAlarmForHubDeliver(AlarmCreateRequestDto alarmCreateRequestDto);
+
     AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto alarmCreateRequestDto);
+
+    void deleteAlarm(String channelId, String messageId);
 }

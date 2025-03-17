@@ -16,12 +16,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@Table(name = "p_notification")
+@Table(name = "p_alarm")
+@SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notification extends BaseEntity {
+public class Alarm extends BaseEntity {
     @Id
     @Column(name = "notification_id", length = 50)
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -54,7 +56,7 @@ public class Notification extends BaseEntity {
     private MessageType messageType;
 
     @Builder
-    public Notification(
+    public Alarm(
             Long userId,
             String userPlatformId,
             PlatformType platformType,
