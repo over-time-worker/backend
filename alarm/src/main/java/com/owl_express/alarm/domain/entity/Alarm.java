@@ -16,12 +16,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@Table(name = "p_notification")
+@Table(name = "p_alarm")
+@SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notification extends BaseEntity {
+public class Alarm extends BaseEntity {
     @Id
     @Column(name = "notification_id", length = 50)
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,8 +32,8 @@ public class Notification extends BaseEntity {
     @Column(name = "user_id", length = 50, nullable = false)
     private Long userId;
 
-    @Column(name = "user_platform_id", length = 50, nullable = false)
-    private String userPlatformId;
+    @Column(name = "user_channel_id", length = 50, nullable = false)
+    private String userChannelId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "platform_type", length = 50, nullable = false)
@@ -54,9 +56,9 @@ public class Notification extends BaseEntity {
     private MessageType messageType;
 
     @Builder
-    public Notification(
+    public Alarm(
             Long userId,
-            String userPlatformId,
+            String userChannelId,
             PlatformType platformType,
             String message,
             LocalDateTime sendAt,
@@ -65,7 +67,7 @@ public class Notification extends BaseEntity {
             MessageType messageType
     ) {
         this.userId = userId;
-        this.userPlatformId = userPlatformId;
+        this.userChannelId = userChannelId;
         this.platformType = platformType;
         this.message = message;
         this.sendAt = sendAt;

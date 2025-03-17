@@ -28,8 +28,8 @@ public class MessageCreateRequestDto {
     private UUID deliverId;
     @Size(min = 1, max = 50, message = "[size:deliverName]")
     private String deliverName;
-    @Size(min = 1, max = 50, message = "[size:deliverPlatformId]")
-    private String deliverPlatformId;
+    @Size(min = 1, max = 50, message = "[size:deliverChannelId]")
+    private String deliverChannelId;
     private String orderDescription;
     @NotBlank(message = "[notBlank:departureDeadline]")
     private String departureDeadline;

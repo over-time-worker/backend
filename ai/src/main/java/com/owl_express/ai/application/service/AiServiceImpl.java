@@ -1,5 +1,7 @@
 package com.owl_express.ai.application.service;
 
+import static com.owl_express.ai.common.exceptions.ExceptionMessage.MESSAGE_NOT_FOUND_MESSAGE;
+
 import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
@@ -51,7 +53,7 @@ public class AiServiceImpl implements AiService {
 
         Ai aiMessage = Ai.builder()
                 .hubDeliverId(messageCreateRequestDto.getDeliverId())
-                .hubDeliverPlatformId(messageCreateRequestDto.getDeliverPlatformId())
+                .hubDeliverChannelId(messageCreateRequestDto.getDeliverChannelId())
                 .request(requestMessage)
                 .response(responseMessage)
                 .build();
@@ -72,7 +74,7 @@ public class AiServiceImpl implements AiService {
 
         Ai aiMessage = Ai.builder()
                 .consumerDeliverId(messageCreateRequestDto.getDeliverId())
-                .consumerDeliverPlatformId(messageCreateRequestDto.getDeliverPlatformId())
+                .consumerDeliverChannelId(messageCreateRequestDto.getDeliverChannelId())
                 .request(requestMessage)
                 .response(responseMessage)
                 .build();
@@ -85,17 +87,17 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    public MessageFindResponseDto findMessage(UUID aiId) {
+    public MessageFindResponseDto find(UUID aiId) {
 
         Ai ai = aiRepository.findById(aiId).orElseThrow(
-                () -> new AiException.MessageNotFoundException("Not Found Message"));
+                () -> new AiException.MessageNotFoundException(MESSAGE_NOT_FOUND_MESSAGE));
 
         return MessageFindResponseDto.toDto(ai);
 
     }
 
     @Override
-    public PagedModel<MessageFindResponseDto> searchMessages(int page, int size, String sort, String orderBy, UUID keyword) {
+    public PagedModel<MessageFindResponseDto> search(int page, int size, String sort, String orderBy, UUID keyword) {
         Pageable pageable = PageUtil.getPageable(page, size, sort, orderBy);
         Page<MessageFindResponseDto> paged = aiRepository.searchMessages(pageable, keyword);
         return new PagedModel<>(paged);

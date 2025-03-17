@@ -43,8 +43,9 @@ public class User extends BaseEntity {
     @Column(name = "role", nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "approval_status", nullable = false)
-    private ApprovalStatus accountStatus;
+    private ApprovalStatus approvalStatus;
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic;
@@ -66,7 +67,7 @@ public class User extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.platformId = platformId;
         this.platformType = platformType;
-        this.accountStatus = ApprovalStatus.PENDING;
+        this.approvalStatus = ApprovalStatus.PENDING;
         this.role = role;
         this.isPublic = isPublic;
         super.createdEntity(-1L);
@@ -93,5 +94,15 @@ public class User extends BaseEntity {
 
     public void deleteUser(Long userId) {
         super.deleteEntity(userId);
+    }
+
+    public void setApprovalStatus(ApprovalStatus approvalStatus) {
+        this.approvalStatus = approvalStatus;
+        super.updateEntity(-1L);
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+        super.updateEntity(-1L);
     }
 }

@@ -1,5 +1,6 @@
 package com.owlexpress.product.presentation.dto.request;
 
+import com.owlexpress.product.common.dto.ProducerResponseDto;
 import com.owlexpress.product.domain.constant.ProductType;
 import com.owlexpress.product.domain.entity.Product;
 import jakarta.validation.constraints.Size;
@@ -44,14 +45,16 @@ public class CreateProductRequestDto {
         this.producerAddress = producerAddress;
     }
 
-    public static Product toEntity(CreateProductRequestDto createProductRequestDto) {
+    public static Product toEntity(CreateProductRequestDto createProductRequestDto,
+                                   ProducerResponseDto producerResponseDto
+    ) {
         return Product.builder()
                 .productName(createProductRequestDto.getProductName())
                 .productPrice(createProductRequestDto.getProductPrice())
                 .productType(createProductRequestDto.getProductType())
                 .producerId(createProductRequestDto.getProducerId())
-                .producerName(createProductRequestDto.getProducerName()) //TODO:: Clinet 연결 후 필드 삭제
-                .producerAddress(createProductRequestDto.getProducerAddress()) //TODO:: Clinet 연결 후 필드 삭제
+                .producerName(producerResponseDto.getUserName()) //TODO:: Producer find에 companyName 추가할것
+                .producerAddress(producerResponseDto.getCompanyAddress())
                 .build();
     }
 

@@ -17,7 +17,7 @@ public class MessageCreateRequestDto {
     private String destination;
     private UUID deliverId;
     private String deliverName;
-    private String deliverPlatformId;
+    private String deliverChannelId;
     private String orderDescription;
     private String departureDeadline;
 
@@ -30,7 +30,7 @@ public class MessageCreateRequestDto {
             String destination,
             UUID deliverId,
             String deliverName,
-            String deliverPlatformId,
+            String deliverChannelId,
             String orderDescription,
             String departureDeadline) {
         this.orderId = orderId;
@@ -40,7 +40,7 @@ public class MessageCreateRequestDto {
         this.destination = destination;
         this.deliverId = deliverId;
         this.deliverName = deliverName;
-        this.deliverPlatformId = deliverPlatformId;
+        this.deliverChannelId = deliverChannelId;
         this.orderDescription = orderDescription;
         this.departureDeadline = departureDeadline;
     }
@@ -55,7 +55,7 @@ public class MessageCreateRequestDto {
                 .destination(requestDto.getDestination())
                 .deliverId(requestDto.getDeliverId())
                 .deliverName(requestDto.getDeliverName())
-                .deliverPlatformId(requestDto.getDeliverPlatformId())
+                .deliverChannelId(requestDto.getDeliverChannelId())
                 .orderDescription(requestDto.getOrderDescription())
                 .departureDeadline(requestDto.getDepartureDeadline())
                 .build();

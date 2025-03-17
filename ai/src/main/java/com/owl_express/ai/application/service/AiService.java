@@ -12,7 +12,7 @@ public interface AiService {
 
     MessageCreateResponseDto createMessageForCompanyDeliver(MessageCreateRequestDto messageCreateRequestDto);
 
-    MessageFindResponseDto findMessage(UUID aiId);
+    MessageFindResponseDto find(UUID aiId);
 
-    PagedModel<MessageFindResponseDto> searchMessages(int page, int size, String sort, String orderBy, UUID keyword);
+    PagedModel<MessageFindResponseDto> search(int page, int size, String sort, String orderBy, UUID keyword);
 }
