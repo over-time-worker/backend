@@ -2,14 +2,13 @@ package com.owlexpress.hub.domain.entity;
 
 import com.owlexpress.hub.common.BaseEntity;
 import com.owlexpress.hub.common.util.GeoUtil;
-import com.owlexpress.hub.presentation.dto.HubUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -64,32 +63,20 @@ public class Hub extends BaseEntity {
     }
 
     public void update(HubUpdateRequestDto requestDto) {
-        Optional.ofNullable(requestDto.getName()).ifPresent(name -> this.name = name);
+        // PUT 매핑으로 변경하기 떄문에 모든 값이 다 채워진 상태로 전달됨.
+        this.name = requestDto.getName();
 
-        Optional.ofNullable(requestDto.getHubAddress())
-                .ifPresent(address -> this.hubAddress = address);
+        this.hubAddress = requestDto.getHubAddress();
 
-        Optional.ofNullable(getLocation(requestDto))
-                .ifPresent(location -> this.location = location);
+        this.location = GeoUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude());
 
-        Optional.ofNullable(requestDto.getUserId()).ifPresent(userId -> this.userId = userId);
+        this.userId = requestDto.getUserId();
 
-        Optional.ofNullable(requestDto.getUserName())
-                .ifPresent(username -> this.userName = username);
+        this.userName = requestDto.getUserName();
 
-        Optional.ofNullable(requestDto.getUserPhoneNumber())
-                .ifPresent(phoneNumber -> this.userPhoneNumber = phoneNumber);
+        this.userPhoneNumber = requestDto.getUserPhoneNumber();
 
-        Optional.ofNullable(requestDto.getParentId())
-                .ifPresent(parentId -> this.parentHubId = parentId);
+        this.parentHubId = requestDto.getParentId();
     }
-
-    private Point getLocation(HubUpdateRequestDto requestDto) {
-        if (requestDto.getLatitude() == null || requestDto.getLongitude() == null) {
-            return null;
-        }
-        return GeoUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude());
-    }
-
 
 }

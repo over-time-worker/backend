@@ -1,4 +1,4 @@
-package com.owlexpress.hub.presentation.dto;
+package com.owlexpress.hub.presentation.dto.request;
 
 import com.owlexpress.hub.common.util.GeoUtil;
 import com.owlexpress.hub.domain.entity.Hub;
@@ -14,11 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class HubUpdateRequestDto {
-
-    // TODO: 추후 PATCH 요청으로 받는 필드만 수정 고려
-    @NotNull(message = "허브 ID는 비어있을 수 없습니다.")
-    private UUID hubId;
+public class HubCreateRequestDto {
 
     @NotBlank(message = "이름은 비어있을 수 없습니다.")
     private String name;
@@ -40,6 +36,7 @@ public class HubUpdateRequestDto {
 
     @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = "전화번호 형식이 일치하지 않습니다.")
     private String userPhoneNumber;
+
 
     private UUID parentId;
 

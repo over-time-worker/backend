@@ -1,7 +1,7 @@
 package com.owlexpress.hub.domain.service;
 
-import com.owlexpress.hub.presentation.dto.HubCreateRequestDto;
-import com.owlexpress.hub.presentation.dto.HubUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
+import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 
 public interface HubService {
 

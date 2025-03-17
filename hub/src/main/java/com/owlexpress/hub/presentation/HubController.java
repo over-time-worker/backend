@@ -2,9 +2,8 @@ package com.owlexpress.hub.presentation;
 
 import com.owlexpress.hub.domain.service.HubService;
 import com.owlexpress.hub.presentation.dto.CommonDto;
-import com.owlexpress.hub.presentation.dto.HubCreateRequestDto;
-import com.owlexpress.hub.presentation.dto.HubUpdateRequestDto;
-import jakarta.validation.Valid;
+import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
+import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,7 @@ public class HubController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            @Valid @RequestBody HubCreateRequestDto requestDto
+            @Validated @RequestBody HubCreateRequestDto requestDto
     ) {
         hubService.create(requestDto);
 
