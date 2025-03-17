@@ -1,5 +1,7 @@
 package com.owl_express.ai.application.service;
 
+import static com.owl_express.ai.common.exceptions.ExceptionMessage.MESSAGE_NOT_FOUND_MESSAGE;
+
 import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
@@ -88,7 +90,7 @@ public class AiServiceImpl implements AiService {
     public MessageFindResponseDto find(UUID aiId) {
 
         Ai ai = aiRepository.findById(aiId).orElseThrow(
-                () -> new AiException.MessageNotFoundException("Not Found Message"));
+                () -> new AiException.MessageNotFoundException(MESSAGE_NOT_FOUND_MESSAGE));
 
         return MessageFindResponseDto.toDto(ai);
 
