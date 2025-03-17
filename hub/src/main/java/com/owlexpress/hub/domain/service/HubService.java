@@ -1,9 +1,13 @@
 package com.owlexpress.hub.domain.service;
 
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
+import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
+import java.util.UUID;
 
 public interface HubService {
+
+    public HubFindResponseDto find(UUID hubID);
 
     public void create(HubCreateRequestDto requestDto);
 

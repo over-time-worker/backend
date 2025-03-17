@@ -1,10 +1,13 @@
 package com.owlexpress.hub.domain.service;
 
+import com.owlexpress.hub.common.HubHelper;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
+import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,5 +38,11 @@ public class HubServiceImpl implements HubService {
         // TODO: 패스포트 토큰에서 값 뺴서 집어넣기
         origin.modifiedEntity(1L);
         origin.update(requestDto);
+    }
+
+    @Override
+    public HubFindResponseDto find(UUID hubID) {
+        return HubFindResponseDto.fromEntity(HubHelper.findByHubId(hubID, hubRepository));
+
     }
 }
