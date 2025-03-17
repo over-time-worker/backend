@@ -3,11 +3,16 @@ package com.owl_express.alarm.application.service;
 import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
 import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
+import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
+import com.owl_express.alarm.application.exceptions.AlarmException;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
+import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
 import com.owl_express.alarm.application.exceptions.AlarmException.OrderNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
+import com.owl_express.alarm.common.util.CommonUtil;
 import com.owl_express.alarm.domain.entity.Notification;
+import com.owl_express.alarm.domain.entity.Notification.MessageType;
 import com.owl_express.alarm.domain.entity.Notification.PlatformType;
 import com.owl_express.alarm.domain.repository.AlarmRepository;
 import com.owl_express.alarm.infrastructure.feignClient.AiClient;
@@ -16,14 +21,15 @@ import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
-import com.slack.api.webhook.Payload;
+import com.slack.api.methods.response.chat.ChatScheduleMessageResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -53,31 +59,79 @@ public class AlarmServiceImpl implements AlarmService {
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
+        ChatPostMessageResponse chatPostMessageResponse;
 
         if(platformType.equals(PlatformType.SLACK)) {
-            sendMessage(messageCreateResponseDto.getMessage(), requestDto.getDeliverPlatformId());
+            chatPostMessageResponse = sendMessage(messageCreateResponseDto.getMessage(),
+                    requestDto.getDeliverPlatformId());
+
+            String gmtDate = chatPostMessageResponse.getHttpResponseHeaders().get("date").get(0);
+
+            //alarm 생성
+            Notification notification = Notification.builder()
+                    .aiId(messageCreateResponseDto.getAiId())
+                    .userId(requestDto.getUserId())
+                    .userPlatformId(requestDto.getDeliverPlatformId())
+                    .platformType(platformType)
+                    .message(messageCreateResponseDto.getMessage())
+                    .aiId(messageCreateResponseDto.getAiId())
+                    .sendAt(CommonUtil.gmtStringToDefaultLocalDateTime(gmtDate))
+                    .messageType(MessageType.NORMAL)
+                    .build();
+
+            // TODO : UserId 넣어주기
+            notification.createdEntity(1L);
+            alarmRepository.save(notification);
         }
-
-        //alarm 생성
-        Notification notification = Notification.builder()
-                .aiId(messageCreateResponseDto.getAiId())
-                .userId(requestDto.getUserId())
-                .userPlatformId(requestDto.getDeliverPlatformId())
-                .platformType(platformType)
-                .message(messageCreateResponseDto.getMessage())
-                .aiId(messageCreateResponseDto.getAiId())
-                .sendAt(LocalDateTime.now())
-                .isSend(true)
-                .build();
-
-        // TODO : UserId 넣어주기
-        notification.createdEntity(1L);
-
-        alarmRepository.save(notification);
-
     }
 
-    public MessageCreateResponseDto getMessageFromAi(AlarmCreateRequestDto requestDto, String productInfo) {
+    @Override
+    public AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto requestDto) {
+        // TODO : order service 생긴 후 feign client 통신으로 정보 얻어오기 or 배송쪽에서 product 정보 함께 넘기기(메세지큐 방식이면 괜찮을듯)
+        String productInfo = "생쭈꾸미 10마리, 냉동 쭈꾸미 1팩";
+
+        // TODO : ai 메세지 요청 feign client 통신 test
+        // MessageCreateResponseDto messageCreateResponseDto = getMessageFromAi(requestDto, productInfo);
+        //MockData
+        MessageCreateResponseDto messageCreateResponseDto
+                = MessageCreateResponseDto.builder()
+                .aiId(UUID.randomUUID())
+                .message("자 슬랙 메세지 전송 테스트 해보자 !")
+                .build();
+
+        //slack 전송
+        PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
+
+        if(platformType.equals(PlatformType.SLACK)) {
+            ChatScheduleMessageResponse chatScheduleMessageResponse
+                    = scheduleMessage(messageCreateResponseDto.getMessage(), requestDto.getDeliverPlatformId());
+
+            String platformMessageId = chatScheduleMessageResponse.getScheduledMessageId();
+            String gmtDate = chatScheduleMessageResponse.getHttpResponseHeaders().get("date").get(0);
+
+            //alarm 생성
+            Notification notification = Notification.builder()
+                    .aiId(messageCreateResponseDto.getAiId())
+                    .userId(requestDto.getUserId())
+                    .userPlatformId(requestDto.getDeliverPlatformId())
+                    .platformType(platformType)
+                    .message(messageCreateResponseDto.getMessage())
+                    .aiId(messageCreateResponseDto.getAiId())
+                    .sendAt(CommonUtil.gmtStringToDefaultLocalDateTime(gmtDate))
+                    .messageType(MessageType.RESERVATION)
+                    .messageId(platformMessageId)
+                    .build();
+
+            // TODO : UserId 넣어주기
+            notification.createdEntity(1L);
+            alarmRepository.save(notification);
+
+            return AlarmCreateResponseDto.toDto(notification, platformMessageId);
+        }
+        return AlarmCreateResponseDto.builder().build();
+    }
+
+    private MessageCreateResponseDto getMessageFromAi(AlarmCreateRequestDto requestDto, String productInfo) {
         MessageCreateResponseDto messageCreateResponseDto;
 
         try{
@@ -100,7 +154,8 @@ public class AlarmServiceImpl implements AlarmService {
         return messageCreateResponseDto;
     }
 
-    public void sendMessage(String message, String channelId) {
+    private ChatPostMessageResponse sendMessage(String message, String channelId) {
+        ChatPostMessageResponse response;
         try {
             MethodsClient client = Slack.getInstance().methods(slackBotToken);
 
@@ -111,10 +166,41 @@ public class AlarmServiceImpl implements AlarmService {
                     .unfurlMedia(true)
                     .build();
 
-            client.chatPostMessage(request);
+            response = client.chatPostMessage(request);
 
         } catch (IOException | SlackApiException e) {
             throw new SlackException(e.getMessage());
+        }
+
+        if(!(response == null) && response.isOk()) {
+            return response;
+        } else {
+            throw new SlackException("메세지 전송에 실패했습니다.");
+        }
+    }
+
+    private ChatScheduleMessageResponse scheduleMessage(String message, String channelId) {
+        ChatScheduleMessageResponse response;
+        LocalDateTime reserveTime = LocalDate.now().atTime(6, 00);
+
+        if (LocalDateTime.now().isAfter(reserveTime)) {
+            reserveTime = reserveTime.plusDays(1);
+        }
+
+        try {
+            LocalDateTime finalReserveTime = reserveTime;
+            response = Slack.getInstance().methods(slackBotToken)
+                    .chatScheduleMessage(r -> r.postAt((int) finalReserveTime.atZone(ZoneId.systemDefault()).toEpochSecond())
+                            .text(message)
+                            .channel(channelId));
+        } catch (IOException | SlackApiException e) {
+            throw new SlackException(e.getMessage());
+        }
+
+        if(!(response == null) && response.isOk()) {
+            return response;
+        } else {
+            throw new SlackException("메세지 예약에 실패했습니다.");
         }
     }
 

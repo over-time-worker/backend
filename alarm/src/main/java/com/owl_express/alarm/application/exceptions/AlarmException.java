@@ -20,6 +20,12 @@ public class AlarmException extends RuntimeException {
         }
     }
 
+    public static class NotSupportedMessageTypeException extends RuntimeException {
+        public NotSupportedMessageTypeException(String message) {
+            super(message);
+        }
+    }
+
     public static class SlackException extends RuntimeException {
         public SlackException(String message) {
             super(message);

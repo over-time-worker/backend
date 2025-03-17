@@ -5,7 +5,6 @@ import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 

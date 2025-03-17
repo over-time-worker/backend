@@ -43,11 +43,15 @@ public class Notification extends BaseEntity {
     @Column(name = "send_at")
     private LocalDateTime sendAt;
 
-    @Column(name = "is_send", nullable = false)
-    private Boolean isSend = false;
-
     @Column(name = "ai_id", length = 50, nullable = false)
     private UUID aiId;
+
+    @Column(name = "message_id")
+    private String messageId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_type", nullable = false)
+    private MessageType messageType;
 
     @Builder
     public Notification(
@@ -56,16 +60,18 @@ public class Notification extends BaseEntity {
             PlatformType platformType,
             String message,
             LocalDateTime sendAt,
-            Boolean isSend,
-            UUID aiId
+            UUID aiId,
+            String messageId,
+            MessageType messageType
     ) {
         this.userId = userId;
         this.userPlatformId = userPlatformId;
         this.platformType = platformType;
         this.message = message;
         this.sendAt = sendAt;
-        this.isSend = isSend;
         this.aiId = aiId;
+        this.messageId = messageId;
+        this.messageType = messageType;
     }
 
     @RequiredArgsConstructor
@@ -81,6 +87,23 @@ public class Notification extends BaseEntity {
                 }
             }
             throw new NotSupportedPlatformTypeException("지원하지 않는 플랫폼 타입 입니다." + type);
+        }
+    }
+
+    @RequiredArgsConstructor
+    public enum MessageType{
+        NORMAL("일반 메세지"),
+        RESERVATION("예약 메세지");
+
+        private final String value;
+
+        public static MessageType getType(String type) {
+            for(MessageType mt : MessageType.values()) {
+                if(mt.value.equalsIgnoreCase(type)) {
+                    return mt;
+                }
+            }
+            throw new NotSupportedPlatformTypeException("지원하지 않는 메세지 타입 입니다." + type);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.owl_express.alarm.common.advice;
 
 import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
+import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedMessageTypeException;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
 import com.owl_express.alarm.application.exceptions.AlarmException.OrderNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
@@ -79,6 +80,20 @@ public class GlobalExceptionAdvice {
     public CommonDto<Object> handlePlatformTypeNotSupportedException(NotSupportedPlatformTypeException e) {
 
         log.error("handlePlatformTypeNotSupportedException : {}", e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(NotSupportedMessageTypeException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handleMessageTypeNotSupportedException(NotSupportedMessageTypeException e) {
+
+        log.error("handleMessageTypeNotSupportedException : {}", e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)
