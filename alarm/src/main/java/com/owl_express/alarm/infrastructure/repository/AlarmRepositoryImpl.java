@@ -1,10 +1,17 @@
 package com.owl_express.alarm.infrastructure.repository;
 
+import com.owl_express.alarm.domain.entity.Notification;
+import com.owl_express.alarm.domain.repository.AlarmRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class AlarmRepositoryImpl {
+public class AlarmRepositoryImpl implements AlarmRepository {
+    private final AlarmJpaRepository alarmJpaRepository;
+    private final AlarmQueryRepository alarmQueryRepository;
 
+    public Notification save(Notification notification) {
+        return alarmJpaRepository.save(notification);
+    }
 }

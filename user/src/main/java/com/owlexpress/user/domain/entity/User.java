@@ -72,7 +72,6 @@ public class User extends BaseEntity {
         super.createdEntity(-1L);
     }
 
-    @Builder
     public void setUserInfo(
             Long userId,
             String PlatformId,

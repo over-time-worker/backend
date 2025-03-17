@@ -1,5 +1,29 @@
 package com.owl_express.alarm.application.exceptions;
 
-public class AlarmException {
+public class AlarmException extends RuntimeException {
+
+    public static class AiFeignClientException extends RuntimeException {
+        public AiFeignClientException(String message) {
+            super(message);
+        }
+    }
+
+    public static class OrderNotFoundException extends RuntimeException {
+        public OrderNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public static class NotSupportedPlatformTypeException extends RuntimeException {
+        public NotSupportedPlatformTypeException(String message) {
+            super(message);
+        }
+    }
+
+    public static class SlackException extends RuntimeException {
+        public SlackException(String message) {
+            super(message);
+        }
+    }
 
 }

@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name="ai-service")
 public interface AiClient {
-    @PostMapping("/messages/hub")
-    ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForHubDeliver(
+    @PostMapping("api/ai/messages/hub")
+    CommonDto<MessageCreateResponseDto> createMessagesForHubDeliver(
             MessageCreateRequestDto requestDto
     );
 
-    @PostMapping("/messages/company")
-    ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForCompanyDeliver(
+    @PostMapping("api/ai/messages/company")
+    CommonDto<MessageCreateResponseDto> createMessagesForCompanyDeliver(
             @Valid @RequestBody MessageCreateRequestDto requestDto
     );
 }
