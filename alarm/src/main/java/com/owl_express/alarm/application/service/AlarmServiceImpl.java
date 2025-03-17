@@ -135,11 +135,12 @@ public class AlarmServiceImpl implements AlarmService {
         MessageCreateResponseDto messageCreateResponseDto;
 
         try{
+
             CommonDto<MessageCreateResponseDto> responseEntity
                     = aiClient.createMessagesForHubDeliver(MessageCreateRequestDto.AlarmDtoToMessageDto(requestDto,productInfo));
 
             messageCreateResponseDto = responseEntity.getData();
-
+          
         } catch (RuntimeException e) {
             log.error(e.getMessage());
             throw new AiFeignClientException("잠시 후에 다시 시도해주세요.");
