@@ -4,8 +4,11 @@ import static com.owlexpress.user.common.exception.ExceptionMessage.EXIST_ACCOUN
 
 import com.owlexpress.user.domain.entity.User;
 import com.owlexpress.user.domain.repository.UserRepository;
+import com.owlexpress.user.presentation.dto.response.GetUsersResponseDto;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -45,6 +48,11 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> delete(Long userId) {
         return userJpaRepository.findById(userId);
+    }
+
+    @Override
+    public Page<GetUsersResponseDto> searchUsers(String keyword, Pageable pageable) {
+        return userQueryDSLRepository.searchUsers(pageable, keyword);
     }
 
     public boolean existsByAccountId(String accountId) {
