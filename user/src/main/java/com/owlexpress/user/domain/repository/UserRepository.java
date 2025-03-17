@@ -1,7 +1,10 @@
 package com.owlexpress.user.domain.repository;
 
 import com.owlexpress.user.domain.entity.User;
+import com.owlexpress.user.presentation.dto.response.GetUsersResponseDto;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserRepository {
     void save(User user);
@@ -10,9 +13,5 @@ public interface UserRepository {
 
     Optional<User> findByUserId(Long userId);
 
-    Optional<User> updatePassword(Long userId);
-
-    Optional<User> updateInfo(Long userId);
-
-    Optional<User> delete(Long userId);
+    Page<GetUsersResponseDto> searchUsers(String keyword, Pageable pageable);
 }
