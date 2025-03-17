@@ -1,12 +1,15 @@
 package com.owlexpress.hub.domain.entity;
 
 import com.owlexpress.hub.common.BaseEntity;
+import com.owlexpress.hub.common.util.GeoUtil;
+import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -58,4 +61,22 @@ public class Hub extends BaseEntity {
         this.userPhoneNumber = userPhoneNumber;
         this.parentHubId = parentHubId;
     }
+
+    public void update(HubUpdateRequestDto requestDto) {
+        // PUT 매핑으로 변경하기 떄문에 모든 값이 다 채워진 상태로 전달됨.
+        this.name = requestDto.getName();
+
+        this.hubAddress = requestDto.getHubAddress();
+
+        this.location = GeoUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude());
+
+        this.userId = requestDto.getUserId();
+
+        this.userName = requestDto.getUserName();
+
+        this.userPhoneNumber = requestDto.getUserPhoneNumber();
+
+        this.parentHubId = requestDto.getParentId();
+    }
+
 }

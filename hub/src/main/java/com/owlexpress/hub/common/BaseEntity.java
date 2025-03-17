@@ -31,17 +31,18 @@ public abstract class BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    protected void createdEntity(Long userId) {
+    // 임시로 생성자 변경
+    public void createdEntity(Long userId) {
         this.createdBy = userId;
         this.createdAt = LocalDateTime.now();
     }
 
-    protected void modifiedEntity(Long userId){
+    public void modifiedEntity(Long userId){
         this.modifiedBy = userId;
         this.modifiedAt = LocalDateTime.now();
     }
 
-    protected void deleteEntity(Long userId) {
+    public void deleteEntity(Long userId) {
         this.deletedBy = userId;
         this.deletedAt = LocalDateTime.now();
     }
