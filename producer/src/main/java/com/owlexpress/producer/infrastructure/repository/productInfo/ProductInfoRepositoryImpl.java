@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,5 +21,10 @@ public class ProductInfoRepositoryImpl implements ProductInfoRepository {
     @Override
     public ProductInfo save(ProductInfo productInfo) {
         return productInfoJpaRepository.save(productInfo);
+    }
+
+    @Override
+    public Optional<ProductInfo> findByProductId(UUID productId) {
+        return productInfoJpaRepository.findByProductId(productId);
     }
 }
