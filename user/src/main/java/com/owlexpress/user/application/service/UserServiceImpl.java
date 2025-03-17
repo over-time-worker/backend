@@ -10,7 +10,6 @@ import com.owlexpress.user.domain.entity.User;
 import com.owlexpress.user.domain.repository.UserRepository;
 import com.owlexpress.user.infrastructure.exception.UserNotFoundException;
 import com.owlexpress.user.presentation.dto.request.UpdatePasswordRequestDto;
-import com.owlexpress.user.presentation.dto.request.UpdateUserInfoRequestDto;
 import com.owlexpress.user.presentation.dto.request.UserSigninRequestDto;
 import com.owlexpress.user.presentation.dto.request.UserSignupRequestDto;
 import com.owlexpress.user.presentation.dto.response.GetUserInfoResponseDto;
@@ -96,29 +95,6 @@ public class UserServiceImpl implements UserService {
                 passwordEncoder.encode(updatePasswordRequestDto.getNewPassword()),
                 userId
         );
-    }
-
-    @Override
-    public void updateUserInfo(Long userId, UpdateUserInfoRequestDto updateUserInfoRequestDto) {
-        // TODO : 수정 권한은 MASTER에게만 존재한다.
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
-
-        user.setUserInfo(
-                userId,
-                updateUserInfoRequestDto.getPlatformId(),
-                updateUserInfoRequestDto.getPlatformType(),
-                updateUserInfoRequestDto.getPhoneNumber(),
-                updateUserInfoRequestDto.getIsPublic()
-        );
-    }
-
-    @Override
-    public void delete(Long userId) {
-        // TODO : 삭제 권한은 MASTER에게만 존재한다.
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
-        user.deleteUser(userId);
     }
 
     private boolean newPasswordMatching(UpdatePasswordRequestDto updatePasswordRequestDto) {
