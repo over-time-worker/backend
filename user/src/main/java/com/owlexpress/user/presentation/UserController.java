@@ -15,6 +15,7 @@ import com.owlexpress.user.presentation.dto.request.UserSigninRequestDto;
 import com.owlexpress.user.presentation.dto.request.UserSignupRequestDto;
 import com.owlexpress.user.presentation.dto.response.GetUserInfoResponseDto;
 import com.owlexpress.user.presentation.dto.response.UserSigninResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,27 +36,28 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<CommonDto<Object>> signUp(
-            @RequestBody UserSignupRequestDto userSignupRequestDto
+    public ResponseEntity<CommonDto<Void>> signUp(
+            @Valid @RequestBody UserSignupRequestDto userSignupRequestDto
     ) {
         userService.signup(userSignupRequestDto);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
                 .message(SIGNUP_SUCCESS)
+                .data(null)
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<CommonDto<Object>> signIn(
-            @RequestBody UserSigninRequestDto userSigninRequestDto
+    public ResponseEntity<CommonDto<UserSigninResponseDto>> signIn(
+            @Valid @RequestBody UserSigninRequestDto userSigninRequestDto
     ) {
         UserSigninResponseDto signin = userService.signin(userSigninRequestDto);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<UserSigninResponseDto> commonDto = CommonDto.<UserSigninResponseDto>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
                 .message(SIGNIN_SUCCESS)
@@ -66,26 +68,26 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<CommonDto<Object>> get(
+    public ResponseEntity<CommonDto<GetUserInfoResponseDto>> get(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable("userId") Long userId
     ) {
         GetUserInfoResponseDto getUserInfoResponseDto = userService.find(userId);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<GetUserInfoResponseDto> commonDto = CommonDto.<GetUserInfoResponseDto>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
                 .message(GET_USER_INFO_SUCCESS)
                 .data(getUserInfoResponseDto)
                 .build();
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(commonDto);
     }
 
     @PatchMapping("/password")
     public ResponseEntity<CommonDto<Void>> patch(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto
+            @Valid @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto
     ) {
         // TODO : Passport 적용 이후 Service로 전달 후 UserId 변환
         Long userId = 1L;
@@ -95,6 +97,7 @@ public class UserController {
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
                 .message(UPDATE_USER_PASSWORD_SUCCESS)
+                .data(null)
                 .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
@@ -104,7 +107,7 @@ public class UserController {
     public ResponseEntity<CommonDto<Void>> update(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable("userId") Long userId,
-            @RequestBody UpdateUserInfoRequestDto updateUserInfoRequestDto
+            @Valid @RequestBody UpdateUserInfoRequestDto updateUserInfoRequestDto
     ) {
 
         userService.updateUserInfo(userId, updateUserInfoRequestDto);
@@ -113,24 +116,26 @@ public class UserController {
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
                 .message(UPDATE_USER_INFO_SUCCESS)
+                .data(null)
                 .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<CommonDto<Object>> delete(
+    public ResponseEntity<CommonDto<Void>> delete(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable("userId") Long userId
     ) {
         userService.delete(userId);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
                 .message(DELETE_USER_SUCCESS)
+                .data(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
     }
 }
