@@ -14,7 +14,19 @@ public class GlobalException {
 
     @ExceptionHandler({EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonDto<Object> handleProductNotFoundException(EntityNotFoundException e) {
+    public CommonDto<Object> handleUserNotFoundException(EntityNotFoundException e) {
+        log.error("error ={}", e.getMessage(), e);
+        return CommonDto.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage()) // Ensure the message is included
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler({AbstractUserUpdateException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleUserUpdateException(AbstractUserUpdateException e) {
         log.error("error ={}", e.getMessage(), e);
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
