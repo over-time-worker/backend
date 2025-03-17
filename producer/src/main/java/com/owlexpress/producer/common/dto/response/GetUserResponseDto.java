@@ -1,4 +1,4 @@
-package com.owlexpress.producer.application.dto.response;
+package com.owlexpress.producer.common.dto.response;
 
 import lombok.Data;
 

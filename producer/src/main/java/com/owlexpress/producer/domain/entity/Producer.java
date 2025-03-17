@@ -4,10 +4,7 @@ import com.owlexpress.producer.common.BaseEntity;
 import com.owlexpress.producer.domain.entity.constant.CompanyType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @Service
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_producer")
@@ -30,10 +28,13 @@ public class Producer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "producer_id")
-    private UUID producer_id;
+    private UUID producerId;
     /**
      * 가져와야할 User(Owner) 값
      */
+
+    @Column(name = "user_id")
+    private Long userId;
 
     @Column(name = "user_name", nullable = false, unique = true)
     @Size(min = 1, max = 50)
@@ -66,6 +67,7 @@ public class Producer extends BaseEntity {
 
     @Builder
     public Producer(
+            Long userId,
             String userName,
             String userPhoneNumber,
             String businessNumber,
@@ -77,6 +79,7 @@ public class Producer extends BaseEntity {
             UUID hubManagerId,
             String hubAddress
     ) {
+        this.userId = userId;
         this.userName = userName;
         this.userPhoneNumber = userPhoneNumber;
         this.businessNumber = businessNumber;
