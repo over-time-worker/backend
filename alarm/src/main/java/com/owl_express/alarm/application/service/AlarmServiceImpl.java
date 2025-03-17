@@ -5,10 +5,7 @@ import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
 import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
-import com.owl_express.alarm.application.exceptions.AlarmException;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
-import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
-import com.owl_express.alarm.application.exceptions.AlarmException.OrderNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
 import com.owl_express.alarm.common.util.CommonUtil;
 import com.owl_express.alarm.domain.entity.Notification;
@@ -25,7 +22,9 @@ import com.slack.api.methods.response.chat.ChatScheduleMessageResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -181,16 +180,17 @@ public class AlarmServiceImpl implements AlarmService {
 
     private ChatScheduleMessageResponse scheduleMessage(String message, String channelId) {
         ChatScheduleMessageResponse response;
-        LocalDateTime reserveTime = LocalDate.now().atTime(6, 00);
+        ZonedDateTime koreaTime = ZonedDateTime.of(LocalDate.now(), LocalTime.of(6,0), ZoneId.of("Asia/Seoul"));
+        ZonedDateTime serverTime = koreaTime.withZoneSameInstant(ZoneId.systemDefault());
 
-        if (LocalDateTime.now().isAfter(reserveTime)) {
-            reserveTime = reserveTime.plusDays(1);
+        if (ZonedDateTime.now().isAfter(serverTime)) {
+            serverTime = serverTime.plusDays(1);
         }
 
         try {
-            LocalDateTime finalReserveTime = reserveTime;
+            ZonedDateTime finalServerTime = serverTime;
             response = Slack.getInstance().methods(slackBotToken)
-                    .chatScheduleMessage(r -> r.postAt((int) finalReserveTime.atZone(ZoneId.systemDefault()).toEpochSecond())
+                    .chatScheduleMessage(r -> r.postAt((int) finalServerTime.toEpochSecond())
                             .text(message)
                             .channel(channelId));
         } catch (IOException | SlackApiException e) {
