@@ -1,11 +1,10 @@
 package com.owlexpress.user.infrastructure.repository;
 
 import static com.owlexpress.user.common.exception.ExceptionMessage.EXIST_ACCOUNT_MESSAGE;
-import static com.owlexpress.user.common.exception.ExceptionMessage.USER_NOT_FOUND_MESSAGE;
 
 import com.owlexpress.user.domain.entity.User;
 import com.owlexpress.user.domain.repository.UserRepository;
-import com.owlexpress.user.infrastructure.exception.UserNotFoundException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -24,33 +23,28 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findByAccountId(String accountId) {
-        return userJpaRepository.findByAccountId(accountId)
-                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+    public Optional<User> findByAccountId(String accountId) {
+        return userJpaRepository.findByAccountId(accountId);
     }
 
     @Override
-    public User findByUserId(Long userId) {
-        return userJpaRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+    public Optional<User> findByUserId(Long userId) {
+        return userJpaRepository.findById(userId);
     }
 
     @Override
-    public User updatePassword(Long userId) {
-        return userJpaRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+    public Optional<User> updatePassword(Long userId) {
+        return userJpaRepository.findById(userId);
     }
 
     @Override
-    public User updateInfo(Long userId) {
-        return userJpaRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+    public Optional<User> updateInfo(Long userId) {
+        return userJpaRepository.findById(userId);
     }
 
     @Override
-    public User delete(Long userId) {
-        return userJpaRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+    public Optional<User> delete(Long userId) {
+        return userJpaRepository.findById(userId);
     }
 
     public boolean existsByAccountId(String accountId) {
