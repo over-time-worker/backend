@@ -8,8 +8,8 @@ public class ProducerException extends RuntimeException {
         }
     }
 
-    public static class ProducerNameDuplicateExceptoin extends RuntimeException{
-        public ProducerNameDuplicateExceptoin(String message) {
+    public static class ProducerNameDuplicateException extends RuntimeException{
+        public ProducerNameDuplicateException(String message) {
             super(message);
         }
     }

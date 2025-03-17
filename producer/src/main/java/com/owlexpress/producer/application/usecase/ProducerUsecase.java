@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateExceptoin;
+import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class ProducerUsecase {
 
         producerRepository.findByCompanyName(createProducerRequestDto.getCompanyName())
                           .ifPresent(producer -> {
-                              throw new ProducerNameDuplicateExceptoin("이미 존재하는 업체명입니다.");
+                              throw new ProducerNameDuplicateException("이미 존재하는 업체명입니다.");
                           });
         Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto);
         producer.updateCreateData(1L);
