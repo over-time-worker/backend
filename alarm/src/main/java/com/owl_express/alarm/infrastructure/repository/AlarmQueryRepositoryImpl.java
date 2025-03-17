@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class AlarmQueryRepositoryImpl {
+public class AlarmQueryRepositoryImpl implements AlarmQueryRepository {
 
 }

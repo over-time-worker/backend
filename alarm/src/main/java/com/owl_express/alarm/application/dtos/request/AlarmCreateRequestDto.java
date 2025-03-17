@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 public class AlarmCreateRequestDto {
     @NotNull(message = "[notNull:deliverId]")
     private UUID deliverId;
+    @NotNull(message = "[notNull:userId]")
+    private Long userId;
     @Size(min = 1, max = 50, message = "[size:deliverName]")
     private String deliverName;
     @Size(min = 1, max = 50, message = "[size:deliverPlatformId]")

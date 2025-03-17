@@ -1,6 +1,10 @@
 package com.owl_express.alarm.common.advice;
 
 import com.owl_express.alarm.application.dtos.CommonDto;
+import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
+import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
+import com.owl_express.alarm.application.exceptions.AlarmException.OrderNotFoundException;
+import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,6 +38,54 @@ public class GlobalExceptionAdvice {
                 .data(null)
                 .build();
 
+    }
+
+    @ExceptionHandler(AiFeignClientException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public CommonDto<Object> handleAiFeignClientException(AiFeignClientException e) {
+
+        return CommonDto.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handleOrderNotFoundException(OrderNotFoundException e) {
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(NotSupportedPlatformTypeException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handlePlatformTypeNotSupportedException(NotSupportedPlatformTypeException e) {
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(SlackException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public CommonDto<Object> handleSlackException(SlackException e) {
+
+        return CommonDto.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
     }
 
 }
