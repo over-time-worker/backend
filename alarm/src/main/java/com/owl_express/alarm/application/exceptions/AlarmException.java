@@ -14,6 +14,12 @@ public class AlarmException extends RuntimeException {
         }
     }
 
+    public static class AlarmNotFoundException extends RuntimeException {
+        public AlarmNotFoundException(String message) {
+            super(message);
+        }
+    }
+
     public static class NotSupportedPlatformTypeException extends RuntimeException {
         public NotSupportedPlatformTypeException(String message) {
             super(message);
