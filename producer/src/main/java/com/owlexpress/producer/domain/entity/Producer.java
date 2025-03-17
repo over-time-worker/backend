@@ -5,9 +5,11 @@ import com.owlexpress.producer.domain.entity.constant.CompanyType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -16,7 +18,14 @@ import java.util.UUID;
 @Service
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_producer")
+@SQLRestriction("deleted_at is null")
 public class Producer extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "producer_id")
+    private UUID producerId;
+
     /**
      * 가져와야할 Hub 값
      */
@@ -25,10 +34,6 @@ public class Producer extends BaseEntity {
     public UUID hubId;
     @Column(name = "hub_manager_id")
     public Long hubManagerId;
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "producer_id")
-    private UUID producerId;
     /**
      * 가져와야할 User(Owner) 값
      */
@@ -65,6 +70,9 @@ public class Producer extends BaseEntity {
     @Size(min = 1, max = 255)
     private String hubAddress;
 
+    @OneToMany(mappedBy = "producer")
+    private List<ProductInfo> productInfos;
+
     @Builder
     public Producer(
             Long userId,
@@ -77,7 +85,8 @@ public class Producer extends BaseEntity {
             Point location,
             UUID hubId,
             Long hubManagerId,
-            String hubAddress
+            String hubAddress,
+            List<ProductInfo> productInfos
     ) {
         this.userId = userId;
         this.userName = userName;
@@ -90,5 +99,6 @@ public class Producer extends BaseEntity {
         this.hubId = hubId;
         this.hubManagerId = hubManagerId;
         this.hubAddress = hubAddress;
+        this.productInfos = productInfos;
     }
 }
