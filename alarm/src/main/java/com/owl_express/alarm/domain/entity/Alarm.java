@@ -32,8 +32,8 @@ public class Alarm extends BaseEntity {
     @Column(name = "user_id", length = 50, nullable = false)
     private Long userId;
 
-    @Column(name = "user_platform_id", length = 50, nullable = false)
-    private String userPlatformId;
+    @Column(name = "user_channel_id", length = 50, nullable = false)
+    private String userChannelId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "platform_type", length = 50, nullable = false)
@@ -58,7 +58,7 @@ public class Alarm extends BaseEntity {
     @Builder
     public Alarm(
             Long userId,
-            String userPlatformId,
+            String userChannelId,
             PlatformType platformType,
             String message,
             LocalDateTime sendAt,
@@ -67,7 +67,7 @@ public class Alarm extends BaseEntity {
             MessageType messageType
     ) {
         this.userId = userId;
-        this.userPlatformId = userPlatformId;
+        this.userChannelId = userChannelId;
         this.platformType = platformType;
         this.message = message;
         this.sendAt = sendAt;

@@ -1,5 +1,9 @@
 package com.owl_express.alarm.presentation;
 
+import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.DELETE_MESSAGE_SUCCESS;
+import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.RESERVE_MESSAGE_SUCCESS;
+import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEND_MESSAGE_SUCCESS;
+
 import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
@@ -34,7 +38,7 @@ public class AlarmController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<Void>builder()
                         .status(HttpStatus.CREATED)
-                        .message("알림 전송 완료")
+                        .message(SEND_MESSAGE_SUCCESS)
                         .code(HttpStatus.CREATED.value())
                         .data(null)
                         .build());
@@ -49,23 +53,23 @@ public class AlarmController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<AlarmCreateResponseDto>builder()
                         .status(HttpStatus.CREATED)
-                        .message("알림 예약 완료")
+                        .message(RESERVE_MESSAGE_SUCCESS)
                         .code(HttpStatus.CREATED.value())
                         .data(response)
                         .build());
     }
 
     @DeleteMapping("/channel/{channel_id}/message/{message_id}")
-    public ResponseEntity<CommonDto<Void>> deleteAlarm(
+    public ResponseEntity<CommonDto<Void>> delete(
             @NotNull(message = "[notNull:channel_id]") @PathVariable("channel_id") String channelId,
             @NotNull(message = "[notNull:message_id]") @PathVariable("message_id") String messageId
     ) {
-        alarmService.deleteAlarm(channelId, messageId);
+        alarmService.delete(channelId, messageId);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
                         .status(HttpStatus.ACCEPTED)
-                        .message("예약 메세지 삭제 완료")
+                        .message(DELETE_MESSAGE_SUCCESS)
                         .code(HttpStatus.ACCEPTED.value())
                         .data(null)
                         .build());
