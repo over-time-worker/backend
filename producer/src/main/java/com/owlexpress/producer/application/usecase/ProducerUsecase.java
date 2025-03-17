@@ -1,12 +1,13 @@
 package com.owlexpress.producer.application.usecase;
 
+import com.owlexpress.producer.common.dto.request.CreateProducerRequestDto;
+import com.owlexpress.producer.common.dto.request.UpdateProductRequestDto;
+import com.owlexpress.producer.common.helper.ProducerHelper;
 import com.owlexpress.producer.common.util.GeoUtil;
 import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.repository.ProducerRepository;
 import com.owlexpress.producer.infrastructure.feignClient.HubFeignClient;
 import com.owlexpress.producer.infrastructure.feignClient.UserFeignClient;
-import com.owlexpress.producer.common.dto.request.CreateProducerRequestDto;
-import com.owlexpress.producer.common.dto.request.UpdateProductRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.owlexpress.producer.common.exception.ProducerException.*;
+import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateExceptoin;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ import static com.owlexpress.producer.common.exception.ProducerException.*;
 public class ProducerUsecase {
     private final UserFeignClient userFeignClient;
     private final ProducerRepository producerRepository;
+    private final ProducerHelper producerHelper;
     private final HubFeignClient hubFeignClient;
 
     @Transactional
@@ -51,7 +53,7 @@ public class ProducerUsecase {
     ) {
         //TODO:: 본인의 생성업체가 맞는지 확인 필요
         // passport로 가져온 ID와 대조하기
-        Producer producer = getProducer(producerId);
+        Producer producer = producerHelper.getProducer(producerId);
 
         //TODO:: 가져온 데이터의 정보를 통해 기존 producer의 데이터 수정
         //        GetUserResponseDto findUserResponseDto = userFeignClient.get(createProducerRequestDto.getUserId());
@@ -63,11 +65,7 @@ public class ProducerUsecase {
         // 많은 곳에 FeignClient 통신을 보내야하기 때문에 메세지 큐의 필요성을 느끼게됨... 이벤트리스너야 보고싶다
     }
 
-    private Producer getProducer(UUID producerId) {
-       return producerRepository.findById(producerId).orElseThrow(
-                ()-> new ProducerNotFoundException("찾는 영업이 존재하지 않습니다.")
-        );
-    }
+
 
     public void updateProducer(Producer producer, UpdateProductRequestDto dto) {
         //TODO:: 데이터를 어떤것만 가져올지 정책적으로 정한 후에 코드 수정하기
