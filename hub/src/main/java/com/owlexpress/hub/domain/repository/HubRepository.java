@@ -4,13 +4,12 @@ import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 
 public interface HubRepository {
 
-    public void save(Hub hub);
+    public Hub save(Hub hub);
 
     public Optional<Hub> findByHubId(UUID hubId);
 
