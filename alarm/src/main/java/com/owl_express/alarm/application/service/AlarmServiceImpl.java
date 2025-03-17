@@ -180,7 +180,7 @@ public class AlarmServiceImpl implements AlarmService {
 
     private ChatScheduleMessageResponse scheduleMessage(String message, String channelId) {
         ChatScheduleMessageResponse response;
-        ZonedDateTime koreaTime = ZonedDateTime.of(LocalDate.now(), LocalTime.of(21,0), ZoneId.of("Asia/Seoul"));
+        ZonedDateTime koreaTime = ZonedDateTime.of(LocalDate.now(), LocalTime.of(6,0), ZoneId.of("Asia/Seoul"));
         ZonedDateTime serverTime = koreaTime.withZoneSameInstant(ZoneId.systemDefault());
 
         if (ZonedDateTime.now().isAfter(serverTime)) {
