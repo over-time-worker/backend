@@ -1,5 +1,14 @@
 package com.owl_express.alarm.application.service;
 
+
+import static com.owl_express.alarm.common.exception.ExceptionMessage.ALARM_NOT_FOUND_MESSAGE;
+import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_CREATE_FAIL_MESSAGE;
+import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_DELETE_FAIL_MESSAGE;
+import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_NOT_FOUND_MESSAGE;
+import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_RESERVATION_FAIL_MESSAGE;
+import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_SEND_FAIL_MESSAGE;
+import static com.owl_express.alarm.common.exception.ExceptionMessage.RETRY_MESSAGE;
+
 import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
 import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
@@ -36,6 +45,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AlarmServiceImpl implements AlarmService {
+
+    public static final String INVALID_SLACK_MESSAGE = "invalid_scheduled_message_id";
+    public static final String KOREA_ZONE_ID = "Asia/Seoul";
 
     private final AlarmRepository alarmRepository;
     private final AiClient aiClient;
@@ -136,7 +148,7 @@ public class AlarmServiceImpl implements AlarmService {
         deleteMessage(channelId, messageId);
 
         Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
-                () -> new AlarmNotFoundException("일치 하는 알림 정보가 없습니다."));
+                () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
         // TODO : UserId 넣어주기
         alarm.deleteEntity(1L);
@@ -155,12 +167,11 @@ public class AlarmServiceImpl implements AlarmService {
           
         } catch (RuntimeException e) {
             log.error(e.getMessage());
-            throw new AiFeignClientException("잠시 후에 다시 시도해주세요.");
+            throw new AiFeignClientException(RETRY_MESSAGE);
         }
 
         if(messageCreateResponseDto == null) {
-            log.error("messageCreateResponseDto is null");
-            throw new AiFeignClientException("메세지 생성에 실패하였습니다.");
+            throw new AiFeignClientException(MESSAGE_CREATE_FAIL_MESSAGE);
         }
 
         return messageCreateResponseDto;
@@ -187,13 +198,13 @@ public class AlarmServiceImpl implements AlarmService {
         if(!(response == null) && response.isOk()) {
             return response;
         } else {
-            throw new SlackException("메세지 전송에 실패했습니다.");
+            throw new SlackException(MESSAGE_SEND_FAIL_MESSAGE);
         }
     }
 
     private ChatScheduleMessageResponse scheduleMessage(String message, String channelId) {
         ChatScheduleMessageResponse response;
-        ZonedDateTime koreaTime = ZonedDateTime.of(LocalDate.now(), LocalTime.of(6,0), ZoneId.of("Asia/Seoul"));
+        ZonedDateTime koreaTime = ZonedDateTime.of(LocalDate.now(), LocalTime.of(6,0), ZoneId.of(KOREA_ZONE_ID));
         ZonedDateTime serverTime = koreaTime.withZoneSameInstant(ZoneId.systemDefault());
 
         if (ZonedDateTime.now().isAfter(serverTime)) {
@@ -213,7 +224,7 @@ public class AlarmServiceImpl implements AlarmService {
         if(!(response == null) && response.isOk()) {
             return response;
         } else {
-            throw new SlackException("메세지 예약에 실패했습니다.");
+            throw new SlackException(MESSAGE_RESERVATION_FAIL_MESSAGE);
         }
     }
 
@@ -227,11 +238,11 @@ public class AlarmServiceImpl implements AlarmService {
 
             log.info(response.toString());
         } catch (IOException | SlackApiException e) {
-            throw new SlackException("예약 메세지 삭제에 실패했습니다.");
+            throw new SlackException(MESSAGE_DELETE_FAIL_MESSAGE);
         }
 
-        if(!response.isOk() && response.getError().equals("invalid_scheduled_message_id")) {
-            throw new SlackException("존재하지 않거나 이미 전송된 메세지 입니다.");
+        if(!response.isOk() && response.getError().equals(INVALID_SLACK_MESSAGE)) {
+            throw new SlackException(MESSAGE_NOT_FOUND_MESSAGE);
         }
 
     }
