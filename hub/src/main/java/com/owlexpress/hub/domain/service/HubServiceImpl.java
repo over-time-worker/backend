@@ -7,8 +7,14 @@ import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +44,24 @@ public class HubServiceImpl implements HubService {
         // TODO: 패스포트 토큰에서 값 뺴서 집어넣기
         origin.modifiedEntity(1L);
         origin.update(requestDto);
+    }
+
+    @Override
+    public PagedModel<HubSearchResponseDto> search(
+            int page,
+            int size,
+            String sort,
+            String q,
+            String orderBy
+    ) {
+        Sort.Direction direction = sort.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC;
+        if (!List.of(10, 30, 50).contains(size)) {
+            size = 10;
+        }
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return hubRepository.searchHub(pageRequest, q, sort, orderBy);
     }
 
     @Override

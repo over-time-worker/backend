@@ -14,12 +14,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import org.locationtech.jts.geom.Point;
 
 @Getter
 @Entity
 @Table(name = "p_hub")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted_at is null")
 public class Hub extends BaseEntity {
 
     @Id

@@ -2,6 +2,7 @@ package com.owlexpress.hub.common.advice;
 
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.presentation.dto.CommonDto;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,12 +10,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonDto<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public CommonDto<Object> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e) {
+        log.error("error] {}", e.getBindingResult().getAllErrors());
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -27,7 +31,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleConstraintViolationException(ConstraintViolationException e) {
-
+        log.error("error] {}", e.getMessage());
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .code(HttpStatus.BAD_REQUEST.value())
@@ -40,6 +44,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HubNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleHubNotFoundException(HubNotFoundException e) {
+        log.error("error] {}", e.getMessage());
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .code(HttpStatus.BAD_REQUEST.value())
