@@ -1,4 +1,4 @@
-package com.owlexpress.producer.presentation.dto.request;
+package com.owlexpress.producer.common.dto.request;
 
 import com.owlexpress.producer.common.util.GeoUtil;
 import com.owlexpress.producer.domain.entity.Producer;
@@ -60,6 +60,7 @@ public class CreateProducerRequestDto {
                 .companyName(createProducerRequestDto.getCompanyName())
                 .companyType(createProducerRequestDto.getCompanyType())
                 .companyAddress(createProducerRequestDto.getCompanyAddress())
+                .userId(createProducerRequestDto.getUserId())
                 .userName("Admin")
                 .userPhoneNumber("010-1234-1234")
                 .hubId(createProducerRequestDto.getHubId())
