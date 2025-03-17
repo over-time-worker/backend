@@ -1,5 +1,6 @@
 package com.owlexpress.hub.common.advice;
 
+import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -34,5 +35,16 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build();
 
+    }
+
+    @ExceptionHandler(HubNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleHubNotFoundException(HubNotFoundException e) {
+        return CommonDto.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
     }
 }

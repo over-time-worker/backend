@@ -64,7 +64,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     // ✅ for PostGIS
-    implementation 'org.hibernate:hibernate-spatial:5.6.11.Final'
+    implementation 'org.hibernate.orm:hibernate-spatial:6.6.11.Final'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

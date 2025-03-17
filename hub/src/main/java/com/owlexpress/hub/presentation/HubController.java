@@ -3,6 +3,8 @@ package com.owlexpress.hub.presentation;
 import com.owlexpress.hub.domain.service.HubService;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import com.owlexpress.hub.presentation.dto.HubCreateRequestDto;
+import com.owlexpress.hub.presentation.dto.HubUpdateRequestDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +29,16 @@ public class HubController {
     }
 
     @PostMapping
-    public ResponseEntity<CommonDto<Object>> create(
-            @Validated @RequestBody HubCreateRequestDto requestDto
+    public ResponseEntity<CommonDto<Void>> create(
+            @Valid @RequestBody HubCreateRequestDto requestDto
     ) {
         hubService.create(requestDto);
 
-        CommonDto<Object> created = CommonDto.builder()
+        CommonDto<Void> created = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
                 .message("허브 등록 완료")
+                .data(null)
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -43,7 +46,20 @@ public class HubController {
     }
 
     @PutMapping
-    public void update() {
+    public ResponseEntity<CommonDto<Void>> update(
+            @Validated @RequestBody HubUpdateRequestDto requestDto
+    ) {
+        hubService.update(requestDto);
+
+        CommonDto<Void> updated = CommonDto.<Void>builder()
+                .status(HttpStatus.ACCEPTED)
+                .code(HttpStatus.ACCEPTED.value())
+                .message("허브 수정 완료")
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(updated);
     }
 
     @DeleteMapping

@@ -1,12 +1,16 @@
 package com.owlexpress.hub.domain.entity;
 
 import com.owlexpress.hub.common.BaseEntity;
+import com.owlexpress.hub.common.util.GeoUtil;
+import com.owlexpress.hub.presentation.dto.HubUpdateRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -58,4 +62,34 @@ public class Hub extends BaseEntity {
         this.userPhoneNumber = userPhoneNumber;
         this.parentHubId = parentHubId;
     }
+
+    public void update(HubUpdateRequestDto requestDto) {
+        Optional.ofNullable(requestDto.getName()).ifPresent(name -> this.name = name);
+
+        Optional.ofNullable(requestDto.getHubAddress())
+                .ifPresent(address -> this.hubAddress = address);
+
+        Optional.ofNullable(getLocation(requestDto))
+                .ifPresent(location -> this.location = location);
+
+        Optional.ofNullable(requestDto.getUserId()).ifPresent(userId -> this.userId = userId);
+
+        Optional.ofNullable(requestDto.getUserName())
+                .ifPresent(username -> this.userName = username);
+
+        Optional.ofNullable(requestDto.getUserPhoneNumber())
+                .ifPresent(phoneNumber -> this.userPhoneNumber = phoneNumber);
+
+        Optional.ofNullable(requestDto.getParentId())
+                .ifPresent(parentId -> this.parentHubId = parentId);
+    }
+
+    private Point getLocation(HubUpdateRequestDto requestDto) {
+        if (requestDto.getLatitude() == null || requestDto.getLongitude() == null) {
+            return null;
+        }
+        return GeoUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude());
+    }
+
+
 }
