@@ -39,7 +39,7 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Override
     public void createAlarmForHubDeliver(AlarmCreateRequestDto requestDto) {
-        // TODO : order service 생긴 후 feign client 통신으로 정보 얻어오기
+        // TODO : order service 생긴 후 feign client 통신으로 정보 얻어오기 or 배송쪽에서 product 정보 함께 넘기기(메세지큐 방식이면 괜찮을듯)
         String productInfo = "생쭈꾸미 10마리, 냉동 쭈꾸미 1팩";
 
         // TODO : ai 메세지 요청 feign client 통신 test
@@ -53,6 +53,7 @@ public class AlarmServiceImpl implements AlarmService {
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
+
         if(platformType.equals(PlatformType.SLACK)) {
             sendMessage(messageCreateResponseDto.getMessage(), requestDto.getDeliverPlatformId());
         }
@@ -80,10 +81,11 @@ public class AlarmServiceImpl implements AlarmService {
         MessageCreateResponseDto messageCreateResponseDto;
 
         try{
-            ResponseEntity<CommonDto<MessageCreateResponseDto>> responseEntity
+            CommonDto<MessageCreateResponseDto> responseEntity
                     = aiClient.createMessagesForHubDeliver(MessageCreateRequestDto.AlarmDtoToMessageDto(requestDto,productInfo));
 
-            messageCreateResponseDto = responseEntity.getBody().getData();
+            messageCreateResponseDto = responseEntity.getData();
+
         } catch (RuntimeException e) {
             log.error(e.getMessage());
             throw new AiFeignClientException("잠시 후에 다시 시도해주세요.");
