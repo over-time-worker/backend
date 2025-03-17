@@ -51,7 +51,7 @@ public class AiServiceImpl implements AiService {
 
         Ai aiMessage = Ai.builder()
                 .hubDeliverId(messageCreateRequestDto.getDeliverId())
-                .hubDeliverPlatformId(messageCreateRequestDto.getDeliverPlatformId())
+                .hubDeliverChannelId(messageCreateRequestDto.getDeliverChannelId())
                 .request(requestMessage)
                 .response(responseMessage)
                 .build();
@@ -72,7 +72,7 @@ public class AiServiceImpl implements AiService {
 
         Ai aiMessage = Ai.builder()
                 .consumerDeliverId(messageCreateRequestDto.getDeliverId())
-                .consumerDeliverPlatformId(messageCreateRequestDto.getDeliverPlatformId())
+                .consumerDeliverChannelId(messageCreateRequestDto.getDeliverChannelId())
                 .request(requestMessage)
                 .response(responseMessage)
                 .build();

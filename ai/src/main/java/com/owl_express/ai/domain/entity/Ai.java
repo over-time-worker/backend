@@ -35,11 +35,11 @@ public class Ai extends BaseEntity {
     @Column(name = "consumer_deliver_id")
     private UUID consumerDeliverId;
 
-    @Column(name = "hub_deliver_platform_id", length = 50)
-    private String hubDeliverPlatformId;
+    @Column(name = "hub_deliver_channel_id", length = 50)
+    private String hubDeliverChannelId;
 
-    @Column(name = "consumer_deliver_platform_id", length = 50)
-    private String consumerDeliverPlatformId;
+    @Column(name = "consumer_deliver_channel_id", length = 50)
+    private String consumerDeliverChannelId;
 
     @Builder
     public Ai(
@@ -47,14 +47,14 @@ public class Ai extends BaseEntity {
             String response,
             UUID hubDeliverId,
             UUID consumerDeliverId,
-            String hubDeliverPlatformId,
-            String consumerDeliverPlatformId
+            String hubDeliverChannelId,
+            String consumerDeliverChannelId
     ) {
         this.request = request;
         this.response = response;
         this.hubDeliverId = hubDeliverId;
         this.consumerDeliverId = consumerDeliverId;
-        this.hubDeliverPlatformId = hubDeliverPlatformId;
-        this.consumerDeliverPlatformId = consumerDeliverPlatformId;
+        this.hubDeliverChannelId = hubDeliverChannelId;
+        this.consumerDeliverChannelId = consumerDeliverChannelId;
     }
 }
