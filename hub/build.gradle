@@ -4,7 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'com.owlexpress.user'
+group = 'com.owlexpress'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -25,50 +25,55 @@ repositories {
 
 ext {
     set('springCloudVersion', "2024.0.0")
+    set('querydslVersion', "5.0.0")
+}
+
+dependencies {
+    // ✅ QueryDSL
+    implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // ✅ JSON
+    implementation 'org.json:json:20230227'
+
+    // ✅ JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // ✅ Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // ✅ Eureka Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // ✅ OpenFeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    // ✅ Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // ✅ Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // ✅ H2
+    runtimeOnly 'com.h2database:h2'
+
+    // ✅ PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // ✅ for PostGIS
+    implementation 'org.hibernate:hibernate-spatial:5.6.11.Final'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
-}
-
-dependencies {
-
-    // springboot
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-
-    // validation
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    // data
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.postgresql:postgresql'
-    runtimeOnly 'com.h2database:h2' // test db
-
-    //QueryDSL
-    implementation "com.querydsl:querydsl-jpa:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
-    implementation "com.querydsl:querydsl-core"
-    implementation "com.querydsl:querydsl-collections"
-    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
-    // security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    testImplementation 'org.springframework.security:spring-security-test'
-
-    // spring cloud
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-
-    // lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    // test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
