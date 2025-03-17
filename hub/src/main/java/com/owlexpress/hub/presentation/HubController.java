@@ -1,5 +1,6 @@
 package com.owlexpress.hub.presentation;
 
+import com.owlexpress.hub.common.Constant.ResponseMessage;
 import com.owlexpress.hub.domain.service.HubService;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
@@ -35,7 +36,7 @@ public class HubController {
         CommonDto<HubFindResponseDto> found = CommonDto.<HubFindResponseDto>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
-                .message("허브 조회 성공")
+                .message(ResponseMessage.HUB_FIND_SUCCESS)
                 .data(hubService.find(hubId))
                 .build();
 
@@ -51,7 +52,7 @@ public class HubController {
         CommonDto<Void> created = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
-                .message("허브 등록 완료")
+                .message(ResponseMessage.HUB_CREATE_SUCCESS)
                 .data(null)
                 .build();
 
@@ -68,7 +69,7 @@ public class HubController {
         CommonDto<Void> updated = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
-                .message("허브 수정 완료")
+                .message(ResponseMessage.HUB_UPDATE_SUCCESS)
                 .data(null)
                 .build();
 
@@ -93,7 +94,7 @@ public class HubController {
         CommonDto<PagedModel<HubSearchResponseDto>> searchCompleted = CommonDto.<PagedModel<HubSearchResponseDto>>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
-                .message("허브 검색 성공")
+                .message(ResponseMessage.HUB_SEARCH_SUCCESS)
                 .data(searchedResults)
                 .build();
 

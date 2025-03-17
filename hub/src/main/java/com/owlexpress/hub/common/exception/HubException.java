@@ -1,11 +1,13 @@
 package com.owlexpress.hub.common.exception;
 
+import com.owlexpress.hub.common.Constant.ErrorMessage;
+
 public class HubException {
 
     public static class HubNotFoundException extends RuntimeException {
 
         public HubNotFoundException() {
-            super("해당 허브를 찾을 수 없습니다.");
+            super(ErrorMessage.HUB_DOES_NOT_MATCHES);
         }
     }
 }

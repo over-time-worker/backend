@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class HubServiceImpl implements HubService {
 
     private final HubRepository hubRepository;
+    private static final List<Integer> ALLOWED_SIZES = List.of(10, 30, 50);
+    private static final Integer DEFAULT_SIZE = 10;
 
     @Override
     @Transactional
@@ -55,8 +57,8 @@ public class HubServiceImpl implements HubService {
             String orderBy
     ) {
         Sort.Direction direction = sort.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC;
-        if (!List.of(10, 30, 50).contains(size)) {
-            size = 10;
+        if (!ALLOWED_SIZES.contains(size)) {
+            size = DEFAULT_SIZE;
         }
 
         PageRequest pageRequest = PageRequest.of(page, size);

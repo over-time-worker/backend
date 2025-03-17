@@ -1,5 +1,6 @@
-package com.owlexpress.hub.common.advice;
+package com.owlexpress.hub.common.exception;
 
+import com.owlexpress.hub.common.Constant.ErrorMessage;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e) {
-        log.error("error] {}", e.getBindingResult().getAllErrors());
+        log.error(ErrorMessage.METHOD_ARGUMENT_NOT_VALID, e.getBindingResult().getAllErrors());
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleConstraintViolationException(ConstraintViolationException e) {
-        log.error("error] {}", e.getMessage());
+        log.error(ErrorMessage.CONSTRAINT_VIOLATION_EXCEPTION, e.getMessage());
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .code(HttpStatus.BAD_REQUEST.value())
@@ -44,7 +45,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HubNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleHubNotFoundException(HubNotFoundException e) {
-        log.error("error] {}", e.getMessage());
+        log.error(ErrorMessage.HUB_NOT_FOUND_EXCEPTION, e.getMessage());
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .code(HttpStatus.BAD_REQUEST.value())
