@@ -1,15 +1,20 @@
 package com.owl_express.ai.common.advice;
 
 import com.owl_express.ai.application.dtos.CommonDto;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestController
+@Slf4j
+@RestControllerAdvice
 public class GlobalExceptionAdvice {
+
+    private static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
+    private static final String CONSTRAINT_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -19,6 +24,8 @@ public class GlobalExceptionAdvice {
         e.getBindingResult().getAllErrors().forEach((error) -> {
             sb.append(error.getDefaultMessage());
         });
+
+       log.error(METHOD_ARGUMENT_NOT_VALID_EXCEPTION, sb.toString());
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -31,6 +38,8 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleConstraintViolationException(ConstraintViolationException e) {
+
+        log.error(CONSTRAINT_VIOLATION_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
