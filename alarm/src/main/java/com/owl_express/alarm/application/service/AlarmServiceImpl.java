@@ -13,6 +13,7 @@ import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
 import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
+import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
@@ -153,6 +154,14 @@ public class AlarmServiceImpl implements AlarmService {
         // TODO : UserId 넣어주기
         alarm.deleteEntity(1L);
         alarmRepository.save(alarm);
+    }
+
+    @Override
+    public AlarmFindResponseDto find(UUID alarmId) {
+        Alarm alarm = alarmRepository.findById(alarmId).orElseThrow(
+                () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
+
+        return AlarmFindResponseDto.toDto(alarm);
     }
 
     private MessageCreateResponseDto getMessageFromAi(AlarmCreateRequestDto requestDto, String productInfo) {
