@@ -1,12 +1,8 @@
 package com.owlexpress.product.infrastructure.repository;
 
 import com.owlexpress.product.domain.entity.HubInfo;
-import com.owlexpress.product.domain.entity.Product;
 import com.owlexpress.product.domain.repository.HubInfoRepository;
-import com.owlexpress.product.domain.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

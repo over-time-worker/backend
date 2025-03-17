@@ -4,6 +4,7 @@ import com.owlexpress.product.application.dto.response.FindProductResponseDto;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import com.owlexpress.product.common.dto.CreateProductInfoRequestDto;
 import com.owlexpress.product.common.dto.ProducerResponseDto;
+import com.owlexpress.product.common.dto.UpdateProductInfoRequestDto;
 import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.entity.HubInfo;
 import com.owlexpress.product.domain.entity.Product;
@@ -12,6 +13,7 @@ import com.owlexpress.product.infrastructure.config.ProductSearchConfig;
 import com.owlexpress.product.infrastructure.feignClient.ProducerClient;
 import com.owlexpress.product.presentation.dto.request.CreateHubInfoRequestDto;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
+import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
 import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,28 @@ public class ProductHubUsecase {
                         totalQuantity.addAndGet(hubInfo.getHubProductQuantity())
         );
         return FindProductResponseDto.toDTO(product, totalQuantity);
+    }
+
+    @Transactional
+    public void updateProduct(UpdateProductDto updateProductDto, UUID productsId) {
+        //1.제품 정보 수정
+        Product product = getProduct(productsId);
+
+        product.setProductName(updateProductDto.getProductName());
+        product.setProductPrice(updateProductDto.getProductPrice());
+        product.setProductType(updateProductDto.getProductType());
+        product.setProducerId(updateProductDto.getProducerId());
+        product.setProducerName(updateProductDto.getProducerName());
+        product.setProducerAddress(updateProductDto.getProducerAddress());
+
+        //TODO :: AuditAware 추가 후 제거
+        product.updateModifiedData(1L);
+
+        //TODO :: 2. 제품 정보 수정 이벤트 전파(FeignClient)
+        // - 생성업체 상품 정보에 전파
+        UpdateProductInfoRequestDto updateProductInfoRequestDto = UpdateProductInfoRequestDto.fromEntity(product);
+        producerClient.update(productsId,updateProductInfoRequestDto);
+        // - 허브 상품 정보에 전파
     }
 
     public PagedModel<SearchProductResponseDto> search(
