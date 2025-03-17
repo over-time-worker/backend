@@ -23,16 +23,14 @@ public class MasterServiceImpl implements MasterService {
 
     @Override
     public void updateRole(UpdateUserRoleRequestDto updateUserRoleRequestDto) {
-        User user = userRepository.findByUserId(updateUserRoleRequestDto.getUserId())
-                .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+        User user = getUser(updateUserRoleRequestDto.getUserId());
 
         user.setRole(updateUserRoleRequestDto.getRole());
     }
 
     @Override
     public void updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto) {
-        User user = userRepository.findByUserId(updateUserInfoRequestDto.getUserId())
-                .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+        User user = getUser(updateUserInfoRequestDto.getUserId());
 
         user.setUserInfo(
                 updateUserInfoRequestDto.getUserId(),
@@ -45,15 +43,13 @@ public class MasterServiceImpl implements MasterService {
 
     @Override
     public void delete(Long userId) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+        User user = getUser(userId);
         user.deleteUser(userId);
     }
 
     @Override
     public void approvalUser(ApprovalUserRequestDto approvalUserRequestDto) {
-        User user = userRepository.findByUserId(approvalUserRequestDto.getUserId())
-                .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
+        User user = getUser(approvalUserRequestDto.getUserId());
 
         user.setApprovalStatus(approvalUserRequestDto.getApprovalStatus());
     }
@@ -69,5 +65,10 @@ public class MasterServiceImpl implements MasterService {
         Pageable pageable = PageUtil.getPageable(page, size, sort, orderBy);
         Page<GetUsersResponseDto> paged = userRepository.searchUsers(keyword, pageable);
         return new PagedModel<>(paged);
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 }
