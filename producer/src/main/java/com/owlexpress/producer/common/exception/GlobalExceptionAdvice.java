@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateExceptoin;
+import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateException;
 import static com.owlexpress.producer.common.exception.ProducerException.ProducerNotFoundException;
 import static com.owlexpress.producer.common.exception.ProductInfoException.*;
 
@@ -33,9 +33,9 @@ public class GlobalExceptionAdvice {
                 .build();
     }
 
-    @ExceptionHandler(ProducerNameDuplicateExceptoin.class)
+    @ExceptionHandler(ProducerNameDuplicateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonDto<Object> handleProducerNotFoundException(ProducerNameDuplicateExceptoin e) {
+    public CommonDto<Object> handleProducerNameDuplicateException(ProducerNameDuplicateException e) {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
