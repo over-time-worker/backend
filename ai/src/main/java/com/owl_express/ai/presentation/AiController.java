@@ -1,19 +1,22 @@
 package com.owl_express.ai.presentation;
 
-import com.owl_express.ai.application.service.AiService;
+import static com.owl_express.ai.presentation.ApiResponseMessageConstant.CREATE_MESSAGE_SUCCESS;
+import static com.owl_express.ai.presentation.ApiResponseMessageConstant.FIND_MESSAGE_SUCCESS;
+import static com.owl_express.ai.presentation.ApiResponseMessageConstant.SEARCH_MESSAGE_SUCCESS;
+
 import com.owl_express.ai.application.dtos.CommonDto;
 import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
-import com.owl_express.ai.domain.entity.Ai;
+import com.owl_express.ai.application.service.AiService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
@@ -37,7 +41,7 @@ public class AiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<MessageCreateResponseDto>builder()
                         .status(HttpStatus.CREATED)
-                        .message("메세지 생성 완료")
+                        .message(CREATE_MESSAGE_SUCCESS)
                         .code(HttpStatus.CREATED.value())
                         .data(responseDto)
                         .build());
@@ -52,7 +56,7 @@ public class AiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<MessageCreateResponseDto>builder()
                         .status(HttpStatus.CREATED)
-                        .message("메세지 생성 완료")
+                        .message(CREATE_MESSAGE_SUCCESS)
                         .code(HttpStatus.CREATED.value())
                         .data(responseDto)
                         .build());
@@ -60,14 +64,14 @@ public class AiController {
 
     @GetMapping("/messages/{ai_id}")
     public ResponseEntity<CommonDto<MessageFindResponseDto>> find(
-            @PathVariable("ai_id") UUID aiId
+            @NotNull(message = "[notNull:ai_id]") @PathVariable("ai_id") UUID aiId
     ) {
         MessageFindResponseDto responseDto = aiService.find(aiId);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 CommonDto.<MessageFindResponseDto>builder()
                         .status(HttpStatus.CREATED)
-                        .message("메세지 조회 완료")
+                        .message(FIND_MESSAGE_SUCCESS)
                         .code(HttpStatus.OK.value())
                         .data(responseDto)
                         .build());
@@ -86,7 +90,7 @@ public class AiController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 CommonDto.<PagedModel<MessageFindResponseDto>>builder()
                         .status(HttpStatus.OK)
-                        .message("메세지 검색 조회 완료")
+                        .message(SEARCH_MESSAGE_SUCCESS)
                         .code(HttpStatus.OK.value())
                         .data(pagedModel)
                         .build());
