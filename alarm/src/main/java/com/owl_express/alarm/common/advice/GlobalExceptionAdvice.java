@@ -19,11 +19,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionAdvice {
 
+    public static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
+    public static final String CONSTRAIN_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
+    public static final String AI_FEIGN_CLIENT_EXCEPTION = "handleAiFeignClientException : {}";
+    public static final String ORDER_NOT_FOUND_EXCEPTION = "handleOrderNotFoundException : {}";
+    public static final String ALARM_NOT_FOUND_EXCEPTION = "handleAlarmNotFoundException : {}";
+    public static final String PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION = "handlePlatformTypeNotSupportedException : {}";
+    public static final String MESSAGE_TYPE_NOT_SUPPORTED_EXCEPTION = "handleMessageTypeNotSupportedException : {}";
+    public static final String SLACK_EXCEPTION = "handleSlackException : {}";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
 
-        log.error("handleMethodArgumentNotValidException : {}", e.getBindingResult().getAllErrors());
+        log.error(METHOD_ARGUMENT_NOT_VALID_EXCEPTION, e.getBindingResult().getAllErrors());
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -37,7 +46,7 @@ public class GlobalExceptionAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleConstraintViolationException(ConstraintViolationException e) {
 
-        log.error("handleConstraintViolationException : {}", e.getMessage());
+        log.error(CONSTRAIN_VIOLATION_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -52,7 +61,7 @@ public class GlobalExceptionAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public CommonDto<Object> handleAiFeignClientException(AiFeignClientException e) {
 
-        log.error("handleAiFeignClientException : {}", e.getMessage());
+        log.error(AI_FEIGN_CLIENT_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -66,7 +75,7 @@ public class GlobalExceptionAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public CommonDto<Object> handleOrderNotFoundException(OrderNotFoundException e) {
 
-        log.error("handleOrderNotFoundException : {}", e.getMessage());
+        log.error(ORDER_NOT_FOUND_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)
@@ -80,7 +89,7 @@ public class GlobalExceptionAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public CommonDto<Object> handleAlarmNotFoundException(AlarmNotFoundException e) {
 
-        log.error("handleAlarmNotFoundException : {}", e.getMessage());
+        log.error(ALARM_NOT_FOUND_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)
@@ -94,7 +103,7 @@ public class GlobalExceptionAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public CommonDto<Object> handlePlatformTypeNotSupportedException(NotSupportedPlatformTypeException e) {
 
-        log.error("handlePlatformTypeNotSupportedException : {}", e.getMessage());
+        log.error(PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)
@@ -108,7 +117,7 @@ public class GlobalExceptionAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public CommonDto<Object> handleMessageTypeNotSupportedException(NotSupportedMessageTypeException e) {
 
-        log.error("handleMessageTypeNotSupportedException : {}", e.getMessage());
+        log.error(MESSAGE_TYPE_NOT_SUPPORTED_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)
@@ -122,7 +131,7 @@ public class GlobalExceptionAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public CommonDto<Object> handleSlackException(SlackException e) {
 
-        log.error("handleSlackException : {}", e.getMessage());
+        log.error(SLACK_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
