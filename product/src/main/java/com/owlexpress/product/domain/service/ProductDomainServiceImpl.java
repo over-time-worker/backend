@@ -3,7 +3,6 @@ package com.owlexpress.product.domain.service;
 import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.entity.Product;
 import com.owlexpress.product.domain.repository.ProductRepository;
-import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,22 +14,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductDomainServiceImpl implements ProductDomainService {
     private final ProductRepository productRepository;
-
-    @Override
-    @Transactional
-    public void createProduct(CreateProductRequestDto createProductRequestDto) {
-
-        //상품 중복검사
-        validateProductName(createProductRequestDto);
-
-        Product product = CreateProductRequestDto.toEntity(createProductRequestDto);
-
-        //TODO :: AuditAware 추가 후 제거
-        product.updateCreateData(1L);
-
-
-        productRepository.save(product);
-    }
 
     @Override
     @Transactional
@@ -65,14 +48,6 @@ public class ProductDomainServiceImpl implements ProductDomainService {
 
     }
 
-
-    private void validateProductName(CreateProductRequestDto createProductRequestDto) {
-        productRepository.findByProductName(createProductRequestDto.getProductName()).ifPresent(
-                product -> {
-                    throw new ProductException.ProductNameDuplicateExceptoin("해당 상품명이 이미 존재합니다.");
-                }
-        );
-    }
 
     private Product getProduct(UUID productsId) {
         return productRepository.findById(productsId).orElseThrow(
