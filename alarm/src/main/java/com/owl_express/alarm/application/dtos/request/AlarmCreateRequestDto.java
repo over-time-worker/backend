@@ -18,7 +18,7 @@ public class AlarmCreateRequestDto {
     @Size(min = 1, max = 50, message = "[size:deliverName]")
     private String deliverName;
     @Size(min = 1, max = 50, message = "[size:deliverPlatformId]")
-    private String deliverPlatformId;
+    private String deliverChannelId;
     @Size(min = 1, max = 50, message = "[size:platformName]")
     private String platformName;
     @NotNull(message = "[notNull:orderId]")

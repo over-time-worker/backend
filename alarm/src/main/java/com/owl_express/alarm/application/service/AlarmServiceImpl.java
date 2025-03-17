@@ -63,7 +63,7 @@ public class AlarmServiceImpl implements AlarmService {
 
         if(platformType.equals(PlatformType.SLACK)) {
             chatPostMessageResponse = sendMessage(messageCreateResponseDto.getMessage(),
-                    requestDto.getDeliverPlatformId());
+                    requestDto.getDeliverChannelId());
 
             String gmtDate = chatPostMessageResponse.getHttpResponseHeaders().get("date").get(0);
 
@@ -71,7 +71,7 @@ public class AlarmServiceImpl implements AlarmService {
             Alarm alarm = Alarm.builder()
                     .aiId(messageCreateResponseDto.getAiId())
                     .userId(requestDto.getUserId())
-                    .userPlatformId(requestDto.getDeliverPlatformId())
+                    .userChannelId(requestDto.getDeliverChannelId())
                     .platformType(platformType)
                     .message(messageCreateResponseDto.getMessage())
                     .aiId(messageCreateResponseDto.getAiId())
@@ -104,7 +104,7 @@ public class AlarmServiceImpl implements AlarmService {
 
         if(platformType.equals(PlatformType.SLACK)) {
             ChatScheduleMessageResponse chatScheduleMessageResponse
-                    = scheduleMessage(messageCreateResponseDto.getMessage(), requestDto.getDeliverPlatformId());
+                    = scheduleMessage(messageCreateResponseDto.getMessage(), requestDto.getDeliverChannelId());
 
             String platformMessageId = chatScheduleMessageResponse.getScheduledMessageId();
             String gmtDate = chatScheduleMessageResponse.getHttpResponseHeaders().get("date").get(0);
@@ -113,7 +113,7 @@ public class AlarmServiceImpl implements AlarmService {
             Alarm alarm = Alarm.builder()
                     .aiId(messageCreateResponseDto.getAiId())
                     .userId(requestDto.getUserId())
-                    .userPlatformId(requestDto.getDeliverPlatformId())
+                    .userChannelId(requestDto.getDeliverChannelId())
                     .platformType(platformType)
                     .message(messageCreateResponseDto.getMessage())
                     .aiId(messageCreateResponseDto.getAiId())
