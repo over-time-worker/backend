@@ -25,7 +25,7 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Alarm extends BaseEntity {
     @Id
-    @Column(name = "notification_id", length = 50)
+    @Column(name = "alarm_id", length = 50)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
