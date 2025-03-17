@@ -36,21 +36,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> updatePassword(Long userId) {
-        return userJpaRepository.findById(userId);
-    }
-
-    @Override
-    public Optional<User> updateInfo(Long userId) {
-        return userJpaRepository.findById(userId);
-    }
-
-    @Override
-    public Optional<User> delete(Long userId) {
-        return userJpaRepository.findById(userId);
-    }
-
-    @Override
     public Page<GetUsersResponseDto> searchUsers(String keyword, Pageable pageable) {
         return userQueryDSLRepository.searchUsers(pageable, keyword);
     }

@@ -13,11 +13,5 @@ public interface UserRepository {
 
     Optional<User> findByUserId(Long userId);
 
-    Optional<User> updatePassword(Long userId);
-
-    Optional<User> updateInfo(Long userId);
-
-    Optional<User> delete(Long userId);
-
     Page<GetUsersResponseDto> searchUsers(String keyword, Pageable pageable);
 }
