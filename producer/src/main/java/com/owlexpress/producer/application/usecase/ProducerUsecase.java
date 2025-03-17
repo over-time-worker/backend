@@ -83,4 +83,15 @@ public class ProducerUsecase {
         }
         Optional.ofNullable(dto.getHubId()).ifPresent(producer::setHubId);
     }
+
+    @Transactional
+    public void delete(UUID producerId) {
+        Producer producer = producerHelper.getProducer(producerId);
+
+        producer.softDeleteData(1L);
+        //TODO :: 방법2. 생산업체는 null 처리하고 남은 모든 재고까지만 판매
+        // 상품 SoftDelete 처리 요청
+        // 허브에 연관된 상품 생산업체 null 처리
+        // 모두 성공시 회사 softDelete
+    }
 }

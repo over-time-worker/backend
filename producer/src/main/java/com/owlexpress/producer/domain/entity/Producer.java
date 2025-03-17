@@ -36,7 +36,7 @@ public class Producer extends BaseEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "user_name", nullable = false, unique = true)
+    @Column(name = "user_name", nullable = false)
     @Size(min = 1, max = 50)
     private String userName;
     @Column(name = "user_phone_number")
