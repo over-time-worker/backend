@@ -24,13 +24,13 @@ public class ProducerController {
     private final ProducerService producerService;
 
     @PostMapping()
-    public ResponseEntity<CommonDto<Object>> create(
+    public ResponseEntity<CommonDto<Void>> create(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody CreateProducerRequestDto createProducerRequestDto
     ) {
         producerUsecase.create(createProducerRequestDto);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                                .status(HttpStatus.CREATED)
                                                .code(HttpStatus.CREATED.value())
                                                .message("생성 업체 등록 성공")
@@ -41,7 +41,7 @@ public class ProducerController {
     }
 
     @PutMapping("/{producerId}")
-    public ResponseEntity<CommonDto<Object>> update(
+    public ResponseEntity<CommonDto<Void>> update(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody UpdateProductRequestDto updateProductRequestDto,
             @PathVariable UUID producerId
@@ -51,7 +51,7 @@ public class ProducerController {
                 updateProductRequestDto,
                 producerId
         );
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                                .status(HttpStatus.ACCEPTED)
                                                .code(HttpStatus.ACCEPTED.value())
                                                .message("생성 업체 수정 성공")
@@ -88,17 +88,40 @@ public class ProducerController {
             @RequestParam(name = "q", defaultValue = "") String q,
             @RequestParam(name = "orderBy", defaultValue = "createdAt") String orderBy
     ) {
-        PagedModel<SearchProducerResponseDto> searchResult = producerService.search(page,size,sort, q,orderBy);
+        PagedModel<SearchProducerResponseDto> searchResult = producerService.search(
+                page,
+                size,
+                sort,
+                q,
+                orderBy
+        );
 
         CommonDto<PagedModel<SearchProducerResponseDto>> commonDto = CommonDto.<PagedModel<SearchProducerResponseDto>>builder()
-                                                                             .status(HttpStatus.OK)
-                                                                             .code(HttpStatus.OK.value())
-                                                                             .message("생성 업체 검색 성공")
-                                                                             .data(searchResult)
-                                                                             .build();
+                                                                              .status(HttpStatus.OK)
+                                                                              .code(HttpStatus.OK.value())
+                                                                              .message("생성 업체 검색 성공")
+                                                                              .data(searchResult)
+                                                                              .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                              .body(commonDto);
+    }
+
+    @DeleteMapping("/{producerId}")
+    public ResponseEntity<CommonDto<Void>> delete(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @PathVariable UUID producerId
+    ) {
+        producerUsecase.delete(producerId);
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
+                                                         .status(HttpStatus.OK)
+                                                         .code(HttpStatus.OK.value())
+                                                         .message("생성 업체 검색 성공")
+                                                         .build();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                             .body(commonDto);
+
     }
 
 
