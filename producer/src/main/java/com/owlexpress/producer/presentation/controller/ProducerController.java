@@ -114,12 +114,12 @@ public class ProducerController {
     ) {
         producerUsecase.delete(producerId);
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
-                                                         .status(HttpStatus.OK)
-                                                         .code(HttpStatus.OK.value())
+                                                         .status(HttpStatus.ACCEPTED)
+                                                         .code(HttpStatus.ACCEPTED.value())
                                                          .message("생성 업체 검색 성공")
                                                          .build();
 
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
                              .body(commonDto);
 
     }
