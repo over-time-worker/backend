@@ -64,7 +64,7 @@ public class CreateProducerRequestDto {
                 .userName("Admin")
                 .userPhoneNumber("010-1234-1234")
                 .hubId(createProducerRequestDto.getHubId())
-                .hubManagerId(createProducerRequestDto.getHubId())
+                .hubManagerId(1L)
                 .hubAddress("client에서 가져올 주소")
                 .location(GeoUtil.createPoint(
                         createProducerRequestDto.getLatitude(),

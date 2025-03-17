@@ -8,8 +8,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class ProducerResponseDto {
-
+public class SearchProducerResponseDto {
     public UUID hubId;
 
     public Long hubManagerId;
@@ -35,7 +34,7 @@ public class ProducerResponseDto {
     private String hubAddress;
 
     @Builder
-    public ProducerResponseDto(
+    public SearchProducerResponseDto(
             UUID hubId,
             Long hubManagerId,
             UUID producerId,
@@ -63,20 +62,20 @@ public class ProducerResponseDto {
         this.hubAddress = hubAddress;
     }
 
-    public static ProducerResponseDto fromEntity(Producer producer) {
-        return ProducerResponseDto.builder()
-                           .hubId(producer.getHubId())
-                           .hubManagerId(producer.getHubManagerId())
-                           .hubAddress(producer.getHubAddress())
-                           .producerId(producer.getProducerId())
-                           .userId(producer.getUserId())
-                           .userName(producer.getUserName())
-                           .userPhoneNumber(producer.getUserPhoneNumber())
-                           .businessNumber(producer.getBusinessNumber())
-                           .companyType(producer.getCompanyType())
-                           .companyAddress(producer.getCompanyAddress())
-                           .latitude(producer.getLocation().getX())
-                           .longitude(producer.getLocation().getY())
-                           .build();
+    public static SearchProducerResponseDto fromEntity(Producer producer) {
+        return SearchProducerResponseDto.builder()
+                                  .hubId(producer.getHubId())
+                                  .hubManagerId(producer.getHubManagerId())
+                                  .hubAddress(producer.getHubAddress())
+                                  .producerId(producer.getProducerId())
+                                  .userId(producer.getUserId())
+                                  .userName(producer.getUserName())
+                                  .userPhoneNumber(producer.getUserPhoneNumber())
+                                  .businessNumber(producer.getBusinessNumber())
+                                  .companyType(producer.getCompanyType())
+                                  .companyAddress(producer.getCompanyAddress())
+                                  .latitude(producer.getLocation().getX())
+                                  .longitude(producer.getLocation().getY())
+                                  .build();
     }
 }
