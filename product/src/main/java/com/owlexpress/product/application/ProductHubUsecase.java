@@ -2,12 +2,16 @@ package com.owlexpress.product.application;
 
 import com.owlexpress.product.application.dto.response.FindProductResponseDto;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
+import com.owlexpress.product.common.dto.CreateProductInfoRequestDto;
+import com.owlexpress.product.common.dto.ProducerResponseDto;
 import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.entity.HubInfo;
 import com.owlexpress.product.domain.entity.Product;
 import com.owlexpress.product.domain.repository.ProductRepository;
 import com.owlexpress.product.infrastructure.config.ProductSearchConfig;
+import com.owlexpress.product.infrastructure.feignClient.ProducerClient;
 import com.owlexpress.product.presentation.dto.request.CreateHubInfoRequestDto;
+import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,6 +31,7 @@ public class ProductHubUsecase {
 
     private final ProductRepository productRepository;
     private final ProductSearchConfig productSearchConfig; // 설정 클래스 주입
+    private final ProducerClient producerClient;
 
 
     public FindProductResponseDto find(UUID productsId) {
@@ -91,6 +96,38 @@ public class ProductHubUsecase {
         product.updateModifiedData(1L); //TODO :: AUdit설정후 삭제
 
         hubInfo.setProduct(product);
+    }
+
+    @Transactional
+    public void createProduct(CreateProductRequestDto createProductRequestDto) {
+
+        //1. 상품 중복검사
+        validateProductName(createProductRequestDto);
+
+        //2. producer 정보 조회
+        ProducerResponseDto producerResponseDto = producerClient.find(createProductRequestDto.getProducerId())
+                                                 .getData();
+        //3.상품 등록
+        Product product = CreateProductRequestDto.toEntity(createProductRequestDto,producerResponseDto);
+        //TODO :: AuditAware 추가 후 제거
+        product.updateCreateData(1L);
+        product = productRepository.save(product);
+
+        //4. client 통신용 dto 생성
+        CreateProductInfoRequestDto createProductInfoRequestDto = CreateProductInfoRequestDto.fromEntity(product);
+
+        //5.상품 정보 Producer(productInfo)에 전달
+        producerClient.create(createProductInfoRequestDto);
+
+
+    }
+
+    private void validateProductName(CreateProductRequestDto createProductRequestDto) {
+        productRepository.findByProductName(createProductRequestDto.getProductName()).ifPresent(
+                product -> {
+                    throw new ProductException.ProductNameDuplicateExceptoin("해당 상품명이 이미 존재합니다.");
+                }
+        );
     }
 
     private Product getProduct(UUID productsId) {
