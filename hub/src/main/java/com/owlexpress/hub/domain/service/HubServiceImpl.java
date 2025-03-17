@@ -67,8 +67,8 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
-    public HubFindResponseDto find(UUID hubID) {
-        return HubFindResponseDto.fromEntity(HubHelper.findByHubId(hubID, hubRepository));
+    public HubFindResponseDto find(UUID hubId) {
+        return HubFindResponseDto.fromEntity(HubHelper.findByHubId(hubId, hubRepository));
 
     }
 }

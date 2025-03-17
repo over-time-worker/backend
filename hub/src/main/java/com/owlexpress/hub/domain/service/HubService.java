@@ -9,11 +9,11 @@ import org.springframework.data.web.PagedModel;
 
 public interface HubService {
 
-    public HubFindResponseDto find(UUID hubID);
+    HubFindResponseDto find(UUID hubId);
 
-    public void create(HubCreateRequestDto requestDto);
+    void create(HubCreateRequestDto requestDto);
 
-    public void update(HubUpdateRequestDto requestDto);
+    void update(HubUpdateRequestDto requestDto);
 
     PagedModel<HubSearchResponseDto> search(int page, int size, String sort, String q, String orderBy);
 }
