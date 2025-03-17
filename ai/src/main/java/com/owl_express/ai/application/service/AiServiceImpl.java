@@ -85,7 +85,7 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    public MessageFindResponseDto findMessage(UUID aiId) {
+    public MessageFindResponseDto find(UUID aiId) {
 
         Ai ai = aiRepository.findById(aiId).orElseThrow(
                 () -> new AiException.MessageNotFoundException("Not Found Message"));
@@ -95,7 +95,7 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    public PagedModel<MessageFindResponseDto> searchMessages(int page, int size, String sort, String orderBy, UUID keyword) {
+    public PagedModel<MessageFindResponseDto> search(int page, int size, String sort, String orderBy, UUID keyword) {
         Pageable pageable = PageUtil.getPageable(page, size, sort, orderBy);
         Page<MessageFindResponseDto> paged = aiRepository.searchMessages(pageable, keyword);
         return new PagedModel<>(paged);

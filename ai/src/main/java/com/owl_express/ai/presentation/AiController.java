@@ -59,10 +59,10 @@ public class AiController {
     }
 
     @GetMapping("/messages/{ai_id}")
-    public ResponseEntity<CommonDto<MessageFindResponseDto>> getMessage(
+    public ResponseEntity<CommonDto<MessageFindResponseDto>> find(
             @PathVariable("ai_id") UUID aiId
     ) {
-        MessageFindResponseDto responseDto = aiService.findMessage(aiId);
+        MessageFindResponseDto responseDto = aiService.find(aiId);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 CommonDto.<MessageFindResponseDto>builder()
@@ -74,14 +74,14 @@ public class AiController {
     }
 
     @GetMapping("/messages/search")
-    public ResponseEntity<CommonDto<PagedModel<MessageFindResponseDto>>> searchMessages(
+    public ResponseEntity<CommonDto<PagedModel<MessageFindResponseDto>>> search(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "sort", defaultValue = "CREATEDAT") String sort,
             @RequestParam(name = "order_by", defaultValue = "ASC") String orderBy,
             @RequestParam(name = "q", required = false) UUID keyword
     ) {
-        PagedModel<MessageFindResponseDto> pagedModel = aiService.searchMessages(page, size, sort, orderBy, keyword);
+        PagedModel<MessageFindResponseDto> pagedModel = aiService.search(page, size, sort, orderBy, keyword);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 CommonDto.<PagedModel<MessageFindResponseDto>>builder()
