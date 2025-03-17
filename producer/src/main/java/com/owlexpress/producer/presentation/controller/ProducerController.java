@@ -75,7 +75,7 @@ public class ProducerController {
                                                             .build();
 
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.OK)
                              .body(commonDto);
     }
 
