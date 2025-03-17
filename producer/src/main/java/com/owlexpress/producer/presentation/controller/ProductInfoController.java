@@ -53,4 +53,20 @@ public class ProductInfoController {
 
     }
 
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<CommonDto<Void>> delete(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @PathVariable UUID productId
+    ){
+        productInfoService.delete(productId);
+
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
+                                             .status(HttpStatus.ACCEPTED)
+                                             .code(HttpStatus.ACCEPTED.value())
+                                             .message("상품 정보 삭제 성공")
+                                             .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+    }
+
 }

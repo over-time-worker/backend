@@ -58,12 +58,26 @@ public class ProductInfoServiceImpl implements ProductInfoService {
             UUID productId,
             UpdateProductInfoRequestDto updateProductInfoRequestDto
     ) {
-        ProductInfo productInfo = productInfoRepository.findByProductId(productId)
-                                                       .orElseThrow(() -> new ProductInfoException.ProductInfoNotFoundException("찾는 상품 정보가 없습니다."));
+        ProductInfo productInfo = getProductInfo(productId);
         productInfo.setProductName(updateProductInfoRequestDto.getProductName());
         productInfo.setProductPrice(updateProductInfoRequestDto.getProductPrice());
         productInfo.setProductType(updateProductInfoRequestDto.getProductType());
 
         productInfo.updateModifiedData(1L);
+    }
+
+    private ProductInfo getProductInfo(UUID productId) {
+        return productInfoRepository.findByProductId(productId)
+                                    .orElseThrow(() -> new ProductInfoException.ProductInfoNotFoundException("찾는 상품 정보가 없습니다."));
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID productId) {
+        ProductInfo productInfo = getProductInfo(productId);
+
+        productInfo.softDeleteData(1L);
+
+
     }
 }
