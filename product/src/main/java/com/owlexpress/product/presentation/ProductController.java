@@ -1,6 +1,6 @@
 package com.owlexpress.product.presentation;
 
-import com.owlexpress.product.application.ProductHubUsecase;
+import com.owlexpress.product.application.ProductUsecase;
 import com.owlexpress.product.application.dto.response.FindProductResponseDto;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import com.owlexpress.product.common.CommonDto;
@@ -21,14 +21,14 @@ import java.util.UUID;
 @RequestMapping("/products")
 public class ProductController {
     private final ProductDomainService productDomainService;
-    private final ProductHubUsecase productHubUsecase;
+    private final ProductUsecase productUsecase;
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
 //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody CreateProductRequestDto createProductRequestDto
     ) {
-        productHubUsecase.createProduct(createProductRequestDto);
+        productUsecase.createProduct(createProductRequestDto);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
@@ -46,7 +46,7 @@ public class ProductController {
             @PathVariable UUID productsId
     ){
 
-        productHubUsecase.updateProduct(updateProductDto,productsId);
+        productUsecase.updateProduct(updateProductDto, productsId);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
@@ -62,7 +62,7 @@ public class ProductController {
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID productsId
     ){
-        FindProductResponseDto findProductResponseDto = productHubUsecase.find(productsId);
+        FindProductResponseDto findProductResponseDto = productUsecase.find(productsId);
 
         CommonDto<FindProductResponseDto> commonDto = CommonDto.<FindProductResponseDto>builder()
                 .status(HttpStatus.OK)
@@ -82,7 +82,7 @@ public class ProductController {
             @RequestParam(name = "q", defaultValue = "") String q,
             @RequestParam(name = "orderBy",defaultValue = "createdAt") String orderBy
     ) {
-        PagedModel<SearchProductResponseDto> searchResult = productHubUsecase.search(page,size,sort, q,orderBy);
+        PagedModel<SearchProductResponseDto> searchResult = productUsecase.search(page, size, sort, q, orderBy);
 
         CommonDto<PagedModel<SearchProductResponseDto>> commonDto = CommonDto.
                 <PagedModel<SearchProductResponseDto>>builder().
@@ -100,7 +100,7 @@ public class ProductController {
             @PathVariable UUID productsId
     ){
 
-        productDomainService.delete(productsId);
+        productUsecase.delete(productsId);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
