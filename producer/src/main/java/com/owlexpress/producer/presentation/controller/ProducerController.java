@@ -31,10 +31,10 @@ public class ProducerController {
         producerUsecase.create(createProducerRequestDto);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
-                                               .status(HttpStatus.CREATED)
-                                               .code(HttpStatus.CREATED.value())
-                                               .message("생성 업체 등록 성공")
-                                               .build();
+                                             .status(HttpStatus.CREATED)
+                                             .code(HttpStatus.CREATED.value())
+                                             .message("생성 업체 등록 성공")
+                                             .build();
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(commonDto);
@@ -52,10 +52,10 @@ public class ProducerController {
                 producerId
         );
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
-                                               .status(HttpStatus.ACCEPTED)
-                                               .code(HttpStatus.ACCEPTED.value())
-                                               .message("생성 업체 수정 성공")
-                                               .build();
+                                             .status(HttpStatus.ACCEPTED)
+                                             .code(HttpStatus.ACCEPTED.value())
+                                             .message("생성 업체 수정 성공")
+                                             .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                              .body(commonDto);
@@ -114,10 +114,10 @@ public class ProducerController {
     ) {
         producerUsecase.delete(producerId);
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
-                                                         .status(HttpStatus.ACCEPTED)
-                                                         .code(HttpStatus.ACCEPTED.value())
-                                                         .message("생성 업체 검색 성공")
-                                                         .build();
+                                             .status(HttpStatus.ACCEPTED)
+                                             .code(HttpStatus.ACCEPTED.value())
+                                             .message("생성 업체 검색 성공")
+                                             .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                              .body(commonDto);
