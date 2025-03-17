@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateExceptoin;
 import static com.owlexpress.producer.common.exception.ProducerException.ProducerNotFoundException;
+import static com.owlexpress.producer.common.exception.ProductInfoException.*;
 
 @ControllerAdvice
 @RestController
@@ -22,7 +23,7 @@ public class GlobalExceptionAdvice {
 
     @ExceptionHandler(ProducerNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonDto<Object> handleProductNotFoundException(ProducerNotFoundException e) {
+    public CommonDto<Object> handleProducerNotFoundException(ProducerNotFoundException e) {
         log.error("error ={}", e.getMessage(), e);
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -34,7 +35,7 @@ public class GlobalExceptionAdvice {
 
     @ExceptionHandler(ProducerNameDuplicateExceptoin.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonDto<Object> handleProductNotFoundException(ProducerNameDuplicateExceptoin e) {
+    public CommonDto<Object> handleProducerNotFoundException(ProducerNameDuplicateExceptoin e) {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
@@ -43,6 +44,31 @@ public class GlobalExceptionAdvice {
                 .message(e.getMessage()) // Ensure the message is included
                 .data(null)
                 .build();
+    }
+
+    @ExceptionHandler(ProductInfoNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleProductInfoNotFoundException(ProductInfoNotFoundException e) {
+        log.error("error ={}", e.getMessage(), e);
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+
+    @ExceptionHandler(ProductInfoNameDuplicateExceptoin.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleProductInfoNameDuplicateException(ProductInfoNameDuplicateExceptoin e) {
+        log.error("error ={}", e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
