@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateExceptoin;
+import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class ProducerUsecase {
 
         producerRepository.findByCompanyName(createProducerRequestDto.getCompanyName())
                           .ifPresent(producer -> {
-                              throw new ProducerNameDuplicateExceptoin("이미 존재하는 업체명입니다.");
+                              throw new ProducerNameDuplicateException("이미 존재하는 업체명입니다.");
                           });
         Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto);
         producer.updateCreateData(1L);
@@ -82,5 +82,16 @@ public class ProducerUsecase {
             producer.setLocation(point);
         }
         Optional.ofNullable(dto.getHubId()).ifPresent(producer::setHubId);
+    }
+
+    @Transactional
+    public void delete(UUID producerId) {
+        Producer producer = producerHelper.getProducer(producerId);
+
+        producer.softDeleteData(1L);
+        //TODO :: 방법2. 생산업체는 null 처리하고 남은 모든 재고까지만 판매
+        // 상품 SoftDelete 처리 요청
+        // 허브에 연관된 상품 생산업체 null 처리
+        // 모두 성공시 회사 softDelete
     }
 }

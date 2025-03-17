@@ -1,4 +1,4 @@
-package com.owlexpress.producer.infrastructure.repository;
+package com.owlexpress.producer.infrastructure.repository.producer;
 
 import com.owlexpress.producer.domain.entity.Producer;
 import org.springframework.data.jpa.repository.JpaRepository;
