@@ -14,4 +14,6 @@ public interface ProductInfoService {
             UUID productId,
             @Valid UpdateProductInfoRequestDto updateProductInfoRequestDto
     );
+
+    void delete(UUID productId);
 }
