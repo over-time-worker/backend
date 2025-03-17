@@ -12,6 +12,7 @@ import com.owlexpress.product.infrastructure.config.ProductSearchConfig;
 import com.owlexpress.product.infrastructure.feignClient.ProducerClient;
 import com.owlexpress.product.presentation.dto.request.CreateHubInfoRequestDto;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
+import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -107,6 +108,9 @@ public class ProductHubUsecase {
         //2. producer 정보 조회
         ProducerResponseDto producerResponseDto = producerClient.find(createProductRequestDto.getProducerId())
                                                  .getData();
+
+        validateProducerResponseDto(producerResponseDto);
+
         //3.상품 등록
         Product product = CreateProductRequestDto.toEntity(createProductRequestDto,producerResponseDto);
         //TODO :: AuditAware 추가 후 제거
@@ -120,6 +124,14 @@ public class ProductHubUsecase {
         producerClient.create(createProductInfoRequestDto);
 
 
+    }
+
+    private static void validateProducerResponseDto(ProducerResponseDto producerResponseDto) {
+        if(producerResponseDto == null) {
+            throw new BadRequestException("요청 오류");//TODO:: CompanyName추가하고 null체크하기
+        } else if (producerResponseDto.getCompanyAddress() ==null) {
+            throw new BadRequestException("회사주소를 찾을 수 없습니다.");
+        }
     }
 
     private void validateProductName(CreateProductRequestDto createProductRequestDto) {
