@@ -24,13 +24,13 @@ public class ProductController {
     private final ProductHubUsecase productHubUsecase;
 
     @PostMapping
-    public ResponseEntity<CommonDto<Object>> create(
+    public ResponseEntity<CommonDto<Void>> create(
 //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody CreateProductRequestDto createProductRequestDto
     ) {
-        productDomainService.createProduct(createProductRequestDto);
+        productHubUsecase.createProduct(createProductRequestDto);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
                 .message("상품 생성 성공")
@@ -40,7 +40,7 @@ public class ProductController {
     }
 
     @PutMapping("/{productsId}")
-    public ResponseEntity<CommonDto<Object>> update(
+    public ResponseEntity<CommonDto<Void>> update(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody UpdateProductDto updateProductDto,
             @PathVariable UUID productsId
@@ -48,7 +48,7 @@ public class ProductController {
 
         productDomainService.updateProduct(updateProductDto,productsId);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
                 .message("상품 수정 성공")
@@ -96,13 +96,13 @@ public class ProductController {
     }
 
     @DeleteMapping("/{productsId}")
-    public ResponseEntity<CommonDto<Object>> delete(
+    public ResponseEntity<CommonDto<Void>> delete(
             @PathVariable UUID productsId
     ){
 
         productDomainService.delete(productsId);
 
-        CommonDto<Object> commonDto = CommonDto.builder()
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
                 .message("상품 삭제 성공")
