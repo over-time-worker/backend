@@ -11,7 +11,7 @@ import java.util.UUID;
 public class SearchProducerResponseDto {
     public UUID hubId;
 
-    public UUID hubManagerId;
+    public Long hubManagerId;
 
     private UUID producerId;
 
@@ -36,7 +36,7 @@ public class SearchProducerResponseDto {
     @Builder
     public SearchProducerResponseDto(
             UUID hubId,
-            UUID hubManagerId,
+            Long hubManagerId,
             UUID producerId,
             Long userId,
             String userName,

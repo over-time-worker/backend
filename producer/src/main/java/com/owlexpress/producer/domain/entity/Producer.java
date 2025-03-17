@@ -24,7 +24,7 @@ public class Producer extends BaseEntity {
     @Column(name = "hub_id")
     public UUID hubId;
     @Column(name = "hub_manager_id")
-    public UUID hubManagerId;
+    public Long hubManagerId;
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "producer_id")
@@ -76,7 +76,7 @@ public class Producer extends BaseEntity {
             String companyAddress,
             Point location,
             UUID hubId,
-            UUID hubManagerId,
+            Long hubManagerId,
             String hubAddress
     ) {
         this.userId = userId;

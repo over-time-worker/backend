@@ -12,7 +12,7 @@ public class ProducerResponseDto {
 
     public UUID hubId;
 
-    public UUID hubManagerId;
+    public Long hubManagerId;
 
     private UUID producerId;
 
@@ -37,7 +37,7 @@ public class ProducerResponseDto {
     @Builder
     public ProducerResponseDto(
             UUID hubId,
-            UUID hubManagerId,
+            Long hubManagerId,
             UUID producerId,
             Long userId,
             String userName,
