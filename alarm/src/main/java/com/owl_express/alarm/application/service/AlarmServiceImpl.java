@@ -144,7 +144,7 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
-    public void deleteAlarm(String channelId, String messageId) {
+    public void delete(String channelId, String messageId) {
         deleteMessage(channelId, messageId);
 
         Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(

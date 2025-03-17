@@ -60,11 +60,11 @@ public class AlarmController {
     }
 
     @DeleteMapping("/channel/{channel_id}/message/{message_id}")
-    public ResponseEntity<CommonDto<Void>> deleteAlarm(
+    public ResponseEntity<CommonDto<Void>> delete(
             @NotNull(message = "[notNull:channel_id]") @PathVariable("channel_id") String channelId,
             @NotNull(message = "[notNull:message_id]") @PathVariable("message_id") String messageId
     ) {
-        alarmService.deleteAlarm(channelId, messageId);
+        alarmService.delete(channelId, messageId);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()

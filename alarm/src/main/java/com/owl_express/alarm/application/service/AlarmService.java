@@ -10,5 +10,5 @@ public interface AlarmService {
 
     AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto alarmCreateRequestDto);
 
-    void deleteAlarm(String channelId, String messageId);
+    void delete(String channelId, String messageId);
 }
