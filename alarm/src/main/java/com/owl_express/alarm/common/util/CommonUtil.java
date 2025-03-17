@@ -16,6 +16,10 @@ public class CommonUtil {
         return localDateTime == null ? null : localDateTime.format(dateTimeFormatter);
     }
 
+    public static LocalDateTime StringToLocalDateTime(String localDateTime) {
+        return localDateTime == null ? null : LocalDateTime.parse(localDateTime, dateTimeFormatter);
+    }
+
     public static LocalDateTime gmtStringToDefaultLocalDateTime(String gmtDateString) {
         ZonedDateTime gmtDateTime = ZonedDateTime.parse(gmtDateString, DayDateTimeFormatter);
         ZonedDateTime localDateTime = gmtDateTime.withZoneSameInstant(ZoneId.systemDefault());

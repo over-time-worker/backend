@@ -14,11 +14,13 @@ import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
 import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
+import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
 import com.owl_express.alarm.common.util.CommonUtil;
+import com.owl_express.alarm.common.util.PageUtil;
 import com.owl_express.alarm.domain.entity.Alarm;
 import com.owl_express.alarm.domain.entity.Alarm.MessageType;
 import com.owl_express.alarm.domain.entity.Alarm.PlatformType;
@@ -40,6 +42,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -184,6 +189,23 @@ public class AlarmServiceImpl implements AlarmService {
         }
 
         return messageCreateResponseDto;
+    }
+
+    @Override
+    public PagedModel<AlarmSearchResponseDto> search(
+            int page,
+            int size,
+            String sort,
+            String orderBy,
+            String startDate,
+            String endDate,
+            String deliveryUserId,
+            String platformType
+    ) {
+        Pageable pageable = PageUtil.getPageable(page, size, sort, orderBy);
+        Page<AlarmSearchResponseDto> paged = alarmRepository.search(pageable, startDate, endDate, deliveryUserId, platformType);
+        return new PagedModel<>(paged);
+
     }
 
     private ChatPostMessageResponse sendMessage(String message, String channelId) {

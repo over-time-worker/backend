@@ -3,17 +3,20 @@ package com.owl_express.alarm.presentation;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.DELETE_MESSAGE_SUCCESS;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.GET_ALARM_SUCCESS;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.RESERVE_MESSAGE_SUCCESS;
+import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEARCH_ALARM_SUCCESS;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEND_MESSAGE_SUCCESS;
 
 import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
+import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
 import com.owl_express.alarm.application.service.AlarmService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -94,6 +98,35 @@ public class AlarmController {
                         .build());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<CommonDto<PagedModel<AlarmSearchResponseDto>>> search(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "CREATEDAT") String sort,
+            @RequestParam(name = "order_by", defaultValue = "ASC") String orderBy,
+            @RequestParam(name = "start_date", required = false) String startDate,
+            @RequestParam(name = "end_date", required = false) String endDate,
+            @RequestParam(name = "user_id", required = false) String deliveryUserId,
+            @RequestParam(name = "platform_type", required = false) String platformType
+    ) {
+        PagedModel<AlarmSearchResponseDto> response = alarmService.search(
+                page,
+                size,
+                sort,
+                orderBy,
+                startDate,
+                endDate,
+                deliveryUserId,
+                platformType
+        );
 
+        return ResponseEntity.status(HttpStatus.OK).body(
+                CommonDto.<PagedModel<AlarmSearchResponseDto>>builder()
+                        .status(HttpStatus.OK)
+                        .message(SEARCH_ALARM_SUCCESS)
+                        .code(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
 
 }
