@@ -1,12 +1,12 @@
 package com.owlexpress.product.presentation;
 
 import com.owlexpress.product.application.ProductHubUsecase;
+import com.owlexpress.product.application.dto.response.FindProductResponseDto;
+import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import com.owlexpress.product.common.CommonDto;
 import com.owlexpress.product.domain.service.ProductDomainService;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
-import com.owlexpress.product.application.dto.response.FindProductResponseDto;
-import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
@@ -46,7 +46,7 @@ public class ProductController {
             @PathVariable UUID productsId
     ){
 
-        productDomainService.updateProduct(updateProductDto,productsId);
+        productHubUsecase.updateProduct(updateProductDto,productsId);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
