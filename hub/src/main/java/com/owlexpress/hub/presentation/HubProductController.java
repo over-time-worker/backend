@@ -1,6 +1,7 @@
 package com.owlexpress.hub.presentation;
 
 import com.owlexpress.hub.application.HubProductUseCase;
+import com.owlexpress.hub.common.Constant.ResponseMessage;
 import com.owlexpress.hub.domain.service.HubService;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
@@ -34,7 +35,7 @@ public class HubProductController {
         CommonDto<Void> created = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
-                .message("허브 상품 추가 성공")
+                .message(ResponseMessage.HUB_PRODUCT_CREATE_SUCCESS)
                 .data(null)
                 .build();
 
@@ -49,7 +50,7 @@ public class HubProductController {
         CommonDto<HubProductUpdateRequestDto> updated = CommonDto.<HubProductUpdateRequestDto>builder()
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
-                .message("허브 상품 수정 성공")
+                .message(ResponseMessage.HUB_PRODUCT_UPDATE_SUCCESS)
                 .data(null)
                 .build();
 
@@ -70,7 +71,7 @@ public class HubProductController {
                 CommonDto.<PagedModel<HubProductSearchResponseDto>>builder()
                         .status(HttpStatus.CREATED)
                         .code(HttpStatus.CREATED.value())
-                        .message("허브 상품 조회 성공")
+                        .message(ResponseMessage.HUB_PRODUCT_SEARCH_SUCCESS)
                         .data(products)
                         .build();
 

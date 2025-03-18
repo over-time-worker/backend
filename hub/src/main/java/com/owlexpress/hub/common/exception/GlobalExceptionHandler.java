@@ -2,6 +2,7 @@ package com.owlexpress.hub.common.exception;
 
 import com.owlexpress.hub.common.Constant.ErrorMessage;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
+import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -53,4 +54,17 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build();
     }
+
+    @ExceptionHandler(HubProductNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleHubProductNotFoundException(HubProductNotFoundException e) {
+        log.error(ErrorMessage.HUB_PRODUCT_NOT_FOUND_EXCEPTION, e.getMessage());
+        return CommonDto.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
 }
