@@ -3,6 +3,8 @@ package com.owlexpress.consumer.infrastructure.repository;
 import com.owlexpress.consumer.domain.entity.Consumer;
 import com.owlexpress.consumer.domain.repository.ConsumerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -27,6 +29,16 @@ public class ConsumerRepositoryImpl implements ConsumerRepository {
     @Override
     public Optional<Consumer> findById(UUID consumerId) {
         return consumerJpaRepository.findById(consumerId);
+    }
+
+    @Override
+    public Page<Consumer> searchProducer(
+            String sort,
+            String q,
+            String orderBy,
+            PageRequest pageRequest
+    ) {
+        return consumerQueryDslRepository.searchConsumer(sort,q,orderBy,pageRequest);
     }
 
 }
