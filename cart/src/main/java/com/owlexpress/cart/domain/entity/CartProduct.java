@@ -68,4 +68,18 @@ public class CartProduct extends BaseEntity {
         this.productQuantity = productQuantity;
         this.productType = productType;
     }
+
+    public void deleteCartProduct(Long userId) {
+        super.softDeleteData(userId);
+    }
+
+    public void increaseQuantity() {
+        this.productQuantity = this.productQuantity + 1;
+    }
+
+    public boolean decreaseQuantity() {
+        if (this.productQuantity == 1) return false;
+        this.productQuantity = this.productQuantity - 1;
+        return true;
+    }
 }
