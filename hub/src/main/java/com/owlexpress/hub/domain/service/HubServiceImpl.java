@@ -2,9 +2,13 @@ package com.owlexpress.hub.domain.service;
 
 import com.owlexpress.hub.common.HubHelper;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
+import com.owlexpress.hub.common.exception.HubProductException;
+import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.domain.entity.Hub;
+import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
+import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
@@ -68,6 +72,15 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
+    public HubFindResponseDto find(UUID hubId) {
+        return HubFindResponseDto.fromEntity(HubHelper.findByHubId(hubId, hubRepository));
+
+    }
+
+    /*
+    허브 상품
+     */
+    @Override
     public PagedModel<HubProductSearchResponseDto> searchHubProduct(
             int page,
             int size,
@@ -85,8 +98,10 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
-    public HubFindResponseDto find(UUID hubId) {
-        return HubFindResponseDto.fromEntity(HubHelper.findByHubId(hubId, hubRepository));
-
+    @Transactional
+    public void update(HubProductUpdateRequestDto requestDto) {
+        HubProduct hubProduct = hubRepository.findByHubProductId(requestDto.getHubProductId())
+                .orElseThrow(HubProductNotFoundException::new);
+        hubProduct.updateEntity(requestDto);
     }
 }
