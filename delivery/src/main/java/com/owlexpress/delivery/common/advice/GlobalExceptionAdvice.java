@@ -3,6 +3,7 @@ package com.owlexpress.delivery.common.advice;
 import com.owlexpress.delivery.application.dtos.CommonDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.AlarmFeignClientException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.AlarmNotFoundException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ public class GlobalExceptionAdvice {
     public static final String CONSTRAIN_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
     public static final String ALARM_FEIGN_CLIENT_EXCEPTION = "handleAlarmFeignClientException : {}";
     public static final String ALARM_NOT_FOUND_EXCEPTION = "handleAlarmNotFoundException : {}";
+    public static final String PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION = "handlePlatformTypeNotSupportedException : {}";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -51,7 +53,7 @@ public class GlobalExceptionAdvice {
 
     @ExceptionHandler(AlarmFeignClientException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public CommonDto<Object> handleAiFeignClientException(AlarmFeignClientException e) {
+    public CommonDto<Object> handleAlarmFeignClientException(AlarmFeignClientException e) {
 
         log.error(ALARM_FEIGN_CLIENT_EXCEPTION, e.getMessage());
 
@@ -68,6 +70,21 @@ public class GlobalExceptionAdvice {
     public CommonDto<Object> handleAlarmNotFoundException(AlarmNotFoundException e) {
 
         log.error(ALARM_NOT_FOUND_EXCEPTION, e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(NotSupportedPlatformTypeException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handlePlatformTypeNotSupportedException(
+            NotSupportedPlatformTypeException e) {
+
+        log.error(PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)

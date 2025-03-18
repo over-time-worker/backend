@@ -14,4 +14,10 @@ public class DeliveryException extends RuntimeException {
         }
     }
 
+    public static class NotSupportedPlatformTypeException extends RuntimeException {
+        public NotSupportedPlatformTypeException(String message) {
+            super(message);
+        }
+    }
+
 }
