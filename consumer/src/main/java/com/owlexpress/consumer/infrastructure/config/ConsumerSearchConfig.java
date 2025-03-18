@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @Configuration
 @ConfigurationProperties(prefix = "product.search")
-public class ProductSearchConfig {
+public class ConsumerSearchConfig {
     private int defaultPageSize;
     private List<Integer> allowedPageSizes;
     private String defaultSort;

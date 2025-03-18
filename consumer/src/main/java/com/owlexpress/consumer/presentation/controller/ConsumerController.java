@@ -113,6 +113,7 @@ public class ConsumerController {
     public ResponseEntity<CommonDto<Void>> delete(
             @PathVariable UUID consumerId
     ) {
+        consumerUsecase.delete(consumerId);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
