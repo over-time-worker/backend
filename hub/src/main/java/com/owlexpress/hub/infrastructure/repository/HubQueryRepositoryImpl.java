@@ -1,4 +1,4 @@
-package com.owlexpress.hub.infrastructure;
+package com.owlexpress.hub.infrastructure.repository;
 
 import static com.owlexpress.hub.domain.entity.QHub.*;
 

@@ -1,4 +1,4 @@
-package com.owlexpress.hub.infrastructure;
+package com.owlexpress.hub.infrastructure.repository;
 
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.repository.HubRepository;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 public class HubRepositoryImpl implements HubRepository {
 
     private final HubJpaRepository hubJpaRepository;
+
     private final HubQueryRepository hubQueryRepository;
 
     @Override
@@ -35,5 +36,4 @@ public class HubRepositoryImpl implements HubRepository {
     public Hub save(Hub hub) {
         return hubJpaRepository.save(hub);
     }
-
 }

@@ -1,4 +1,4 @@
-package com.owlexpress.hub.infrastructure;
+package com.owlexpress.hub.infrastructure.repository;
 
 import com.owlexpress.hub.domain.entity.Hub;
 import org.springframework.data.domain.Page;
