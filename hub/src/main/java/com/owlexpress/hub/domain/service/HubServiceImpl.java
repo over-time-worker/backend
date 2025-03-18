@@ -11,6 +11,7 @@ import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
 import java.util.List;
@@ -103,5 +104,13 @@ public class HubServiceImpl implements HubService {
         HubProduct hubProduct = hubRepository.findByHubProductId(requestDto.getHubProductId())
                 .orElseThrow(HubProductNotFoundException::new);
         hubProduct.updateEntity(requestDto);
+    }
+
+    @Override
+    public HubProductFindResponseDto findHubProduct(UUID hubProductId) {
+        HubProduct hubProduct = hubRepository.findByHubProductId(hubProductId)
+                .orElseThrow(HubProductNotFoundException::new);
+
+        return HubProductFindResponseDto.fromEntity(hubProduct);
     }
 }

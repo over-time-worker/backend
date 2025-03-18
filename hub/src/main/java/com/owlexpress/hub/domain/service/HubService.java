@@ -4,6 +4,7 @@ import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
 import java.util.UUID;
@@ -28,5 +29,5 @@ public interface HubService {
 
     void update(HubProductUpdateRequestDto requestDto);
 
-
+    HubProductFindResponseDto findHubProduct(UUID hubProductId);
 }
