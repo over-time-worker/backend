@@ -1,6 +1,8 @@
 package com.owlexpress.consumer.presentation.controller;
 
+import com.owlexpress.consumer.application.usecase.ConsumerUsecase;
 import com.owlexpress.consumer.common.CommonDto;
+import com.owlexpress.consumer.common.dto.request.CreateConsumerRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -13,10 +15,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/api/consumers")
 public class ConsumerController {
+    private final ConsumerUsecase consumerUsecase;
 
     @GetMapping
-    public ResponseEntity<CommonDto<Void>> create() {
-
+    public ResponseEntity<CommonDto<Void>> create(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            CreateConsumerRequestDto consumerRequestDto
+    ) {
+        consumerUsecase.create(consumerRequestDto);
         //메서드 넣기
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
