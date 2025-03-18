@@ -3,6 +3,8 @@ package com.owlexpress.consumer.presentation.controller;
 import com.owlexpress.consumer.application.usecase.ConsumerUsecase;
 import com.owlexpress.consumer.common.CommonDto;
 import com.owlexpress.consumer.common.dto.request.CreateConsumerRequestDto;
+import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ public class ConsumerController {
     @GetMapping
     public ResponseEntity<CommonDto<Void>> create(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            CreateConsumerRequestDto consumerRequestDto
+           @Valid @RequestBody CreateConsumerRequestDto consumerRequestDto
     ) {
         consumerUsecase.create(consumerRequestDto);
         //메서드 넣기
@@ -38,10 +40,12 @@ public class ConsumerController {
     @PutMapping("/{consumerId}")
     public ResponseEntity<CommonDto<Void>> update(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @PathVariable UUID consumerId
+            @PathVariable UUID consumerId,
+            @Valid @RequestBody UpdateConsumerRequestDto updateConsumerRequestDto
     ) {
 
         //메서드 넣기
+        consumerUsecase.update(consumerId, updateConsumerRequestDto);
 
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
