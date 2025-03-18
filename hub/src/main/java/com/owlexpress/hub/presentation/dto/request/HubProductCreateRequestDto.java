@@ -63,6 +63,7 @@ public class HubProductCreateRequestDto {
                 .hub(hub)
                 .producerId(this.producerId)
                 .producerName(this.producerName)
+                .productId(this.productId)
                 .productName(this.productName)
                 .productType(this.productType)
                 .productStock(this.productStock)
