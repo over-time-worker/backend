@@ -6,7 +6,6 @@ import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
 public class GetUserInfoResponseDto {
     private Long userId;
     private String username;
