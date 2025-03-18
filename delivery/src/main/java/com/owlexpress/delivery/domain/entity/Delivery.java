@@ -134,11 +134,15 @@ public class Delivery extends BaseEntity {
 
         private final String name;
     }
+    //허브 대기중, 허브 이동중, 목적지 허브 도착, 배송중, 업체이동중, 배송완료
 
     @RequiredArgsConstructor
     public enum DeliveryStatus {
-        PENDING("PENDING"),
+        PENDING_AT_HUB("PENDING_AT_HUB"),
+        SHIPPING_TO_HUB("SHIPPING_TO_HUB"),
+        ARRIVED_AT_FINAL_HUB("ARRIVED_AT_FINAL_HUB"),
         SHIPPING("SHIPPING"),
+        SHIPPING_TO_COMPANY("SHIPPING_TO_COMPANY"),
         COMPLETE("COMPLETE");
 
         private final String name;
