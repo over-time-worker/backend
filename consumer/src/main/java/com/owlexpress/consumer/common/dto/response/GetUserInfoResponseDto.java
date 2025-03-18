@@ -2,7 +2,10 @@ package com.owlexpress.consumer.common.dto.response;
 
 import com.owlexpress.consumer.common.constant.PlatformType;
 import com.owlexpress.consumer.common.constant.Role;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
