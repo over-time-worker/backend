@@ -2,7 +2,6 @@ package com.owlexpress.hub.domain.service;
 
 import com.owlexpress.hub.common.HubHelper;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
-import com.owlexpress.hub.common.exception.HubProductException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
@@ -104,6 +103,9 @@ public class HubServiceImpl implements HubService {
         HubProduct hubProduct = hubRepository.findByHubProductId(requestDto.getHubProductId())
                 .orElseThrow(HubProductNotFoundException::new);
         hubProduct.updateEntity(requestDto);
+
+        // TODO: PASSPORT 에서 값 뺴오기
+        hubProduct.modifiedEntity(1L);
     }
 
     @Override
