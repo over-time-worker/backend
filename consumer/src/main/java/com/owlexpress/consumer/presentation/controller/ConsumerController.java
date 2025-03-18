@@ -6,6 +6,7 @@ import com.owlexpress.consumer.common.dto.request.CreateConsumerRequestDto;
 import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
 import com.owlexpress.consumer.domain.service.ConsumerService;
 import com.owlexpress.consumer.presentation.dto.response.ConsumerResponseDto;
+import com.owlexpress.consumer.presentation.dto.response.SearchConsumerResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
@@ -81,7 +82,7 @@ public class ConsumerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<CommonDto<PagedModel<?>>> search(
+    public ResponseEntity<CommonDto<PagedModel<SearchConsumerResponseDto>>> search(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "10") Integer size,
             @RequestParam(name = "sort", required = false, defaultValue = "desc") String sort,
@@ -89,11 +90,19 @@ public class ConsumerController {
             @RequestParam(name = "orderBy", defaultValue = "createdAt") String orderBy
     ) {
 
-        CommonDto<PagedModel<?>> commonDto = CommonDto.<PagedModel<?>>builder()
+        PagedModel<SearchConsumerResponseDto> searchResult = consumerService.search(
+                page,
+                size,
+                sort,
+                q,
+                orderBy
+        );
+
+        CommonDto<PagedModel<SearchConsumerResponseDto>> commonDto = CommonDto.<PagedModel<SearchConsumerResponseDto>>builder()
                                                       .status(HttpStatus.OK)
                                                       .code(HttpStatus.OK.value())
                                                       .message("수령업체 검색 성공")
-                                                      .data()
+                                                      .data(searchResult)
                                                       .build();
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -104,7 +113,6 @@ public class ConsumerController {
     public ResponseEntity<CommonDto<Void>> delete(
             @PathVariable UUID consumerId
     ) {
-
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)

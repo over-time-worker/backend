@@ -1,16 +1,15 @@
 package com.owlexpress.consumer.application.usecase;
 
-import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
-import com.owlexpress.consumer.common.dto.response.HubFindResponseDto;
 import com.owlexpress.consumer.common.dto.request.CreateConsumerRequestDto;
+import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
 import com.owlexpress.consumer.common.dto.response.GetUserInfoResponseDto;
+import com.owlexpress.consumer.common.dto.response.HubFindResponseDto;
 import com.owlexpress.consumer.common.exceptions.ConsumerException;
 import com.owlexpress.consumer.common.util.GeoUtil;
 import com.owlexpress.consumer.domain.entity.Consumer;
 import com.owlexpress.consumer.domain.repository.ConsumerRepository;
 import com.owlexpress.consumer.infrastructure.feignClient.HubFeignClient;
 import com.owlexpress.consumer.infrastructure.feignClient.UserFeignClient;
-import feign.FeignException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
