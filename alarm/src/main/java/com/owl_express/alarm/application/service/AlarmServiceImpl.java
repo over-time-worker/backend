@@ -46,6 +46,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -62,6 +63,7 @@ public class AlarmServiceImpl implements AlarmService {
     private String slackBotToken;
 
     @Override
+    @Transactional
     public void createAlarmForHubDeliver(AlarmCreateRequestDto requestDto) {
         // TODO : order service 생긴 후 feign client 통신으로 정보 얻어오기 or 배송쪽에서 product 정보 함께 넘기기(메세지큐 방식이면 괜찮을듯)
         String productInfo = "생쭈꾸미 10마리, 냉동 쭈꾸미 1팩";
@@ -104,6 +106,7 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
+    @Transactional
     public AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto requestDto) {
         // TODO : order service 생긴 후 feign client 통신으로 정보 얻어오기 or 배송쪽에서 product 정보 함께 넘기기(메세지큐 방식이면 괜찮을듯)
         String productInfo = "생쭈꾸미 10마리, 냉동 쭈꾸미 1팩";
