@@ -5,6 +5,7 @@ import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
 import com.owlexpress.consumer.common.dto.response.GetUserInfoResponseDto;
 import com.owlexpress.consumer.common.dto.response.HubFindResponseDto;
 import com.owlexpress.consumer.common.exceptions.ConsumerException;
+import com.owlexpress.consumer.common.util.ConsumerHelper;
 import com.owlexpress.consumer.common.util.GeoUtil;
 import com.owlexpress.consumer.domain.entity.Consumer;
 import com.owlexpress.consumer.domain.repository.ConsumerRepository;
@@ -23,6 +24,7 @@ public class ConsumerUsecase {
     private final ConsumerRepository consumerRepository;
     private final UserFeignClient userFeignClient;
     private final HubFeignClient hubFeignClient;
+    private final ConsumerHelper consumerHelper;
 
     @Transactional
     public void create(CreateConsumerRequestDto consumerRequestDto) {
@@ -51,8 +53,7 @@ public class ConsumerUsecase {
             UUID consumerId,
             @Valid UpdateConsumerRequestDto updateConsumerRequestDto
     ) {
-        Consumer consumer = consumerRepository.findById(consumerId)
-                                              .orElseThrow(() -> new ConsumerException.ConsumerNotFoundException("찾으시는 수령업체가 존재하지 않습니다."));
+        Consumer consumer = consumerHelper.getConsumer(consumerId);
 
         //feignClient로 수정할 데이터 조회
         updateConsumerUserInfoIfNotNull(
@@ -127,5 +128,16 @@ public class ConsumerUsecase {
                        .location(GeoUtil.createPoint(consumerRequestDto.getLatitude(), consumerRequestDto.getLongitude()))
                        .businessNumber(consumerRequestDto.getBusinessNumber())
                        .build();
+    }
+
+    @Transactional
+    public void delete(UUID consumerId) {
+        Consumer consumer = consumerHelper.getConsumer(consumerId);
+
+        //배송쪽 수령업체 조회 후 데이터가 현재 이후인 경우 삭제 불가 예외 처리
+        //주문쪽 수령업체 조회 후 데이터가 현재 이후인경우 삭제 불가 예외 처리
+        //장바구니 삭제 이벤트 발생
+
+        consumer.softDeleteData(1L);
     }
 }
