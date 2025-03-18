@@ -1,9 +1,10 @@
 package com.owlexpress.consumer.domain.service;
 
 import com.owlexpress.consumer.common.exceptions.ConsumerException;
+import com.owlexpress.consumer.common.util.ConsumerHelper;
 import com.owlexpress.consumer.domain.entity.Consumer;
 import com.owlexpress.consumer.domain.repository.ConsumerRepository;
-import com.owlexpress.consumer.infrastructure.config.ProductSearchConfig;
+import com.owlexpress.consumer.infrastructure.config.ConsumerSearchConfig;
 import com.owlexpress.consumer.presentation.dto.response.ConsumerResponseDto;
 import com.owlexpress.consumer.presentation.dto.response.SearchConsumerResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +21,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ConsumerServiceImpl implements ConsumerService {
     private final ConsumerRepository consumerRepository;
-    private final ProductSearchConfig productSearchConfig;
+    private final ConsumerSearchConfig consumerSearchConfig;
+    private final ConsumerHelper consumerHelper;
 
     @Override
     @Transactional(readOnly = true)
     public ConsumerResponseDto find(UUID consumerId) {
-        Consumer consumer = consumerRepository.findById(consumerId)
-                                              .orElseThrow(() -> new ConsumerException.ConsumerNotFoundException("수령 업체를 찾을 수 없습니다."));
-
+        Consumer consumer = consumerHelper.getConsumer(consumerId);
         return ConsumerResponseDto.fromEntity(consumer);
     }
 
@@ -40,15 +40,15 @@ public class ConsumerServiceImpl implements ConsumerService {
             String orderBy
     ) {
         // 페이지 크기 제한 적용
-        if (!productSearchConfig.getAllowedPageSizes()
-                                .contains(size)) {
-            size = productSearchConfig.getDefaultPageSize();
+        if (!consumerSearchConfig.getAllowedPageSizes()
+                                 .contains(size)) {
+            size = consumerSearchConfig.getDefaultPageSize();
         }
 
         // 정렬 기준 제한 적용
-        if (!productSearchConfig.getAllowedSorts()
-                                .contains(sort)) {
-            sort = productSearchConfig.getDefaultSort();
+        if (!consumerSearchConfig.getAllowedSorts()
+                                 .contains(sort)) {
+            sort = consumerSearchConfig.getDefaultSort();
         }
 
         Sort.Direction direction = orderBy.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;

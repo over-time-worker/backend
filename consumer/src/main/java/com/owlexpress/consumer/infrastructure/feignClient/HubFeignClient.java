@@ -11,6 +11,6 @@ import java.util.UUID;
 @FeignClient(name = "hub-service")
 public interface HubFeignClient {
 
-    @GetMapping("/{hubId}")
+    @GetMapping("api/hub/{hubId}")
     CommonDto<HubFindResponseDto> find(@PathVariable("hubId") UUID hubId);
 }
