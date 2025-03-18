@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ProductType {
-    NOMAL("NOMAL"),
+    NORMAL("NORMAL"),
     FRESH("FRESH");
 
     private final String value;
