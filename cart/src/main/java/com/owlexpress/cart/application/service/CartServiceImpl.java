@@ -8,6 +8,7 @@ import com.owlexpress.cart.domain.entity.Cart;
 import com.owlexpress.cart.domain.entity.CartProduct;
 import com.owlexpress.cart.presentation.dto.request.AddCartProductRequestDto;
 import com.owlexpress.cart.presentation.dto.response.CartResponseDto;
+import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,41 +26,16 @@ public class CartServiceImpl implements CartService {
             AddCartProductRequestDto addCartProductRequestDto,
             Long userId
     ) {
-        // 장바구니가 있으면 상품 추가, 없으면 장바구니 생성 + 상품 추가
-        Cart cart = null;
+        Cart cart = findOrCreateCart(
+                consumerId,
+                userId,
+                addCartProductRequestDto.getProductPrice()
+        );
 
-        if (!cartRepository.existsByConsumerId(consumerId)) {
-            Cart newCart = Cart.builder()
-                    .consumerId(consumerId)
-                    .totalPrice(addCartProductRequestDto.getProductPrice())
-                    .build();
-
-            // TODO : AuditAware 적용 후 삭제
-            newCart.updateCreateData(userId);
-
-            cart = cartRepository.save(newCart);
-        }
-
-        if (cart == null) {
-            cart = findCartByConsumerId(consumerId);
-        }
-
-        CartProduct cartProduct = CartProduct.builder()
-                .productId(addCartProductRequestDto.getProductId())
-                .cart(cart)
-                .productName(addCartProductRequestDto.getProductName())
-                .productPrice(addCartProductRequestDto.getProductPrice())
-                .productQuantity(addCartProductRequestDto.getProductQuantity())
-                .productType(addCartProductRequestDto.getProductType())
-                .build();
-
-        // TODO : AuditAware 적용 후 삭제
-        cartProduct.updateCreateData(userId);
+        CartProduct cartProduct = createCartProduct(cart, addCartProductRequestDto, userId);
 
         cart.addCartProduct(cartProduct);
-
-        // TODO : AuditAware 적용 후 삭제
-        cart.updateModifiedData(userId);
+        cart.updateModifiedData(userId);  // TODO: AuditAware 적용 후 삭제
 
         cartRepository.save(cart);
     }
@@ -100,6 +76,32 @@ public class CartServiceImpl implements CartService {
                 .cart(cart)
                 .cartProducts(cart.getCartProductList())
                 .build();
+    }
+
+    private Cart findOrCreateCart(UUID consumerId, Long userId, BigDecimal initialPrice) {
+        return cartRepository.findByConsumerId(consumerId)
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder()
+                            .consumerId(consumerId)
+                            .totalPrice(initialPrice)
+                            .build();
+                    newCart.updateCreateData(userId);  // TODO: AuditAware 적용 후 삭제
+                    return cartRepository.save(newCart);
+                });
+    }
+
+    private CartProduct createCartProduct(Cart cart, AddCartProductRequestDto requestDto, Long userId) {
+        CartProduct cartProduct = CartProduct.builder()
+                .productId(requestDto.getProductId())
+                .cart(cart)
+                .productName(requestDto.getProductName())
+                .productPrice(requestDto.getProductPrice())
+                .productQuantity(requestDto.getProductQuantity())
+                .productType(requestDto.getProductType())
+                .build();
+
+        cartProduct.updateCreateData(userId);  // TODO: AuditAware 적용 후 삭제
+        return cartProduct;
     }
 
     private Cart findCartByConsumerId(UUID consumerId) {

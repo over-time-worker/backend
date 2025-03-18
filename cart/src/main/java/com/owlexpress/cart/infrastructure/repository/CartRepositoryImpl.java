@@ -26,9 +26,4 @@ public class CartRepositoryImpl implements CartRepository {
     public Optional<Cart> findByCartId(UUID cartId) {
         return cartJpaRepository.findByCartIdAndDeletedAtIsNull(cartId);
     }
-
-    @Override
-    public boolean existsByConsumerId(UUID consumerId) {
-        return cartJpaRepository.existsByConsumerId(consumerId);
-    }
 }
