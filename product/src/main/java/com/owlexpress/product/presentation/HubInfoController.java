@@ -1,6 +1,6 @@
 package com.owlexpress.product.presentation;
 
-import com.owlexpress.product.application.ProductHubUsecase;
+import com.owlexpress.product.application.ProductUsecase;
 import com.owlexpress.product.common.CommonDto;
 import com.owlexpress.product.domain.entity.HubInfo;
 import com.owlexpress.product.domain.service.HubInfoService;
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class HubInfoController {
 
     private final HubInfoService hubInfoService;
-    private final ProductHubUsecase productHubUsecase;
+    private final ProductUsecase productUsecase;
 
     @PostMapping
     public ResponseEntity<CommonDto<Object>> create(
@@ -28,7 +28,7 @@ public class HubInfoController {
          @Valid @RequestBody CreateHubInfoRequestDto createHubInfoRequestDto
     ) {
         HubInfo hubInfo = hubInfoService.create(createHubInfoRequestDto);
-        productHubUsecase.connect(createHubInfoRequestDto,hubInfo);
+        productUsecase.connect(createHubInfoRequestDto, hubInfo);
 
         CommonDto<Object> commonDto = CommonDto.builder()
                 .status(HttpStatus.CREATED)
