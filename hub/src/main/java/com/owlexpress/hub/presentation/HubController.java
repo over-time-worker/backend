@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -89,7 +88,7 @@ public class HubController {
             @RequestParam(name = "q", defaultValue = "") String q,
             @RequestParam(name = "orderBy", defaultValue = "createdAt") String orderBy
     ) {
-        PagedModel<HubSearchResponseDto> searchedResults = hubService.search(page, size, sort, q,
+        PagedModel<HubSearchResponseDto> searchedResults = hubService.searchHub(page, size, sort, q,
                 orderBy);
         CommonDto<PagedModel<HubSearchResponseDto>> searchCompleted = CommonDto.<PagedModel<HubSearchResponseDto>>builder()
                 .status(HttpStatus.OK)

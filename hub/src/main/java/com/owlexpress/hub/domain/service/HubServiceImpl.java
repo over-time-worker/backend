@@ -7,6 +7,7 @@ import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +50,7 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
-    public PagedModel<HubSearchResponseDto> search(
+    public PagedModel<HubSearchResponseDto> searchHub(
             int page,
             int size,
             String sort,
@@ -64,6 +65,23 @@ public class HubServiceImpl implements HubService {
         PageRequest pageRequest = PageRequest.of(page, size);
 
         return hubRepository.searchHub(pageRequest, q, sort, orderBy);
+    }
+
+    @Override
+    public PagedModel<HubProductSearchResponseDto> searchHubProduct(
+            int page,
+            int size,
+            String sort,
+            String q,
+            String orderBy
+    ) {
+        Sort.Direction direction = sort.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC;
+        if (!ALLOWED_SIZES.contains(size)) {
+            size = DEFAULT_SIZE;
+        }
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return hubRepository.searchHubProduct(pageRequest, q, orderBy, sort);
     }
 
     @Override

@@ -1,7 +1,9 @@
 package com.owlexpress.hub.infrastructure.repository;
 
 import com.owlexpress.hub.domain.entity.Hub;
+import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubRepository;
+import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +32,16 @@ public class HubRepositoryImpl implements HubRepository {
         Page<Hub> hubs = hubQueryRepository.searchHub(pageable, keyword, orderBy, sort);
         Page<HubSearchResponseDto> results = hubs.map(HubSearchResponseDto::fromEntity);
         return new PagedModel<>(results);
+    }
+
+    @Override
+    public PagedModel<HubProductSearchResponseDto> searchHubProduct(Pageable pageable,
+            String keyword, String orderBy, String sort) {
+        Page<HubProductSearchResponseDto> products =
+                hubQueryRepository.searchHubProduct(pageable, keyword, orderBy, sort)
+                        .map(HubProductSearchResponseDto::fromEntity);
+
+        return new PagedModel<>(products);
     }
 
     @Override
