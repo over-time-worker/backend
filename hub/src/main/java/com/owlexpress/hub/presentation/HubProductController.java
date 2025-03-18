@@ -73,8 +73,8 @@ public class HubProductController {
                 page, size, sort, q, orderBy);
         CommonDto<PagedModel<HubProductSearchResponseDto>> Searched =
                 CommonDto.<PagedModel<HubProductSearchResponseDto>>builder()
-                        .status(HttpStatus.CREATED)
-                        .code(HttpStatus.CREATED.value())
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
                         .message(ResponseMessage.HUB_PRODUCT_SEARCH_SUCCESS)
                         .data(products)
                         .build();
@@ -107,8 +107,8 @@ public class HubProductController {
         hubProductUseCase.delete(hubProductId);
         CommonDto<Void> deleted =
                 CommonDto.<Void>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.ACCEPTED)
+                        .code(HttpStatus.ACCEPTED.value())
                         .message("허브 상품 삭제 완료")
                         .data(null)
                         .build();
