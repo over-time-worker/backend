@@ -1,5 +1,6 @@
 package com.owlexpress.producer.common.dto.request;
 
+import com.owlexpress.producer.common.dto.response.GetUserInfoResponseDto;
 import com.owlexpress.producer.common.util.GeoUtil;
 import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.entity.constant.CompanyType;
@@ -53,7 +54,9 @@ public class CreateProducerRequestDto {
         this.hubId = hubId;
     }
 
-    public static Producer toEntity(CreateProducerRequestDto createProducerRequestDto) {
+    public static Producer toEntity(CreateProducerRequestDto createProducerRequestDto,
+                                    GetUserInfoResponseDto UserInfoResponseDto
+    ) {
 
         return Producer.builder()
                 .businessNumber(createProducerRequestDto.getBusinessNumber())
@@ -61,8 +64,8 @@ public class CreateProducerRequestDto {
                 .companyType(createProducerRequestDto.getCompanyType())
                 .companyAddress(createProducerRequestDto.getCompanyAddress())
                 .userId(createProducerRequestDto.getUserId())
-                .userName("Admin")
-                .userPhoneNumber("010-1234-1234")
+                .userName(UserInfoResponseDto.getUsername())
+                .userPhoneNumber(UserInfoResponseDto.getPhoneNumber())
                 .hubId(createProducerRequestDto.getHubId())
                 .hubManagerId(1L)
                 .hubAddress("client에서 가져올 주소")

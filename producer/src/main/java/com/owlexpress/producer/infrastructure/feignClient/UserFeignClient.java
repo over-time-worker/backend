@@ -1,9 +1,18 @@
 package com.owlexpress.producer.infrastructure.feignClient;
 
+import com.owlexpress.producer.common.CommonDto;
+import com.owlexpress.producer.common.dto.response.GetUserInfoResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "user-service")
 public interface UserFeignClient {
 
     //User정보 조회
+    @GetMapping("/{userId}")
+    CommonDto<GetUserInfoResponseDto> get(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @PathVariable("userId") Long userId
+    );
 }
