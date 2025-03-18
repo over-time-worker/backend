@@ -45,7 +45,7 @@ public class HubController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            @Validated @RequestBody HubCreateRequestDto requestDto
+            @RequestBody HubCreateRequestDto requestDto
     ) {
         hubService.create(requestDto);
 
@@ -62,7 +62,7 @@ public class HubController {
 
     @PutMapping
     public ResponseEntity<CommonDto<Void>> update(
-            @Validated @RequestBody HubUpdateRequestDto requestDto
+            @RequestBody HubUpdateRequestDto requestDto
     ) {
         hubService.update(requestDto);
 
