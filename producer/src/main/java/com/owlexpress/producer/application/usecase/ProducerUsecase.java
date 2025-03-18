@@ -2,11 +2,15 @@ package com.owlexpress.producer.application.usecase;
 
 import com.owlexpress.producer.common.dto.request.CreateProducerRequestDto;
 import com.owlexpress.producer.common.dto.request.UpdateProductRequestDto;
+import com.owlexpress.producer.common.dto.response.GetUserInfoResponseDto;
+import com.owlexpress.producer.common.dto.response.GetUserResponseDto;
+import com.owlexpress.producer.common.exception.ProducerException;
 import com.owlexpress.producer.common.helper.ProducerHelper;
 import com.owlexpress.producer.common.util.GeoUtil;
 import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.repository.ProducerRepository;
 import com.owlexpress.producer.infrastructure.feignClient.HubFeignClient;
+import com.owlexpress.producer.infrastructure.feignClient.ProductClient;
 import com.owlexpress.producer.infrastructure.feignClient.UserFeignClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,19 +31,22 @@ public class ProducerUsecase {
     private final ProducerRepository producerRepository;
     private final ProducerHelper producerHelper;
     private final HubFeignClient hubFeignClient;
+    private final ProductClient productClient;
 
     @Transactional
     public void create(CreateProducerRequestDto createProducerRequestDto) {
 
-        //        GetUserResponseDto findUserResponseDto = userFeignClient.get(createProducerRequestDto.getUserId());
+        GetUserInfoResponseDto getUserInfoResponseDto = userFeignClient.get(createProducerRequestDto.getUserId())
+                                                     .getData();
 
-        //        GetHubResponseDto getUserResponseDto = HubhubFeignClient.get(createProducerRequestDto.getHubId());
+        //TODO:: 허브 조회필요
+        //        GetHubResponseDto getHubResponseDto = hubFeignClient.get(createProducerRequestDto.getHubId());
 
         producerRepository.findByCompanyName(createProducerRequestDto.getCompanyName())
                           .ifPresent(producer -> {
                               throw new ProducerNameDuplicateException("이미 존재하는 업체명입니다.");
                           });
-        Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto);
+        Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto,getUserInfoResponseDto);
         producer.updateCreateData(1L);
 
         producerRepository.save(producer);
@@ -57,7 +64,7 @@ public class ProducerUsecase {
 
         //TODO:: 가져온 데이터의 정보를 통해 기존 producer의 데이터 수정
         //        GetUserResponseDto findUserResponseDto = userFeignClient.get(createProducerRequestDto.getUserId());
-        //        GetHubResponseDto getUserResponseDto = HubhubFeignClient.get(createProducerRequestDto.getHubId());
+        //        GetHubResponseDto getHubResponseDto = HubFeignClient.get(createProducerRequestDto.getHubId());
         updateProducer(producer, updateProductRequestDto);
         producer.updateModifiedData(1L);
 
@@ -88,10 +95,15 @@ public class ProducerUsecase {
     public void delete(UUID producerId) {
         Producer producer = producerHelper.getProducer(producerId);
 
-        producer.softDeleteData(1L);
         //TODO :: 방법2. 생산업체는 null 처리하고 남은 모든 재고까지만 판매
-        // 상품 SoftDelete 처리 요청
-        // 허브에 연관된 상품 생산업체 null 처리
-        // 모두 성공시 회사 softDelete
+        try{
+            //1. 상품 삭제 처리
+            productClient.delete(producerId);
+            //2. 허브에 연관된 상품 생산업체 null 처리
+            // 모두 성공시 회사 softDelete
+            producer.softDeleteData(1L);
+        }catch (Exception e){
+            throw new ProducerException.DeleteClientException(e.getMessage());
+        }
     }
 }
