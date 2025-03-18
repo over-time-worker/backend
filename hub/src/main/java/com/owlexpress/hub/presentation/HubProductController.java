@@ -53,7 +53,7 @@ public class HubProductController {
                 CommonDto.<PagedModel<HubProductSearchResponseDto>>builder()
                         .status(HttpStatus.CREATED)
                         .code(HttpStatus.CREATED.value())
-                        .message("허브 상품 추가 성공")
+                        .message("허브 상품 조회 성공")
                         .data(products)
                         .build();
 
