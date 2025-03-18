@@ -35,6 +35,14 @@ public class HubRepositoryImpl implements HubRepository {
     }
 
     @Override
+    public Hub save(Hub hub) {
+        return hubJpaRepository.save(hub);
+    }
+
+    /*
+    허브 상품
+     */
+    @Override
     public PagedModel<HubProductSearchResponseDto> searchHubProduct(Pageable pageable,
             String keyword, String orderBy, String sort) {
         Page<HubProductSearchResponseDto> products =
@@ -45,7 +53,7 @@ public class HubRepositoryImpl implements HubRepository {
     }
 
     @Override
-    public Hub save(Hub hub) {
-        return hubJpaRepository.save(hub);
+    public Optional<HubProduct> findByHubProductId(UUID hubProductId) {
+        return hubJpaRepository.findByHubProductId(hubProductId);
     }
 }
