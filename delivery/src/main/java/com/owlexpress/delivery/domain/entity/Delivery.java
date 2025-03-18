@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,7 @@ public class Delivery extends BaseEntity {
     @Column(name = "order_type", nullable = false)
     private OrderType orderType;
 
-    @Column(name = "description", columnDefinition = "TEXT", length = 50)
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "request_arrival_time")
@@ -84,19 +85,61 @@ public class Delivery extends BaseEntity {
     @OneToMany(mappedBy = "delivery", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<DeliveryHistory> deliveryHistories = new ArrayList<>();
 
+    @Builder
+    public Delivery(
+            UUID orderId,
+            UUID startHubId,
+            String startHubName,
+            UUID destinationHubId,
+            String destinationHubName,
+            UUID consumerDeliverId,
+            OrderType orderType,
+            String description,
+            LocalDateTime requestArrivalTime,
+            DeliveryStatus deliveryStatus,
+            UUID consumerId,
+            String consumerPhoneNumber,
+            String consumerName,
+            String shippingAddress,
+            Point destinationLocation,
+            List<DeliveryHistory> deliveryHistories
+    ) {
+        this.orderId = orderId;
+        this.startHubId = startHubId;
+        this.startHubName = startHubName;
+        this.destinationHubId = destinationHubId;
+        this.destinationHubName = destinationHubName;
+        this.consumerDeliverId = consumerDeliverId;
+        this.orderType = orderType;
+        this.description = description;
+        this.requestArrivalTime = requestArrivalTime;
+        this.deliveryStatus = deliveryStatus;
+        this.consumerId = consumerId;
+        this.consumerPhoneNumber = consumerPhoneNumber;
+        this.consumerName = consumerName;
+        this.shippingAddress = shippingAddress;
+        this.destinationLocation = destinationLocation;
+        this.deliveryHistories = deliveryHistories;
+    }
+
+    public void updateDeliverHistory(DeliveryHistory deliveryHistory) {
+        this.deliveryHistories.add(deliveryHistory);
+        deliveryHistory.updateDelivery(this);
+    }
+
     @RequiredArgsConstructor
     public enum OrderType {
-        NORMAL("일반"),
-        FRESH("신선");
+        NORMAL("NORMAL"),
+        FRESH("FRESH");
 
         private final String name;
     }
 
     @RequiredArgsConstructor
     public enum DeliveryStatus {
-        PENDING("대기 중"),
-        SHIPPING("배송 중"),
-        COMPLETE("배송 완료");
+        PENDING("PENDING"),
+        SHIPPING("SHIPPING"),
+        COMPLETE("COMPLETE");
 
         private final String name;
     }

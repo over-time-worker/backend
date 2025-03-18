@@ -14,12 +14,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.util.StringUtils;
 
 @Getter
 @Entity
@@ -82,8 +85,52 @@ public class DeliveryHistory {
     @Column(name = "platform_type")
     private PlatformType platformType;
 
-    @Column(name = "deliver_channer_id", length = 50)
-    private String deliverChannerId;
+    @Column(name = "deliver_channel_id", length = 50)
+    private String deliverChannelId;
+
+    @Builder
+    public DeliveryHistory(
+            Delivery delivery,
+            Integer sequence,
+            UUID startHubId,
+            String startHubName,
+            UUID destinationHubId,
+            String destinationHubName,
+            String shippingAddress,
+            Double estimateDistance,
+            Duration estimateTime,
+            Double actualDistance,
+            Duration actualTime,
+            DeliveryStatus deliveryStatus,
+            UUID deliverId,
+            String deliverPhoneNumber,
+            String deliverName,
+            PlatformType platformType,
+            String deliverChannelId
+    ){
+        this.delivery = delivery;
+        this.sequence = sequence;
+        this.startHubId = startHubId;
+        this.startHubName = startHubName;
+        this.destinationHubId = destinationHubId;
+        this.destinationHubName = destinationHubName;
+        this.shippingAddress = shippingAddress;
+        this.estimateDistance = estimateDistance;
+        this.estimateTime = estimateTime;
+        this.actualDistance = actualDistance;
+        this.actualTime = actualTime;
+        this.deliveryStatus = deliveryStatus;
+        this.deliverId = deliverId;
+        this.deliverPhoneNumber = deliverPhoneNumber;
+        this.deliverName = deliverName;
+        this.platformType = platformType;
+        this.deliverChannelId = deliverChannelId;
+
+    }
+
+    public void updateDelivery(Delivery delivery) {
+        this.delivery = delivery;
+    }
 
     @RequiredArgsConstructor
     public enum PlatformType{
@@ -92,12 +139,14 @@ public class DeliveryHistory {
         private final String value;
 
         public static PlatformType getType(String type) {
-            for(PlatformType pt : PlatformType.values()) {
-                if(pt.value.equalsIgnoreCase(type)) {
-                    return pt;
-                }
+            if(!StringUtils.hasText(type)) {
+                throw new NotSupportedPlatformTypeException("플랫폼 타입이 비어있습니다.");
             }
-            throw new NotSupportedPlatformTypeException("지원하지 않는 플랫폼 타입 입니다." + type);
+
+            return Arrays.stream(PlatformType.values())
+                    .filter(val -> val.name().equalsIgnoreCase(type.trim()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotSupportedPlatformTypeException("지원하지 않는 플랫폼 타입 입니다. : " + type));
         }
     }
 
