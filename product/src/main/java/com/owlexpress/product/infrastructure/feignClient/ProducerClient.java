@@ -32,4 +32,10 @@ public interface ProducerClient {
             @PathVariable UUID productId,
             @Valid @RequestBody UpdateProductInfoRequestDto updateProductInfoRequestDto
     );
+
+    @DeleteMapping(REQUEST_PREFIX+"/product-info/{productId}")
+    public ResponseEntity<CommonDto<Void>> delete(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @PathVariable UUID productId
+    );
 }

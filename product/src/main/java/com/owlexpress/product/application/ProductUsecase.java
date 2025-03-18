@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductHubUsecase {
+public class ProductUsecase {
 
     private final ProductRepository productRepository;
     private final ProductSearchConfig productSearchConfig; // 설정 클래스 주입
@@ -70,6 +70,25 @@ public class ProductHubUsecase {
         UpdateProductInfoRequestDto updateProductInfoRequestDto = UpdateProductInfoRequestDto.fromEntity(product);
         producerClient.update(productsId,updateProductInfoRequestDto);
         // - 허브 상품 정보에 전파
+        // - 장바구니에 전파
+    }
+
+    @Transactional
+    public void delete(UUID productsId) {
+        Product product = getProduct(productsId);
+
+        //TODO:: 삭제 통신
+        // 1.생산업체 물품 정보 삭제
+        producerClient.delete(product.getProductId());
+        // 2.허브 물품 정보 삭제
+
+        //3. 장바구니에 있는 경우 삭제
+
+        product.softDeleteData(1L);
+        product.getHubInfo().forEach(
+                hubInfo -> hubInfo.softDeleteData(1L)
+        );
+
     }
 
     public PagedModel<SearchProductResponseDto> search(
