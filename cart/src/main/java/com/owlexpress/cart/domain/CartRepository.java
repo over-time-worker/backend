@@ -12,5 +12,4 @@ public interface CartRepository {
 
     Optional<Cart> findByCartId(UUID cartId);
 
-    boolean existsByConsumerId(UUID consumerId);
 }
