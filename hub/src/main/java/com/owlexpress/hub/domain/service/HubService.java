@@ -27,7 +27,5 @@ public interface HubService {
      */
     PagedModel<HubProductSearchResponseDto> searchHubProduct(int page, int size, String sort, String q, String orderBy);
 
-    void update(HubProductUpdateRequestDto requestDto);
-
     HubProductFindResponseDto findHubProduct(UUID hubProductId);
 }

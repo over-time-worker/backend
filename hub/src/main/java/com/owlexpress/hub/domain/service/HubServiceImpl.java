@@ -98,13 +98,6 @@ public class HubServiceImpl implements HubService {
         return hubRepository.searchHubProduct(pageRequest, q, orderBy, sort);
     }
 
-    @Override
-    @Transactional
-    public void update(HubProductUpdateRequestDto requestDto) {
-        HubProduct hubProduct = hubRepository.findByHubProductId(requestDto.getHubProductId())
-                .orElseThrow(HubProductNotFoundException::new);
-        hubProduct.updateEntity(requestDto);
-    }
 
     @Override
     public HubProductFindResponseDto findHubProduct(UUID hubProductId) {

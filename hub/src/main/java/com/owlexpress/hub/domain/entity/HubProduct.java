@@ -43,6 +43,9 @@ public class HubProduct extends BaseEntity {
     @Column(name = "producer_name", nullable = false, length = 50)
     private String producerName;
 
+    @Column(name = "product_id", nullable = false)
+    private UUID productId;
+
     @Column(name = "product_name", nullable = false, length = 50)
     private String productName;
 
