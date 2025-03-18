@@ -2,6 +2,7 @@ package com.owlexpress.hub.domain.entity;
 
 import com.owlexpress.hub.common.BaseEntity;
 import com.owlexpress.hub.common.ProductType;
+import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -70,5 +71,12 @@ public class HubProduct extends BaseEntity {
         this.productName = productName;
         this.productType = productType;
         this.productStock = productStock;
+    }
+
+    public void updateEntity(HubProductUpdateRequestDto requestDto) {
+        this.hubProductId = requestDto.getHubProductId();
+        this.productName = requestDto.getHubProductName();
+        this.productStock = requestDto.getHubProductStock();
+        this.productType = requestDto.getHubProductType();
     }
 }

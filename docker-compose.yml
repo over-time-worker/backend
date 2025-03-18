@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgis/postgis:latest  # PostgreSQL + PostGIS 포함된 이미지 사용
     networks:
       - overtime_network
     ports:
@@ -9,7 +9,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: overtime
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # 데이터 영구 저장
 
 networks:
   overtime_network:
     driver: bridge
+
+volumes:
+  postgres_data:  # 볼륨 추가하여 데이터 유지

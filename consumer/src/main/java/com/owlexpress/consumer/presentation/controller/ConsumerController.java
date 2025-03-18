@@ -1,6 +1,12 @@
 package com.owlexpress.consumer.presentation.controller;
 
+import com.owlexpress.consumer.application.usecase.ConsumerUsecase;
 import com.owlexpress.consumer.common.CommonDto;
+import com.owlexpress.consumer.common.dto.request.CreateConsumerRequestDto;
+import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
+import com.owlexpress.consumer.domain.service.ConsumerService;
+import com.owlexpress.consumer.presentation.dto.response.ConsumerResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -13,10 +19,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/api/consumers")
 public class ConsumerController {
+    private final ConsumerUsecase consumerUsecase;
+    private final ConsumerService consumerService;
 
     @GetMapping
-    public ResponseEntity<CommonDto<Void>> create() {
-
+    public ResponseEntity<CommonDto<Void>> create(
+            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+           @Valid @RequestBody CreateConsumerRequestDto consumerRequestDto
+    ) {
+        consumerUsecase.create(consumerRequestDto);
         //메서드 넣기
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -32,10 +43,12 @@ public class ConsumerController {
     @PutMapping("/{consumerId}")
     public ResponseEntity<CommonDto<Void>> update(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @PathVariable UUID consumerId
+            @PathVariable UUID consumerId,
+            @Valid @RequestBody UpdateConsumerRequestDto updateConsumerRequestDto
     ) {
 
         //메서드 넣기
+        consumerUsecase.update(consumerId, updateConsumerRequestDto);
 
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -48,19 +61,19 @@ public class ConsumerController {
                              .body(commonDto);
     }
 
-    @GetMapping("/{productsId}")
-    public ResponseEntity<CommonDto<?>> get(
+    @GetMapping("/{consumerId}")
+    public ResponseEntity<CommonDto<ConsumerResponseDto>> find(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID consumerId
     ) {
-
         //메서드 넣기
+        ConsumerResponseDto consumerResponseDto = consumerService.find(consumerId);
 
-        CommonDto<?> commonDto = CommonDto.<?>builder()
+        CommonDto<ConsumerResponseDto> commonDto = CommonDto.<ConsumerResponseDto>builder()
                                           .status(HttpStatus.OK)
                                           .code(HttpStatus.OK.value())
                                           .message("수령 업체 조회 성공")
-                                          .data()
+                                          .data(consumerResponseDto)
                                           .build();
 
         return ResponseEntity.status(HttpStatus.OK)

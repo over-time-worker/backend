@@ -1,7 +1,9 @@
-package com.owlexpress.hub.infrastructure;
+package com.owlexpress.hub.infrastructure.repository;
 
 import com.owlexpress.hub.domain.entity.Hub;
+import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubRepository;
+import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Repository;
 public class HubRepositoryImpl implements HubRepository {
 
     private final HubJpaRepository hubJpaRepository;
+
     private final HubQueryRepository hubQueryRepository;
 
     @Override
@@ -36,4 +39,21 @@ public class HubRepositoryImpl implements HubRepository {
         return hubJpaRepository.save(hub);
     }
 
+    /*
+    허브 상품
+     */
+    @Override
+    public PagedModel<HubProductSearchResponseDto> searchHubProduct(Pageable pageable,
+            String keyword, String orderBy, String sort) {
+        Page<HubProductSearchResponseDto> products =
+                hubQueryRepository.searchHubProduct(pageable, keyword, orderBy, sort)
+                        .map(HubProductSearchResponseDto::fromEntity);
+
+        return new PagedModel<>(products);
+    }
+
+    @Override
+    public Optional<HubProduct> findByHubProductId(UUID hubProductId) {
+        return hubJpaRepository.findByHubProductId(hubProductId);
+    }
 }

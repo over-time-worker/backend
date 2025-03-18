@@ -1,6 +1,7 @@
 package com.owlexpress.consumer.common.exceptions;
 
 import com.owlexpress.consumer.common.CommonDto;
+import com.owlexpress.consumer.common.exceptions.ConsumerException.FeignClientException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -43,6 +44,18 @@ public class GlobalExceptionAdvice {
                 .message(e.getMessage()) // Ensure the message is included
                 .data(null)
                 .build();
+    }
+
+    @ExceptionHandler(FeignClientException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleFeignClientException(FeignClientException e) {
+        log.error("error ={}", e.getMessage(), e);
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

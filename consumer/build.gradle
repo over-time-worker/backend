@@ -45,7 +45,8 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-
+    //GeoMetry
+    implementation "org.hibernate:hibernate-spatial:6.6.8.Final"  // 최신 버전과 맞춤
 
     //QueryDSL
     implementation "com.querydsl:querydsl-jpa:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
