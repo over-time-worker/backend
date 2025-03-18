@@ -13,4 +13,10 @@ public class ConsumerException extends RuntimeException {
             super(message);
         }
     }
+
+    public static class FeignClientException extends RuntimeException{
+        public FeignClientException(String message) {
+            super(message);
+        }
+    }
 }

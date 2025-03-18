@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,4 +23,10 @@ public class ConsumerRepositoryImpl implements ConsumerRepository {
     public Consumer save(Consumer consumer) {
         return consumerJpaRepository.save(consumer);
     }
+
+    @Override
+    public Optional<Consumer> findById(UUID consumerId) {
+        return consumerJpaRepository.findById(consumerId);
+    }
+
 }
