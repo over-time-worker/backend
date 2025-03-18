@@ -6,12 +6,15 @@ import com.owlexpress.hub.domain.service.HubService;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -77,5 +80,22 @@ public class HubProductController {
 
         return ResponseEntity.ok().body(Searched);
 
+    }
+
+    @GetMapping("/{hubProductId}")
+    public ResponseEntity<CommonDto<HubProductFindResponseDto>> find(
+            @PathVariable("hubProductId") UUID hubProductId
+    ) {
+        HubProductFindResponseDto hubProduct = hubService.findHubProduct(hubProductId);
+
+        CommonDto<HubProductFindResponseDto> found =
+                CommonDto.<HubProductFindResponseDto>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message(ResponseMessage.HUB_PRODUCT_FIND_SUCCESS)
+                        .data(hubProduct)
+                        .build();
+
+        return ResponseEntity.ok(found);
     }
 }
