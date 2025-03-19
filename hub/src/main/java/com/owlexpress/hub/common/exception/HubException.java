@@ -10,4 +10,10 @@ public class HubException {
             super(ErrorMessage.HUB_DOES_NOT_MATCHES);
         }
     }
+
+    public static class RouteNotFoundException extends Throwable {
+        public RouteNotFoundException() {
+            super(ErrorMessage.ROUTE_NOT_FOUND_EXCEPTION);
+        }
+    }
 }
