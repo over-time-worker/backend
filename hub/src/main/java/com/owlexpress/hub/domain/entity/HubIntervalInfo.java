@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
-import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -17,7 +16,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Service
 @Table(name = "p_hub_interval_info")
 @SQLRestriction("deleted_at is null")
 public class HubIntervalInfo extends BaseEntity {
