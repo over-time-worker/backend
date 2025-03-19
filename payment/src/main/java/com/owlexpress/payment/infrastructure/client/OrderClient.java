@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient("order-service")
 public interface OrderClient {
 
-    @GetMapping("/api/order/{orderId}")
+    @GetMapping("/api/orders/{orderId}")
     public CommonDto<OrderFindResponseDto> findOrderDetails(@PathVariable("orderId") UUID orderId);
 }
