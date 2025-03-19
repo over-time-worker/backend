@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,8 +73,8 @@ public class HubProductController {
                 page, size, sort, q, orderBy);
         CommonDto<PagedModel<HubProductSearchResponseDto>> Searched =
                 CommonDto.<PagedModel<HubProductSearchResponseDto>>builder()
-                        .status(HttpStatus.CREATED)
-                        .code(HttpStatus.CREATED.value())
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
                         .message(ResponseMessage.HUB_PRODUCT_SEARCH_SUCCESS)
                         .data(products)
                         .build();
@@ -97,5 +98,21 @@ public class HubProductController {
                         .build();
 
         return ResponseEntity.ok(found);
+    }
+
+    @DeleteMapping("/{hubProductId}")
+    public ResponseEntity<CommonDto<Void>> delete(
+            @PathVariable("hubProductId") UUID hubProductId
+    ) {
+        hubProductUseCase.delete(hubProductId);
+        CommonDto<Void> deleted =
+                CommonDto.<Void>builder()
+                        .status(HttpStatus.ACCEPTED)
+                        .code(HttpStatus.ACCEPTED.value())
+                        .message("허브 상품 삭제 완료")
+                        .data(null)
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(deleted);
     }
 }

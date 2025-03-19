@@ -43,6 +43,9 @@ public class HubProduct extends BaseEntity {
     @Column(name = "producer_name", nullable = false, length = 50)
     private String producerName;
 
+    @Column(name = "product_id", nullable = false)
+    private UUID productId;
+
     @Column(name = "product_name", nullable = false, length = 50)
     private String productName;
 
@@ -60,6 +63,7 @@ public class HubProduct extends BaseEntity {
             Hub hub,
             UUID producerId,
             String producerName,
+            UUID productId,
             String productName,
             ProductType productType,
             Long productStock
@@ -68,6 +72,7 @@ public class HubProduct extends BaseEntity {
         this.hub = hub;
         this.producerId = producerId;
         this.producerName = producerName;
+        this.productId = productId;
         this.productName = productName;
         this.productType = productType;
         this.productStock = productStock;
