@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+import static com.owlexpress.producer.common.exception.ExceptionMessage.PRODUCER_NOT_FOUND_MESSAGE;
+
 @Component
 @RequiredArgsConstructor
 public class ProducerHelper {
@@ -16,7 +18,7 @@ public class ProducerHelper {
 
     public Producer getProducer(UUID producerId) {
         return producerRepository.findById(producerId).orElseThrow(
-                ()-> new ProducerException.ProducerNotFoundException("찾는 영업이 존재하지 않습니다.")
+                ()-> new ProducerException.ProducerNotFoundException(PRODUCER_NOT_FOUND_MESSAGE)
         );
     }
 }
