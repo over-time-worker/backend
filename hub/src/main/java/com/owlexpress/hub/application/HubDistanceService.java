@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Duration;
 import java.util.List;
 
@@ -28,59 +27,55 @@ public class HubDistanceService {
 
     @Transactional
     public void calculateAllHubDistances() {
-        List<Hub> allHubs = hubRepository.findAllWithIntervals(); // 모든 허브 조회
+        log.info("🚀 [START] 허브 간 거리 계산 시작");
+
+        List<Hub> allHubs = hubRepository.findAllWithIntervals();
+        log.info("✅ 조회된 허브 개수: {}", allHubs.size());
 
         for (Hub startHub : allHubs) {
             for (Hub endHub : allHubs) {
-                if (startHub.equals(endHub))
-                    continue; // 자기 자신 간 이동은 스킵
+                if (startHub.equals(endHub)) {
+                    log.debug("🔄 동일 허브 간 이동 무시: {}", startHub.getName());
+                    continue;
+                }
 
                 if (startHub.getLocation() == null || endHub.getLocation() == null) {
-
-                    log.info("허브 위치 정보가 존재하지 않습니다. startHub=" + startHub.getName() + ", endHub=" + endHub.getName());
-
+                    log.warn("⚠️ 허브 위치 정보가 존재하지 않습니다. startHub={}, endHub={}", startHub.getName(), endHub.getName());
+                    continue;
                 }
-                // Naver Directions API 요청 DTO 생성
-                DirectionsRequestDto requestDto = DirectionsRequestDto.fromEntity(
-                        startHub,
-                        endHub
-                );
 
-                // API 호출하여 경로 데이터 가져오기
-                DirectionsResponseDto responseDto = naverDirectionsClient.getDrivingRoute(requestDto)
-                                                                         .block();
+                DirectionsRequestDto requestDto = DirectionsRequestDto.fromEntity(startHub, endHub);
+                log.info("📡 API 요청 생성: startHub={}, endHub={}", startHub.getName(), endHub.getName());
 
-                // 응답이 올바르게 왔는지 체크
-                if (responseDto == null || responseDto.getRoute() == null || responseDto.getRoute()
-                                                                                        .isEmpty()) {
+                DirectionsResponseDto responseDto = naverDirectionsClient.getDrivingRoute(requestDto).block();
+
+                if (responseDto == null || responseDto.getRoute() == null || responseDto.getRoute().isEmpty()) {
+                    log.error("❌ API 응답이 올바르지 않습니다. startHub={}, endHub={}", startHub.getName(), endHub.getName());
                     throw new LocationNotExistException();
                 }
 
-                // trafast 옵션에서 데이터 가져오기
-                List<RouteOption> routeOptions = responseDto.getRoute()
-                                                            .get("trafast");
-                if (routeOptions == null || routeOptions.isEmpty())
+                List<RouteOption> routeOptions = responseDto.getRoute().get("trafast");
+                if (routeOptions == null || routeOptions.isEmpty()) {
+                    log.warn("⚠️ 경로 옵션이 없습니다. startHub={}, endHub={}", startHub.getName(), endHub.getName());
                     continue;
+                }
 
                 RouteOption routeOption = routeOptions.get(0);
+                log.info("🚗 경로 데이터 확인: 거리={}m, 예상 시간={}ms", routeOption.getSummary().getDistance(), routeOption.getSummary().getDuration());
 
-                // 허브 간 이동 정보 저장
                 HubIntervalInfo intervalInfo = HubIntervalInfo.builder()
                                                               .startHub(startHub)
                                                               .endHub(endHub)
-                                                              .estimateDistance((double) routeOption.getSummary()
-                                                                                                    .getDistance())
-                                                              .durationOfTime(Duration.ofMillis(routeOption.getSummary()
-                                                                                                           .getDuration()))
-                                                              .estimateTime(DateParserUtil.parseToInstant(routeOption.getSummary()
-                                                                                                                     .getDepartureTime())) // 🛠 해결
-
+                                                              .estimateDistance((double) routeOption.getSummary().getDistance())
+                                                              .durationOfTime(Duration.ofMillis(routeOption.getSummary().getDuration()))
+                                                              .estimateTime(DateParserUtil.parseToInstant(routeOption.getSummary().getDepartureTime()))
                                                               .build();
 
                 hubIntervalInfoRepository.save(intervalInfo);
+                log.info("✅ 허브 간 거리 정보 저장 완료: {} → {} (거리: {}m, 예상 시간: {}ms)", startHub.getName(), endHub.getName(), routeOption.getSummary().getDistance(), routeOption.getSummary().getDuration());
             }
         }
+
+        log.info("🎉 [END] 허브 간 거리 계산 완료");
     }
-
-
 }
