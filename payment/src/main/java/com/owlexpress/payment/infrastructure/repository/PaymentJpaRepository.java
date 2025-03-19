@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PaymentJpaRepository extends JpaRepository<Payment, UUID> {
 
     Optional<Payment> findPaymentByTransactionId(String transactionId);
+
+    Optional<Payment> findPaymentByOrderId(UUID orderId);
 }

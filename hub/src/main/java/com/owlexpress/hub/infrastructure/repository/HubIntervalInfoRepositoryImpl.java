@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -32,5 +34,18 @@ public class HubIntervalInfoRepositoryImpl implements HubIntervalInfoRepository 
                 duration.toSeconds(),
                 estimateTime
         );
+    }
+
+    @Override
+    public List<Object[]> findByStartHubByObject(UUID currentHub) {
+        return hubIntervalInfoJpaRepository.findByStartHubByObject(currentHub);
+    }
+
+    @Override
+    public Optional<Double> findDistanceBetweenHubs(
+            UUID startHubId,
+            UUID endHubId
+    ) {
+        return hubIntervalInfoJpaRepository.findDistanceBetweenHubs(startHubId,endHubId);
     }
 }

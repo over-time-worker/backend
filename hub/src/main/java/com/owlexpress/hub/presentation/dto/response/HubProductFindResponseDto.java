@@ -1,14 +1,13 @@
 package com.owlexpress.hub.presentation.dto.response;
 
 import com.owlexpress.hub.common.ProductType;
-import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
-import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

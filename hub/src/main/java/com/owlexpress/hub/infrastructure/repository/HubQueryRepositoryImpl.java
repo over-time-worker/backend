@@ -1,21 +1,21 @@
 package com.owlexpress.hub.infrastructure.repository;
 
-import static com.owlexpress.hub.domain.entity.QHub.*;
-import static com.owlexpress.hub.domain.entity.QHubProduct.*;
-
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
-import com.owlexpress.hub.domain.entity.QHubProduct;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+import static com.owlexpress.hub.domain.entity.QHub.hub;
+import static com.owlexpress.hub.domain.entity.QHubProduct.hubProduct;
 
 @Repository
 @RequiredArgsConstructor
