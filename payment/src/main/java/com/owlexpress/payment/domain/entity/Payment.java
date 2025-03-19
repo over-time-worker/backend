@@ -32,7 +32,7 @@ public class Payment extends BaseEntity {
     private UUID orderId;
 
     // TossPay 기준 -> PaymentKey
-    @Column(name = "transaction_id", nullable = false)
+    @Column(name = "transaction_id", nullable = false, unique = true)
     private String transactionId;
 
     @Column(name = "price", nullable = false)

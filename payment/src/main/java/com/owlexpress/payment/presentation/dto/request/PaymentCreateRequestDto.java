@@ -14,22 +14,22 @@ import lombok.NoArgsConstructor;
 public class PaymentCreateRequestDto {
 
     private UUID orderId;
-    private BigDecimal amount;
-    private String paymentKey;
+    private BigDecimal price;
+    private String transactionId;
 
     @Builder
-    public PaymentCreateRequestDto(UUID orderId, BigDecimal amount, String paymentKey) {
+    public PaymentCreateRequestDto(UUID orderId, String transactionId, BigDecimal price) {
         this.orderId = orderId;
-        this.amount = amount;
-        this.paymentKey = paymentKey;
+        this.price = price;
+        this.transactionId = transactionId;
     }
 
     public Payment toEntity() {
         return Payment.builder()
+                .orderId(this.orderId)
+                .price(this.price)
+                .transactionId(this.transactionId)
                 .paymentStatus(PaymentStatus.SUCCESS)
-                .transactionId(this.paymentKey)
-                .orderId(orderId)
-                .price(amount)
                 .build();
     }
 }
