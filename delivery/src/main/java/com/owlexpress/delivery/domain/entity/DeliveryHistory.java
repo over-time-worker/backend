@@ -1,5 +1,6 @@
 package com.owlexpress.delivery.domain.entity;
 
+import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import jakarta.persistence.Column;
@@ -14,7 +15,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -29,7 +32,7 @@ import org.springframework.util.StringUtils;
 @Table(name = "p_delivery_history")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class DeliveryHistory {
+public class DeliveryHistory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -59,8 +62,8 @@ public class DeliveryHistory {
     @Column(name = "estimate_distance", nullable = false)
     private Double estimateDistance;
 
-    @Column(name = "estimate_time", columnDefinition = "INTERVAL", nullable = false)
-    private Duration estimateTime;
+    @Column(name = "estimate_duration_time", columnDefinition = "INTERVAL", nullable = false)
+    private Duration estimateDurationTime;
 
     @Column(name = "actual_distance")
     private Double actualDistance;
@@ -70,7 +73,7 @@ public class DeliveryHistory {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", nullable = false)
-    private DeliveryStatus deliveryStatus;
+    private DeliveryStatus deliveryStatus = DeliveryStatus.PENDING_AT_HUB;
 
     @Column(name = "deliver_id", length = 50)
     private UUID deliverId;
@@ -98,7 +101,7 @@ public class DeliveryHistory {
             String destinationHubName,
             String shippingAddress,
             Double estimateDistance,
-            Duration estimateTime,
+            Duration estimateDurationTime,
             Double actualDistance,
             Duration actualTime,
             DeliveryStatus deliveryStatus,
@@ -116,7 +119,7 @@ public class DeliveryHistory {
         this.destinationHubName = destinationHubName;
         this.shippingAddress = shippingAddress;
         this.estimateDistance = estimateDistance;
-        this.estimateTime = estimateTime;
+        this.estimateDurationTime = estimateDurationTime;
         this.actualDistance = actualDistance;
         this.actualTime = actualTime;
         this.deliveryStatus = deliveryStatus;
@@ -128,8 +131,54 @@ public class DeliveryHistory {
 
     }
 
+    public static List<DeliveryHistory> createDeliveryHistoryList(Delivery delivery, List<HubListDto> hubListDtos, Long userId) {
+        List<DeliveryHistory> deliveryHistoryList = new ArrayList<>();
+        HubListDto lastHubListDto = hubListDtos.get(hubListDtos.size() - 1);
+
+        for(int i = 0; i < hubListDtos.size() - 1; i++) {
+            HubListDto startHub = hubListDtos.get(i);
+            HubListDto endHub = hubListDtos.get(i + 1);
+
+            DeliveryHistory deliveryHistory = DeliveryHistory.builder()
+                    .delivery(delivery)
+                    .sequence(i + 1)
+                    .startHubId(startHub.getHubId())
+                    .startHubName(startHub.getHubName())
+                    .destinationHubId(endHub.getHubId())
+                    .destinationHubName(endHub.getHubName())
+                    .shippingAddress(delivery.getShippingAddress())
+                    .estimateDistance(startHub.getEstimateDistance())
+                    .estimateDurationTime(startHub.getEstimateDurationTime())
+                    .build();
+
+            deliveryHistory.createdEntity(userId);
+            deliveryHistoryList.add(deliveryHistory);
+        }
+
+        DeliveryHistory deliveryHistory = DeliveryHistory.builder()
+                .delivery(delivery)
+                .sequence(hubListDtos.size())
+                .startHubId(lastHubListDto.getHubId())
+                .startHubName(lastHubListDto.getHubName())
+                .shippingAddress(delivery.getShippingAddress())
+                .estimateDistance(lastHubListDto.getEstimateDistance())
+                .estimateDurationTime(lastHubListDto.getEstimateDurationTime())
+                .build();
+
+        deliveryHistory.createdEntity(userId);
+        deliveryHistoryList.add(deliveryHistory);
+
+        return deliveryHistoryList;
+    }
+
+
     public void updateDelivery(Delivery delivery) {
         this.delivery = delivery;
+    }
+
+    public void updateDeliveryStatus(DeliveryStatus deliveryStatus, Long userId) {
+        this.deliveryStatus = deliveryStatus;
+        this.modifiedEntity(userId);
     }
 
     @RequiredArgsConstructor

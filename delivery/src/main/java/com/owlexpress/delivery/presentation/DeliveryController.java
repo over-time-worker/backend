@@ -12,6 +12,7 @@ import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.UP
 import com.owlexpress.delivery.application.dtos.CommonDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryHistoryCreateRequestDto;
+import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryHistoryCreateResponseDto;
@@ -39,25 +40,26 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
 
     @PostMapping()
-    public ResponseEntity<CommonDto<DeliveryCreateResponseDto>> create(
+    public ResponseEntity<CommonDto<Void>> create(
             @RequestBody DeliveryCreateRequestDto DeliveryCreateRequestDto
     ) {
-        DeliveryCreateResponseDto response = deliveryService.create(DeliveryCreateRequestDto);
+        deliveryService.create(DeliveryCreateRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                CommonDto.<DeliveryCreateResponseDto>builder()
+                CommonDto.<Void>builder()
                         .status(HttpStatus.CREATED)
                         .message(CREATE_DELIVERY_SUCCESS)
                         .code(HttpStatus.CREATED.value())
-                        .data(response)
+                        .data(null)
                         .build());
     }
 
     @PatchMapping("/{delivery_id}")
     public ResponseEntity<CommonDto<Void>> update(
-            @PathVariable("delivery_id") UUID deliveryId
+            @PathVariable("delivery_id") UUID deliveryId,
+            @RequestBody DeliveryUpdateRequestDto deliveryUpdateRequestDto
     ) {
-        deliveryService.update(deliveryId);
+        deliveryService.update(deliveryId, deliveryUpdateRequestDto);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
@@ -193,19 +195,20 @@ public class DeliveryController {
                         .build());
     }
 
-    @PostMapping()
-    public ResponseEntity<CommonDto<DeliveryHistoryCreateResponseDto>> createDeliveryHistory(
-            @RequestBody DeliveryHistoryCreateRequestDto DeliveryHistoryCreateRequestDto
-    ) {
-        DeliveryHistoryCreateResponseDto response = deliveryService.createDeliveryHistory(DeliveryHistoryCreateRequestDto);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                CommonDto.<DeliveryHistoryCreateResponseDto>builder()
-                        .status(HttpStatus.CREATED)
-                        .message(CREATE_DELIVERY_HISTORY_SUCCESS)
-                        .code(HttpStatus.CREATED.value())
-                        .data(response)
-                        .build());
-    }
+    // TODO : 외부에서 요청 할 일 없을 것 같은데 혹시 모르니 주석..
+//    @PostMapping("/delivery-history")
+//    public ResponseEntity<CommonDto<DeliveryHistoryCreateResponseDto>> createDeliveryHistory(
+//            @RequestBody DeliveryHistoryCreateRequestDto DeliveryHistoryCreateRequestDto
+//    ) {
+//        DeliveryHistoryCreateResponseDto response = deliveryService.createDeliveryHistory(DeliveryHistoryCreateRequestDto);
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body(
+//                CommonDto.<DeliveryHistoryCreateResponseDto>builder()
+//                        .status(HttpStatus.CREATED)
+//                        .message(CREATE_DELIVERY_HISTORY_SUCCESS)
+//                        .code(HttpStatus.CREATED.value())
+//                        .data(response)
+//                        .build());
+//    }
 
 }
