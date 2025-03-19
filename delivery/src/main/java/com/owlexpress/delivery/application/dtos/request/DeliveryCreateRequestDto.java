@@ -1,5 +1,6 @@
 package com.owlexpress.delivery.application.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.owlexpress.delivery.domain.entity.Delivery.OrderType;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,10 +20,10 @@ public class DeliveryCreateRequestDto {
     private String startHubName;
     private UUID destinationHubId;
     private String destinationHubName;
-    private UUID consumerDeliverId;
     private OrderType orderType;
     private String shippingAddress;
     private String description;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     private UUID consumerCompanyId;
     private String consumerPhoneNumber;
@@ -34,7 +36,6 @@ public class DeliveryCreateRequestDto {
     public static class HubListDto {
         private UUID hubId;
         private String hubName;
-        private Double distance;
         private Double estimateDistance;
         private Duration estimateDurationTime;
     }

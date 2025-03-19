@@ -1,11 +1,13 @@
 package com.owlexpress.delivery.common.advice;
 
 import com.owlexpress.delivery.application.dtos.CommonDto;
+import com.owlexpress.delivery.application.exceptions.DeliveryException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.AlarmFeignClientException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryNotFoundException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedOrderTypeException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -27,6 +29,7 @@ public class GlobalExceptionAdvice {
     public static final String PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION = "handlePlatformTypeNotSupportedException : {}";
     public static final String DELIVERY_STATUS_NOT_SUPPORTED_EXCEPTION = "handleNotSupportedDeliveryStatusException : {}";
     public static final String DELIVERY_DELETE_FAIL_EXCEPTION = "handleDeliveryDeleteFailException : {}";
+    public static final String NOT_SUPPORTED_ORDER_TYPE_EXCEPTION = "handleNotSupportedOrderTypeException : {}";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -90,6 +93,21 @@ public class GlobalExceptionAdvice {
     public CommonDto<Object> handleDeliveryHistoryNotFoundException(DeliveryHistoryNotFoundException e) {
 
         log.error(DELIVERY_HISTORY_NOT_FOUND_EXCEPTION, e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(NotSupportedOrderTypeException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handleNotSupportedOrderTypeException(
+            NotSupportedOrderTypeException e) {
+
+        log.error(NOT_SUPPORTED_ORDER_TYPE_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)

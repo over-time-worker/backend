@@ -16,15 +16,18 @@ import com.owlexpress.delivery.domain.entity.Delivery;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import com.owlexpress.delivery.domain.entity.DeliveryHistory;
 import com.owlexpress.delivery.domain.repository.DeliveryRepository;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
@@ -42,7 +45,6 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional
     public void update(UUID deliveryId, DeliveryUpdateRequestDto deliveryUpdateRequestDto) {
-
         Delivery delivery = getDeliveryById(deliveryId);
         // TODO : update By 적용
         delivery.updateDeliveryStatus(DeliveryStatus.getStatus(deliveryUpdateRequestDto.getDeliveryStatus()), 1L);
@@ -120,6 +122,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         // TODO : update By 적용
         delivery.updateDeliveryStatus(DeliveryStatus.ARRIVED_AT_HUB, 1L);
 
+        //TODO : 실제 이동 거리,시간 받아서 update
         List<DeliveryHistory> deliveryHistoryList = delivery.getDeliveryHistories();
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, deliveryHistoryList);
         // TODO : update By 적용
@@ -131,10 +134,11 @@ public class DeliveryServiceImpl implements DeliveryService {
         // TODO : 모든 허브 list 가져 온 후 (sequnce asc) : 배송 담당자 요청시 현재 허브정도, 다음 허브 정보 가공해서 넘겨야함 (요청사항 및 상품 정보 등등)
         // 꺼내온 허브가 마지막 순서라면 ?
         if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 1) {
+
             // TODO : 배송 담당자 서비스에 FeignClient로 업체 배송 담당자 요청
             // 응답 예외 처리
 
-            // TODO : update By 적용
+            // TODO : update By 적용 / 받아온 companyDeliverId 적용
             delivery.updateCompanyDeliver(UUID.randomUUID(), 1L);
         } else {
             // TODO : 배송 담당자 서비스에 FeignClient로 허브 배송 담당자 요청
@@ -148,6 +152,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         // TODO : 배송 담당자 서비스에 FeignClient로 배송 담당자 반환 처리
         //반환 실패시 예외 처리
 
+        //TODO : 실제 이동 거리,시간 받아서 update
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
         // TODO : update By 적용
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETE, 1L);
@@ -163,10 +168,11 @@ public class DeliveryServiceImpl implements DeliveryService {
             DeliveryCreateRequestDto deliveryCreateRequestDto,
             Long userId
     ) {
-        List<HubListDto> hubListDtos = deliveryCreateRequestDto.getHubList();
-        List<DeliveryHistory> deliveryHistoryList = DeliveryHistory.createDeliveryHistoryList(delivery, hubListDtos, userId);
+         List<HubListDto> hubListDtos = deliveryCreateRequestDto.getHubList();
+         List<DeliveryHistory> deliveryHistoryList = DeliveryHistory.createDeliveryHistoryList(delivery, hubListDtos, userId);
 
-        delivery.updateDeliverHistoryList(deliveryHistoryList);
+         delivery.updateDeliverHistoryList(deliveryHistoryList);
+         deliveryRepository.save(delivery);
 
         // TODO : 배송 담당자 service로 첫 배송 담당자 배정 요청
         // 예외 응답 처리
@@ -177,7 +183,6 @@ public class DeliveryServiceImpl implements DeliveryService {
                 () -> new DeliveryNotFoundException(DELIVERY_NOT_FOUND_MESSAGE));
     }
 
-    // TODO : DeliveryHistories를 sequence 에 따라 오름차순 정렬해서 들고오기
     private Delivery getDeliveryByIdWithDeliveryHistories(UUID deliveryId) {
         return deliveryRepository.findDeliveryByIdWithDeliveryHistories(deliveryId).orElseThrow(
                 () -> new DeliveryNotFoundException(DELIVERY_NOT_FOUND_MESSAGE));
