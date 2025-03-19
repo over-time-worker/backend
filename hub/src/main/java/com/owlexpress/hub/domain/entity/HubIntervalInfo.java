@@ -33,7 +33,7 @@ public class HubIntervalInfo extends BaseEntity {
     private Hub endHub;
 
     @Column(name = "duration_of_time")
-    @Convert(converter = DurationConverter.class)
+    @Convert(converter = DurationConverter.class) // 수정된 DurationConverter 적용
     private Duration durationOfTime;
 
     @Column(name = "estimate_distance")
