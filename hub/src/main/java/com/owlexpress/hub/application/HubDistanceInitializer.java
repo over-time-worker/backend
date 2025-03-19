@@ -11,8 +11,8 @@ public class HubDistanceInitializer {
 
     private final HubDistanceService hubDistanceService;
 //서버에서 한 번만실행되는 TaskChecker Entity가 필요할지도...?
-//    @EventListener(ApplicationReadyEvent.class)
-//    public void initialize() {
-//        hubDistanceService.calculateAllHubDistances();
-//    }
+    @EventListener(ApplicationReadyEvent.class)
+    public void initialize() {
+        hubDistanceService.calculateAllHubDistances();
+    }
 }

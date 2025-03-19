@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLRestriction;
 import org.locationtech.jts.geom.Point;
 
@@ -20,6 +21,7 @@ import java.util.UUID;
 @Table(name = "p_hub")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at is null")
+@BatchSize(size = 20)
 public class Hub extends BaseEntity {
 
     @Id
