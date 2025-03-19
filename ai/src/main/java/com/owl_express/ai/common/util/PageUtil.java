@@ -15,9 +15,9 @@ public class PageUtil {
 
         if(StringUtils.hasText(orderBy)) {
             if(orderBy.equalsIgnoreCase("ASC")) {
-                sortAndOrderBy.ascending();
+                sortAndOrderBy = sortAndOrderBy.ascending();
             } else {
-                sortAndOrderBy.descending();
+                sortAndOrderBy = sortAndOrderBy.descending();
             }
         }
 
