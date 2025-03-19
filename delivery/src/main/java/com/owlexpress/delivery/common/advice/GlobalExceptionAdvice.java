@@ -2,7 +2,10 @@ package com.owlexpress.delivery.common.advice;
 
 import com.owlexpress.delivery.application.dtos.CommonDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.AlarmFeignClientException;
-import com.owlexpress.delivery.application.exceptions.DeliveryException.AlarmNotFoundException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryNotFoundException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -19,8 +22,11 @@ public class GlobalExceptionAdvice {
     public static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
     public static final String CONSTRAIN_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
     public static final String ALARM_FEIGN_CLIENT_EXCEPTION = "handleAlarmFeignClientException : {}";
-    public static final String ALARM_NOT_FOUND_EXCEPTION = "handleAlarmNotFoundException : {}";
+    public static final String DELIVERY_NOT_FOUND_EXCEPTION = "handleDeliveryNotFoundException : {}";
+    public static final String DELIVERY_HISTORY_NOT_FOUND_EXCEPTION = "handleDeliveryHistoryNotFoundException : {}";
     public static final String PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION = "handlePlatformTypeNotSupportedException : {}";
+    public static final String DELIVERY_STATUS_NOT_SUPPORTED_EXCEPTION = "handleNotSupportedDeliveryStatusException : {}";
+    public static final String DELIVERY_DELETE_FAIL_EXCEPTION = "handleDeliveryDeleteFailException : {}";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -65,11 +71,25 @@ public class GlobalExceptionAdvice {
                 .build();
     }
 
-    @ExceptionHandler(AlarmNotFoundException.class)
+    @ExceptionHandler(DeliveryNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonDto<Object> handleAlarmNotFoundException(AlarmNotFoundException e) {
+    public CommonDto<Object> handleDeliveryNotFoundException(DeliveryNotFoundException e) {
 
-        log.error(ALARM_NOT_FOUND_EXCEPTION, e.getMessage());
+        log.error(DELIVERY_NOT_FOUND_EXCEPTION, e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(DeliveryHistoryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handleDeliveryHistoryNotFoundException(DeliveryHistoryNotFoundException e) {
+
+        log.error(DELIVERY_HISTORY_NOT_FOUND_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.NOT_FOUND)
@@ -94,5 +114,34 @@ public class GlobalExceptionAdvice {
                 .build();
     }
 
+    @ExceptionHandler(NotSupportedDeliveryStatusException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handleNotSupportedDeliveryStatusException(
+            NotSupportedDeliveryStatusException e) {
+
+        log.error(DELIVERY_STATUS_NOT_SUPPORTED_EXCEPTION, e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
+
+    @ExceptionHandler(DeliveryDeleteFailException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleDeliveryDeleteFailException(
+            DeliveryDeleteFailException e) {
+
+        log.error(DELIVERY_DELETE_FAIL_EXCEPTION, e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+    }
 
 }

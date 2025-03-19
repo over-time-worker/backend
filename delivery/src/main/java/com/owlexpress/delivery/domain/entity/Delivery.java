@@ -1,5 +1,11 @@
 package com.owlexpress.delivery.domain.entity;
 
+import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_HISTORY_NOT_FOUND_MESSAGE;
+
+import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +28,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
-import org.locationtech.jts.geom.Point;
 
 @Getter
 @Entity
@@ -37,6 +43,9 @@ public class Delivery extends BaseEntity {
 
     @Column(name = "order_id", length = 50, nullable = false)
     private UUID orderId;
+
+    @Column(name = "product_info", nullable = false)
+    private String productInfo;
 
     @Column(name = "start_hub_id", length = 50)
     private UUID startHubId;
@@ -63,12 +72,18 @@ public class Delivery extends BaseEntity {
     @Column(name = "request_arrival_time")
     private LocalDateTime requestArrivalTime;
 
+    @Column(name = "total_estimate_duration_time")
+    private Duration totalEstimateDurationTime;
+
+    @Column(name = "total_distance")
+    private Double totalEstimateDistance;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", nullable = false)
-    private DeliveryStatus deliveryStatus;
+    private DeliveryStatus deliveryStatus = DeliveryStatus.PENDING_AT_HUB;
 
-    @Column(name = "consumer_id", length = 50, nullable = false)
-    private UUID consumerId;
+    @Column(name = "consumer_company_id", length = 50, nullable = false)
+    private UUID consumerCompanyId;
 
     @Column(name = "consumer_phone_number", length = 15, nullable = false)
     private String consumerPhoneNumber;
@@ -79,15 +94,13 @@ public class Delivery extends BaseEntity {
     @Column(name = "shipping_address", length = 50, nullable = false)
     private String shippingAddress;
 
-    @Column(name = "destination_location", length = 50, columnDefinition = "GEOMETRY(Point, 4326)")
-    private Point destinationLocation;
-
     @OneToMany(mappedBy = "delivery", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<DeliveryHistory> deliveryHistories = new ArrayList<>();
 
     @Builder
     public Delivery(
             UUID orderId,
+            String productInfo,
             UUID startHubId,
             String startHubName,
             UUID destinationHubId,
@@ -96,15 +109,17 @@ public class Delivery extends BaseEntity {
             OrderType orderType,
             String description,
             LocalDateTime requestArrivalTime,
+            Duration totalEstimateDurationTime,
+            Double totalEstimateDistance,
             DeliveryStatus deliveryStatus,
-            UUID consumerId,
+            UUID consumerCompanyId,
             String consumerPhoneNumber,
             String consumerName,
             String shippingAddress,
-            Point destinationLocation,
             List<DeliveryHistory> deliveryHistories
     ) {
         this.orderId = orderId;
+        this.productInfo = productInfo;
         this.startHubId = startHubId;
         this.startHubName = startHubName;
         this.destinationHubId = destinationHubId;
@@ -113,13 +128,44 @@ public class Delivery extends BaseEntity {
         this.orderType = orderType;
         this.description = description;
         this.requestArrivalTime = requestArrivalTime;
+        this.totalEstimateDurationTime = totalEstimateDurationTime;
+        this.totalEstimateDistance = totalEstimateDistance;
         this.deliveryStatus = deliveryStatus;
-        this.consumerId = consumerId;
+        this.consumerCompanyId = consumerCompanyId;
         this.consumerPhoneNumber = consumerPhoneNumber;
         this.consumerName = consumerName;
         this.shippingAddress = shippingAddress;
-        this.destinationLocation = destinationLocation;
         this.deliveryHistories = deliveryHistories;
+    }
+
+    public static Delivery create(
+            DeliveryCreateRequestDto deliveryCreateRequestDto,
+            DeliveryStatus deliveryStatus,
+            Long userId
+    ) {
+
+        Delivery delivery = Delivery.builder()
+                .orderId(deliveryCreateRequestDto.getOrderId())
+                .productInfo(deliveryCreateRequestDto.getProductInfo())
+                .startHubId(deliveryCreateRequestDto.getStartHubId())
+                .startHubName(deliveryCreateRequestDto.getStartHubName())
+                .destinationHubId(deliveryCreateRequestDto.getDestinationHubId())
+                .destinationHubName(deliveryCreateRequestDto.getDestinationHubName())
+                .consumerDeliverId(deliveryCreateRequestDto.getConsumerDeliverId())
+                .orderType(deliveryCreateRequestDto.getOrderType())
+                .description(deliveryCreateRequestDto.getDescription())
+                .requestArrivalTime(deliveryCreateRequestDto.getRequestArrivalTime())
+                .totalEstimateDurationTime(deliveryCreateRequestDto.getTotalEstimateDurationTime())
+                .totalEstimateDistance(deliveryCreateRequestDto.getTotalEstimateDistance())
+                .deliveryStatus(deliveryStatus)
+                .consumerCompanyId(deliveryCreateRequestDto.getConsumerCompanyId())
+                .consumerPhoneNumber(deliveryCreateRequestDto.getConsumerPhoneNumber())
+                .consumerName(deliveryCreateRequestDto.getConsumerName())
+                .shippingAddress(deliveryCreateRequestDto.getShippingAddress())
+                .build();
+
+        delivery.createdEntity(userId);
+        return delivery;
     }
 
     public void updateDeliverHistory(DeliveryHistory deliveryHistory) {
@@ -127,24 +173,53 @@ public class Delivery extends BaseEntity {
         deliveryHistory.updateDelivery(this);
     }
 
+    public void updateDeliverHistoryList(List<DeliveryHistory> deliveryHistoryList) {
+        this.deliveryHistories = deliveryHistoryList;
+    }
+
+    public void updateDeliveryStatus(DeliveryStatus deliveryStatus, Long userId) {
+        this.deliveryStatus = deliveryStatus;
+        this.modifiedEntity(userId);
+    }
+
+    public void deleteDelivery(Long userId) {
+        this.deleteEntity(userId);
+    }
+
+    public void updateCompanyDeliver(UUID consumerDeliveryId, Long userId) {
+        this.consumerDeliverId = consumerDeliveryId;
+        this.modifiedEntity(userId);
+    }
+
+    public void updateDeliveryHistoryStatus(DeliveryHistory deliveryHistory, DeliveryStatus deliveryStatus, Long userId) {
+        deliveryHistory.updateDeliveryStatus(deliveryStatus, userId);
+    }
+
     @RequiredArgsConstructor
     public enum OrderType {
-        NORMAL("NORMAL"),
+        ROCKET("ROCKET"),
         FRESH("FRESH");
 
         private final String name;
     }
-    //허브 대기중, 허브 이동중, 목적지 허브 도착, 배송중, 업체이동중, 배송완료
 
     @RequiredArgsConstructor
     public enum DeliveryStatus {
         PENDING_AT_HUB("PENDING_AT_HUB"),
         SHIPPING_TO_HUB("SHIPPING_TO_HUB"),
-        ARRIVED_AT_FINAL_HUB("ARRIVED_AT_FINAL_HUB"),
-        SHIPPING("SHIPPING"),
+        ARRIVED_AT_HUB("ARRIVED_AT_HUB"),
         SHIPPING_TO_COMPANY("SHIPPING_TO_COMPANY"),
         COMPLETE("COMPLETE");
 
         private final String name;
+
+        public static DeliveryStatus getStatus(String status) {
+            for(DeliveryStatus ds : DeliveryStatus.values()) {
+                if(ds.name.equalsIgnoreCase(status)) {
+                    return ds;
+                }
+            }
+            throw new NotSupportedDeliveryStatusException("지원하지 않는 배송 상태 입니다." + status);
+        }
     }
 }
