@@ -7,10 +7,10 @@ import java.util.UUID;
 public interface HubIntervalInfoRepository {
     void save(
             UUID uuid,
-            UUID hubId,
-            UUID hubId1,
+            UUID startHub,
+            UUID endHub,
             double distance,
             Duration duration,
-            LocalDateTime parse
+            LocalDateTime estimateTime
     );
 }
