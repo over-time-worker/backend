@@ -32,7 +32,7 @@ public class HubIntervalInfo extends BaseEntity {
     @JoinColumn(name = "end_hub_id")
     private Hub endHub;
 
-    @Column(name = "duration_of_time")
+    @Column(name = "duration_of_time",columnDefinition = "INTERVAL")
     @Convert(converter = DurationConverter.class) // 수정된 DurationConverter 적용
     private Duration durationOfTime;
 
