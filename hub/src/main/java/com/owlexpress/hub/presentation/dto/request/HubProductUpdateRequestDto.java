@@ -1,11 +1,12 @@
 package com.owlexpress.hub.presentation.dto.request;
 
 import com.owlexpress.hub.common.ProductType;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -2,12 +2,12 @@ package com.owlexpress.hub.infrastructure.repository;
 
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 public interface HubJpaRepository extends JpaRepository<Hub, UUID> {
 
@@ -20,4 +20,6 @@ public interface HubJpaRepository extends JpaRepository<Hub, UUID> {
     LEFT JOIN FETCH h.startIntervals si
     LEFT JOIN FETCH si.endHub
     """)    List<Hub> findAllWithIntervals();
+
+    List<Hub> findAllByParentHubIdIsNull();
 }
