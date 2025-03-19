@@ -5,6 +5,8 @@ import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -55,5 +57,10 @@ public class HubRepositoryImpl implements HubRepository {
     @Override
     public Optional<HubProduct> findByHubProductId(UUID hubProductId) {
         return hubJpaRepository.findByHubProductId(hubProductId);
+    }
+
+    @Override
+    public List<Hub> findAllWithIntervals() {
+        return hubJpaRepository.findAllWithIntervals();
     }
 }

@@ -8,6 +8,8 @@ public class Constant {
         public static final String HUB_PRODUCT_NOT_FOUND_EXCEPTION = "HubProductNotFoundException = {}";
 
         public static final String HUB_DOES_NOT_MATCHES = "해당 허브를 찾을 수 없습니다.";
+
+        public static final String HUB_INTERVAL_INFO_LOCATION_NOT_EXIST = "HUB_INTERVAL_INFO_LOCATION_NOT_EXIST = {}";
     }
 
     public static class ResponseMessage{
