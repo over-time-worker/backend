@@ -2,8 +2,11 @@ package com.owlexpress.gateway.common;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+@Getter
 @RequiredArgsConstructor
 public enum Role {
     MASTER("MASTER"),
