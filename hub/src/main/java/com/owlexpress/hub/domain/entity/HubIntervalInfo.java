@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -40,7 +40,7 @@ public class HubIntervalInfo extends BaseEntity {
     private Double estimateDistance;
 
     @Column(name = "estimate_time")
-    private Instant estimateTime; // ISO-8601 대응
+    private LocalDateTime estimateTime;
 
     @Builder
     public HubIntervalInfo(
@@ -49,7 +49,7 @@ public class HubIntervalInfo extends BaseEntity {
             Hub endHub,
             Duration durationOfTime,
             Double estimateDistance,
-            Instant estimateTime
+            LocalDateTime estimateTime
     ) {
         this.hubIntervalId = hubIntervalId;
         this.startHub = startHub;

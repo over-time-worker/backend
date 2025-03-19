@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -68,7 +69,7 @@ public class HubDistanceService {
                                                               .endHub(endHub)
                                                               .estimateDistance((double) routeOption.getSummary().getDistance())
                                                               .durationOfTime(Duration.ofMillis(routeOption.getSummary().getDuration()))
-                                                              .estimateTime(DateParserUtil.parseToInstant(routeOption.getSummary().getDepartureTime()))
+                                                              .estimateTime(LocalDateTime.parse(routeOption.getSummary().getDepartureTime()))
                                                               .build();
 
                 hubIntervalInfoRepository.save(intervalInfo);
