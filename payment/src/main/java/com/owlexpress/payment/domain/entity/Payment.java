@@ -16,11 +16,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
 @Table(name = "p_payment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted_at is null")
 public class Payment extends BaseEntity {
 
     @Id
@@ -44,8 +46,13 @@ public class Payment extends BaseEntity {
 
 
     @Builder
-    public Payment(UUID paymentId, UUID orderId, String transactionId, BigDecimal price,
-            PaymentStatus paymentStatus) {
+    public Payment(
+            UUID paymentId,
+            UUID orderId,
+            String transactionId,
+            BigDecimal price,
+            PaymentStatus paymentStatus
+    ) {
         this.paymentId = paymentId;
         this.orderId = orderId;
         this.transactionId = transactionId;

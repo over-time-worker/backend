@@ -3,6 +3,7 @@ package com.owlexpress.payment.infrastructure.repository;
 import com.owlexpress.payment.domain.entity.Payment;
 import com.owlexpress.payment.domain.repository.PaymentRepository;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +22,10 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public Optional<Payment> findByTransactionId(String transactionId) {
         return paymentJpaRepository.findPaymentByTransactionId(transactionId);
+    }
+
+    @Override
+    public Optional<Payment> findByOrderId(UUID orderId) {
+        return paymentJpaRepository.findPaymentByOrderId(orderId);
     }
 }
