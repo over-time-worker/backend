@@ -1,6 +1,5 @@
 package com.owlexpress.delivery.presentation;
 
-import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.CREATE_DELIVERY_HISTORY_SUCCESS;
 import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.CREATE_DELIVERY_SUCCESS;
 import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.DELETE_DELIVERY_SUCCESS;
 import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.FINISH_DELIVERY_SUCCESS;
@@ -11,11 +10,8 @@ import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.UP
 
 import com.owlexpress.delivery.application.dtos.CommonDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryHistoryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryHistoryCreateResponseDto;
 import com.owlexpress.delivery.application.service.DeliveryService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

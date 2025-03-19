@@ -1,12 +1,8 @@
 package com.owlexpress.delivery.application.service;
 
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryHistoryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryHistoryCreateResponseDto;
-import com.owlexpress.delivery.domain.entity.Delivery;
 import java.util.UUID;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
