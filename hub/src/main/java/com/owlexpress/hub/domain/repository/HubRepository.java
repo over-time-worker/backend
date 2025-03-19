@@ -4,6 +4,8 @@ import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
@@ -11,16 +13,18 @@ import org.springframework.data.web.PagedModel;
 
 public interface HubRepository {
 
-    public Hub save(Hub hub);
+    Hub save(Hub hub);
 
-    public Optional<Hub> findByHubId(UUID hubId);
+    Optional<Hub> findByHubId(UUID hubId);
 
-    public PagedModel<HubSearchResponseDto> searchHub(Pageable pageable, String keyword, String orderBy, String sort);
+    PagedModel<HubSearchResponseDto> searchHub(Pageable pageable, String keyword, String orderBy, String sort);
 
     /*
     허브 상품
      */
-    public PagedModel<HubProductSearchResponseDto> searchHubProduct(Pageable pageable, String keyword, String orderBy, String sort);
+    PagedModel<HubProductSearchResponseDto> searchHubProduct(Pageable pageable, String keyword, String orderBy, String sort);
 
-    public Optional<HubProduct> findByHubProductId(UUID hubProductId);
+    Optional<HubProduct> findByHubProductId(UUID hubProductId);
+
+    List<Hub> findAllWithIntervals();
 }

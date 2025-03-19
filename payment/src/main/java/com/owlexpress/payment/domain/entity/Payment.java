@@ -31,8 +31,9 @@ public class Payment extends BaseEntity {
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
 
-    @Column(name = "transaction_id", nullable = false)
-    private UUID transactionId;
+    // TossPay 기준 -> PaymentKey
+    @Column(name = "transaction_id", nullable = false, unique = true)
+    private String transactionId;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
@@ -43,7 +44,7 @@ public class Payment extends BaseEntity {
 
 
     @Builder
-    public Payment(UUID paymentId, UUID orderId, UUID transactionId, BigDecimal price,
+    public Payment(UUID paymentId, UUID orderId, String transactionId, BigDecimal price,
             PaymentStatus paymentStatus) {
         this.paymentId = paymentId;
         this.orderId = orderId;
@@ -51,4 +52,5 @@ public class Payment extends BaseEntity {
         this.price = price;
         this.paymentStatus = paymentStatus;
     }
+
 }

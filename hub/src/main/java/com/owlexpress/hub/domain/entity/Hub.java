@@ -3,31 +3,25 @@ package com.owlexpress.hub.domain.entity;
 import com.owlexpress.hub.common.BaseEntity;
 import com.owlexpress.hub.common.util.GeoUtil;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLRestriction;
 import org.locationtech.jts.geom.Point;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Entity
 @Table(name = "p_hub")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at is null")
+@BatchSize(size = 20)
 public class Hub extends BaseEntity {
 
     @Id
@@ -60,10 +54,23 @@ public class Hub extends BaseEntity {
     @OneToMany(mappedBy = "hub", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private List<HubProduct> hubProduct = new ArrayList<>();
 
+    @OneToMany(mappedBy = "startHub", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<HubIntervalInfo> startIntervals = new ArrayList<>();
+
+    @OneToMany(mappedBy = "endHub", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<HubIntervalInfo> endIntervals = new ArrayList<>();
+
     @Builder
-    public Hub(UUID hubId, String name, String hubAddress, Point location, Long userId,
+    public Hub(
+            UUID hubId,
+            String name,
+            String hubAddress,
+            Point location,
+            Long userId,
             String userName,
-            String userPhoneNumber, UUID parentHubId) {
+            String userPhoneNumber,
+            UUID parentHubId
+    ) {
         this.hubId = hubId;
         this.name = name;
         this.hubAddress = hubAddress;
@@ -80,7 +87,10 @@ public class Hub extends BaseEntity {
 
         this.hubAddress = requestDto.getHubAddress();
 
-        this.location = GeoUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude());
+        this.location = GeoUtil.createPoint(
+                requestDto.getLatitude(),
+                requestDto.getLongitude()
+        );
 
         this.userId = requestDto.getUserId();
 

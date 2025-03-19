@@ -43,6 +43,8 @@ dependencies {
 
     // ✅ Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // ✅ WebClient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // ✅ Eureka Client
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
