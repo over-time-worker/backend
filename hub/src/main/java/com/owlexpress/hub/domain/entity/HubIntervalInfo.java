@@ -1,12 +1,8 @@
 package com.owlexpress.hub.domain.entity;
 
 import com.owlexpress.hub.common.BaseEntity;
-import com.owlexpress.hub.common.converter.DurationConverter;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Duration;
@@ -15,6 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_hub_interval_info")
 @SQLRestriction("deleted_at is null")
@@ -33,7 +30,6 @@ public class HubIntervalInfo extends BaseEntity {
     private Hub endHub;
 
     @Column(name = "duration_of_time",columnDefinition = "INTERVAL")
-    @Convert(converter = DurationConverter.class) // 수정된 DurationConverter 적용
     private Duration durationOfTime;
 
     @Column(name = "estimate_distance")
