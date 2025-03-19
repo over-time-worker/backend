@@ -11,9 +11,7 @@ import java.util.UUID;
 @Data
 public class UpdateProductRequestDto {
 
-    //TODO:: 정보 수정시 모두 다시 받도록 체크?
-    @NotNull(message = "유저 ID값은 필수입니다.")
-    private Long userId;
+
     @Size(min = 1, max = 20)
     @NotNull(message = "사업자 번호는 필수값입니다.")
     private String businessNumber;
@@ -34,7 +32,6 @@ public class UpdateProductRequestDto {
 
     @Builder
     public UpdateProductRequestDto(
-            Long userId,
             String businessNumber,
             String companyName,
             CompanyType companyType,
@@ -43,7 +40,6 @@ public class UpdateProductRequestDto {
             Double longitude,
             UUID hubId
     ) {
-        this.userId = userId;
         this.businessNumber = businessNumber;
         this.companyName = companyName;
         this.companyType = companyType;
