@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -47,4 +48,23 @@ public class OrderProduct extends BaseEntity {
 
     @Column(name = "price")
     private BigDecimal price;
+
+    @Builder
+    public OrderProduct(
+            UUID orderId,
+            UUID productId,
+            Integer quantity,
+            String productName,
+            ProductType productType,
+            BigDecimal amount,
+            BigDecimal price
+    ) {
+        this.orderId = orderId;
+        this.productId = productId;
+        this.quantity = quantity;
+        this.productName = productName;
+        this.productType = productType;
+        this.amount = amount;
+        this.price = price;
+    }
 }
