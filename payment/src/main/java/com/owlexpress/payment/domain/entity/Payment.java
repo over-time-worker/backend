@@ -31,7 +31,6 @@ public class Payment extends BaseEntity {
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
 
-
     // TossPay 기준 -> PaymentKey
     @Column(name = "transaction_id", nullable = false)
     private String transactionId;
@@ -54,8 +53,4 @@ public class Payment extends BaseEntity {
         this.paymentStatus = paymentStatus;
     }
 
-    public void updateWithStatusAndAmount(PaymentStatus status, BigDecimal amount) {
-        this.paymentStatus = status;
-        this.price = amount;
-    }
 }

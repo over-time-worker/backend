@@ -1,5 +1,7 @@
 package com.owlexpress.payment.presentation.dto.request;
 
+import com.owlexpress.payment.domain.constant.PaymentStatus;
+import com.owlexpress.payment.domain.entity.Payment;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -20,5 +22,14 @@ public class PaymentCreateRequestDto {
         this.orderId = orderId;
         this.amount = amount;
         this.paymentKey = paymentKey;
+    }
+
+    public Payment toEntity() {
+        return Payment.builder()
+                .paymentStatus(PaymentStatus.SUCCESS)
+                .transactionId(this.paymentKey)
+                .orderId(orderId)
+                .price(amount)
+                .build();
     }
 }

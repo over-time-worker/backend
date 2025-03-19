@@ -7,8 +7,8 @@ import com.owlexpress.payment.presentation.dto.request.PaymentCreateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,8 +19,9 @@ public class PaymentController {
 
     private final PaymentUseCase paymentUseCase;
 
-    @GetMapping("/success")
-    public ResponseEntity<CommonDto<Void>> create(@ModelAttribute PaymentCreateRequestDto requestDto) {
+    @PostMapping
+    public ResponseEntity<CommonDto<Void>> create(
+            @ModelAttribute PaymentCreateRequestDto requestDto) {
         paymentUseCase.createPayment(requestDto);
 
         CommonDto<Void> created = CommonDto.<Void>builder()
