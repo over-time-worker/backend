@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -64,19 +65,14 @@ public class HubDistanceService {
                 RouteOption routeOption = routeOptions.get(0);
                 log.info("🚗 경로 데이터 확인: 거리={}m, 예상 시간={}ms", routeOption.getSummary().getDistance(), routeOption.getSummary().getDuration());
 
-                HubIntervalInfo intervalInfo = HubIntervalInfo.builder()
-                                                              .startHub(startHub)
-                                                              .endHub(endHub)
-                                                              .estimateDistance((double) routeOption.getSummary()
-                                                                                                    .getDistance())
-                                                              .durationOfTime(Duration.ofMillis(routeOption.getSummary()
-                                                                                                           .getDuration()))
-                                                              .estimateTime(LocalDateTime.parse(routeOption.getSummary()
-                                                                                                         .getDepartureTime())) // 🛠 해결
-
-                                                              .build();
-
-                hubIntervalInfoRepository.save(intervalInfo);
+                hubIntervalInfoRepository.save(
+                    UUID.randomUUID(),  // Generate a new ID for each interval entry
+                    startHub.getHubId(),
+                    endHub.getHubId(),
+                    (double) routeOption.getSummary().getDistance(),
+                    Duration.ofMillis(routeOption.getSummary().getDuration()),
+                    LocalDateTime.parse(routeOption.getSummary().getDepartureTime())
+                );
                 log.info("✅ 허브 간 거리 정보 저장 완료: {} → {} (거리: {}m, 예상 시간: {}ms)", startHub.getName(), endHub.getName(), routeOption.getSummary().getDistance(), routeOption.getSummary().getDuration());
             }
         }
