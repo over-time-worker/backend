@@ -37,9 +37,9 @@ public class DeliveryController {
 
     @PostMapping()
     public ResponseEntity<CommonDto<Void>> create(
-            @RequestBody DeliveryCreateRequestDto DeliveryCreateRequestDto
+            @RequestBody DeliveryCreateRequestDto deliveryCreateRequestDto
     ) {
-        deliveryService.create(DeliveryCreateRequestDto);
+        deliveryService.create(deliveryCreateRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<Void>builder()
@@ -191,7 +191,7 @@ public class DeliveryController {
                         .build());
     }
 
-    // TODO : 외부에서 요청 할 일 없을 것 같은데 혹시 모르니 주석..
+    // TODO : 외부에서 요청 할 일 없을 것 같은데 비동기로 바꾸게 된다면 혹시 모르니 주석..
 //    @PostMapping("/delivery-history")
 //    public ResponseEntity<CommonDto<DeliveryHistoryCreateResponseDto>> createDeliveryHistory(
 //            @RequestBody DeliveryHistoryCreateRequestDto DeliveryHistoryCreateRequestDto
