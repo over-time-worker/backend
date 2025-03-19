@@ -18,10 +18,10 @@ public class PaymentCreateRequestDto {
     private String transactionId;
 
     @Builder
-    public PaymentCreateRequestDto(UUID orderId, String paymentKey, BigDecimal price) {
+    public PaymentCreateRequestDto(UUID orderId, String transactionId, BigDecimal price) {
         this.orderId = orderId;
         this.price = price;
-        this.transactionId = paymentKey;
+        this.transactionId = transactionId;
     }
 
     public Payment toEntity() {

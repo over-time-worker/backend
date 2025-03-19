@@ -4,9 +4,11 @@ import com.owlexpress.payment.application.PaymentUseCase;
 import com.owlexpress.payment.common.ResponseMessage;
 import com.owlexpress.payment.presentation.dto.CommonDto;
 import com.owlexpress.payment.presentation.dto.request.PaymentCreateRequestDto;
+import com.owlexpress.payment.presentation.dto.request.PaymentDeleteRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +35,20 @@ public class PaymentController {
                 .build();
 
         return ResponseEntity.ok(created);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<CommonDto<Void>> delete(@RequestBody PaymentDeleteRequestDto requestDto) {
+        paymentUseCase.deletePayment(requestDto);
+
+        CommonDto<Void> deleted = CommonDto.<Void>builder()
+                .status(HttpStatus.ACCEPTED)
+                .code(HttpStatus.ACCEPTED.value())
+                .message(ResponseMessage.PAYMENT_CANCEL_SUCESS)
+                .data(null)
+                .build();
+
+        return ResponseEntity.ok(deleted);
     }
 
 }
