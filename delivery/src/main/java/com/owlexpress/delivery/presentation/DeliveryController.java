@@ -1,6 +1,5 @@
 package com.owlexpress.delivery.presentation;
 
-import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.CREATE_DELIVERY_HISTORY_SUCCESS;
 import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.CREATE_DELIVERY_SUCCESS;
 import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.DELETE_DELIVERY_SUCCESS;
 import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.FINISH_DELIVERY_SUCCESS;
@@ -11,11 +10,8 @@ import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.UP
 
 import com.owlexpress.delivery.application.dtos.CommonDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryHistoryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryHistoryCreateResponseDto;
 import com.owlexpress.delivery.application.service.DeliveryService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +37,9 @@ public class DeliveryController {
 
     @PostMapping()
     public ResponseEntity<CommonDto<Void>> create(
-            @RequestBody DeliveryCreateRequestDto DeliveryCreateRequestDto
+            @RequestBody DeliveryCreateRequestDto deliveryCreateRequestDto
     ) {
-        deliveryService.create(DeliveryCreateRequestDto);
+        deliveryService.create(deliveryCreateRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<Void>builder()
@@ -195,7 +191,7 @@ public class DeliveryController {
                         .build());
     }
 
-    // TODO : 외부에서 요청 할 일 없을 것 같은데 혹시 모르니 주석..
+    // TODO : 외부에서 요청 할 일 없을 것 같은데 비동기로 바꾸게 된다면 혹시 모르니 주석..
 //    @PostMapping("/delivery-history")
 //    public ResponseEntity<CommonDto<DeliveryHistoryCreateResponseDto>> createDeliveryHistory(
 //            @RequestBody DeliveryHistoryCreateRequestDto DeliveryHistoryCreateRequestDto
