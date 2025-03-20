@@ -1,9 +1,13 @@
 package com.owlexpress.deliverymanager.common.exception;
 
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNameDuplicateException;
+import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotFoundException;
+import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDuplicateAssignNumber;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDeliveryManagerNameDuplicateException;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDeliveryManagerNotFoundException;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubIsNotAvailableStatusException;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
@@ -79,6 +83,60 @@ public class GlobalExceptionAdvice {
                         .build();
     }
 
+
+    @ExceptionHandler(ConsumerDuplicateAssignNumberException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleDuplicateAssignNumberException(ConsumerDuplicateAssignNumberException e) {
+        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+
+    @ExceptionHandler(ConsumerDeliveryManagerNotAvailableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleConsumerDeliveryManagerNotAvailableException(ConsumerDeliveryManagerNotAvailableException e) {
+        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+    @ExceptionHandler(HubDuplicateAssignNumber.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleDuplicateAssignNumberException(HubDuplicateAssignNumber e) {
+        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+
+    @ExceptionHandler(HubIsNotAvailableStatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleIsNotAvailableStatusException(HubIsNotAvailableStatusException e) {
+        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+
+
+
     @ExceptionHandler(ConsumerDeliveryManagerNameDuplicateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleProducerNameDuplicateException(ConsumerDeliveryManagerNameDuplicateException e) {
@@ -90,6 +148,19 @@ public class GlobalExceptionAdvice {
                 .message(e.getMessage()) // Ensure the message is included
                 .data(null)
                 .build();
+    }
+
+    @ExceptionHandler(ConsumerDeliveryManagerNotAvailableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleNotAvailableException(ConsumerDeliveryManagerNotAvailableException e) {
+        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(FeignException.class)

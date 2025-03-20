@@ -13,4 +13,14 @@ public class ConsumerDeliveryManagerException extends RuntimeException {
             super(message);
         }
     }
+
+    public static class ConsumerDuplicateAssignNumberException extends Throwable {
+        public ConsumerDuplicateAssignNumberException(String meesage) {
+        }
+    }
+
+    public static class ConsumerDeliveryManagerNotAvailableException extends Throwable {
+        public ConsumerDeliveryManagerNotAvailableException(String message) {
+        }
+    }
 }

@@ -19,4 +19,14 @@ public class HubDeliveryManagerException extends RuntimeException {
             super(message);
         }
     }
+
+    public static class HubIsNotAvailableStatusException extends Throwable {
+        public HubIsNotAvailableStatusException(String isNotAvailable) {
+        }
+    }
+
+    public static class HubDuplicateAssignNumber extends Throwable {
+        public HubDuplicateAssignNumber(String duplicateAssignNumber) {
+        }
+    }
 }
