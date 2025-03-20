@@ -2,21 +2,16 @@ package com.owl_express.alarm.application.service;
 
 
 import static com.owl_express.alarm.common.exception.ExceptionMessage.ALARM_NOT_FOUND_MESSAGE;
-import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_CREATE_FAIL_MESSAGE;
 import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_DELETE_FAIL_MESSAGE;
 import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_NOT_FOUND_MESSAGE;
 import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_RESERVATION_FAIL_MESSAGE;
 import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_SEND_FAIL_MESSAGE;
-import static com.owl_express.alarm.common.exception.ExceptionMessage.RETRY_MESSAGE;
 
-import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
-import com.owl_express.alarm.application.dtos.request.MessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
-import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
 import com.owl_express.alarm.common.util.CommonUtil;
@@ -25,7 +20,6 @@ import com.owl_express.alarm.domain.entity.Alarm;
 import com.owl_express.alarm.domain.entity.Alarm.MessageType;
 import com.owl_express.alarm.domain.entity.Alarm.PlatformType;
 import com.owl_express.alarm.domain.repository.AlarmRepository;
-import com.owl_express.alarm.infrastructure.feignClient.AiClient;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
@@ -57,7 +51,7 @@ public class AlarmServiceImpl implements AlarmService {
     public static final String KOREA_ZONE_ID = "Asia/Seoul";
 
     private final AlarmRepository alarmRepository;
-    private final AiClient aiClient;
+    private final AlarmUsecase alarmUsecase;
 
     @Value("${slack.token}")
     private String slackBotToken;
@@ -65,11 +59,9 @@ public class AlarmServiceImpl implements AlarmService {
     @Override
     @Transactional
     public void createAlarmForHubDeliver(AlarmCreateRequestDto requestDto) {
-        // TODO : order service 생긴 후 feign client 통신으로 정보 얻어오기 or 배송쪽에서 product 정보 함께 넘기기(메세지큐 방식이면 괜찮을듯)
-        String productInfo = "생쭈꾸미 10마리, 냉동 쭈꾸미 1팩";
-
         // TODO : ai 메세지 요청 feign client 통신 test
-        // MessageCreateResponseDto messageCreateResponseDto = getMessageFromAi(requestDto, productInfo);
+//        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto);
+
         //MockData
         MessageCreateResponseDto messageCreateResponseDto
                 = MessageCreateResponseDto.builder()
@@ -90,7 +82,7 @@ public class AlarmServiceImpl implements AlarmService {
             //alarm 생성
             Alarm alarm = Alarm.builder()
                     .aiId(messageCreateResponseDto.getAiId())
-                    .userId(requestDto.getUserId())
+                    .userId(requestDto.getDeliverUserId())
                     .userChannelId(requestDto.getDeliverChannelId())
                     .platformType(platformType)
                     .message(messageCreateResponseDto.getMessage())
@@ -108,11 +100,9 @@ public class AlarmServiceImpl implements AlarmService {
     @Override
     @Transactional
     public AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto requestDto) {
-        // TODO : order service 생긴 후 feign client 통신으로 정보 얻어오기 or 배송쪽에서 product 정보 함께 넘기기(메세지큐 방식이면 괜찮을듯)
-        String productInfo = "생쭈꾸미 10마리, 냉동 쭈꾸미 1팩";
-
         // TODO : ai 메세지 요청 feign client 통신 test
-        // MessageCreateResponseDto messageCreateResponseDto = getMessageFromAi(requestDto, productInfo);
+//        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto);
+
         //MockData
         MessageCreateResponseDto messageCreateResponseDto
                 = MessageCreateResponseDto.builder()
@@ -133,7 +123,7 @@ public class AlarmServiceImpl implements AlarmService {
             //alarm 생성
             Alarm alarm = Alarm.builder()
                     .aiId(messageCreateResponseDto.getAiId())
-                    .userId(requestDto.getUserId())
+                    .userId(requestDto.getDeliverUserId())
                     .userChannelId(requestDto.getDeliverChannelId())
                     .platformType(platformType)
                     .message(messageCreateResponseDto.getMessage())
@@ -170,28 +160,6 @@ public class AlarmServiceImpl implements AlarmService {
                 () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
         return AlarmFindResponseDto.toDto(alarm);
-    }
-
-    private MessageCreateResponseDto getMessageFromAi(AlarmCreateRequestDto requestDto, String productInfo) {
-        MessageCreateResponseDto messageCreateResponseDto;
-
-        try{
-
-            CommonDto<MessageCreateResponseDto> responseEntity
-                    = aiClient.createMessagesForHubDeliver(MessageCreateRequestDto.AlarmDtoToMessageDto(requestDto,productInfo));
-
-            messageCreateResponseDto = responseEntity.getData();
-          
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-            throw new AiFeignClientException(RETRY_MESSAGE);
-        }
-
-        if(messageCreateResponseDto == null) {
-            throw new AiFeignClientException(MESSAGE_CREATE_FAIL_MESSAGE);
-        }
-
-        return messageCreateResponseDto;
     }
 
     @Override
