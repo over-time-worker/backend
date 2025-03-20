@@ -21,10 +21,10 @@ public class AlarmUsecase {
 
     public MessageCreateResponseDto getHubDeliverMessageFromAi(AlarmCreateRequestDto requestDto) {
         MessageCreateResponseDto messageCreateResponseDto;
+        HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto = HubDeliverMessageCreateRequestDto.alarmDtoToMessageDto(requestDto);
 
             CommonDto<MessageCreateResponseDto> responseEntity
-                    = aiClient.createMessagesForHubDeliver(
-                    HubDeliverMessageCreateRequestDto.alarmDtoToMessageDto(requestDto));
+                    = aiClient.createMessagesForHubDeliver(hubDeliverMessageCreateRequestDto);
 
             messageCreateResponseDto = responseEntity.getData();
 

@@ -192,7 +192,7 @@ public class AlarmServiceImpl implements AlarmService {
 
     private ChatScheduleMessageResponse scheduleMessage(String message, String channelId) {
         ChatScheduleMessageResponse response;
-        ZonedDateTime koreaTime = ZonedDateTime.of(LocalDate.now(), LocalTime.of(6,0), ZoneId.of(KOREA_ZONE_ID));
+        ZonedDateTime koreaTime = ZonedDateTime.of(LocalDate.now(), LocalTime.of(0,0), ZoneId.of(KOREA_ZONE_ID));
         ZonedDateTime serverTime = koreaTime.withZoneSameInstant(ZoneId.systemDefault());
 
         if (ZonedDateTime.now().isAfter(serverTime)) {
