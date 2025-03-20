@@ -1,13 +1,17 @@
 package com.owlexpress.hub.presentation;
 
 import com.owlexpress.hub.application.HubProductUseCase;
+import com.owlexpress.hub.application.dto.response.HubProductIsEnoughResponseDto;
 import com.owlexpress.hub.common.Constant.ResponseMessage;
 import com.owlexpress.hub.domain.service.HubService;
 import com.owlexpress.hub.presentation.dto.CommonDto;
+import com.owlexpress.hub.presentation.dto.request.HubProductCheckRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -102,10 +106,28 @@ public class HubProductController {
                 CommonDto.<Void>builder()
                         .status(HttpStatus.ACCEPTED)
                         .code(HttpStatus.ACCEPTED.value())
-                        .message("허브 상품 삭제 완료")
+                        .message(ResponseMessage.HUB_PRODUCT_DELETE_SUCCESS)
                         .data(null)
                         .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(deleted);
+    }
+
+    @PostMapping("/check-stock")
+    public ResponseEntity<CommonDto<List<HubProductIsEnoughResponseDto>>> checkStock(
+            @RequestBody List<HubProductCheckRequestDto> requestDto
+    ) {
+        List<HubProductIsEnoughResponseDto> isOrderPossibleByProductId =
+                hubService.checkHubProductStocks(requestDto);
+
+        CommonDto<List<HubProductIsEnoughResponseDto>> found =
+                CommonDto.<List<HubProductIsEnoughResponseDto>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message(ResponseMessage.HUB_PRODUCT_STOCK_CHECK_SUCCESS)
+                        .data(isOrderPossibleByProductId)
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(found);
     }
 }

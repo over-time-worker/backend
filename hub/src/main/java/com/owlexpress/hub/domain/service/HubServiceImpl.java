@@ -1,6 +1,8 @@
 package com.owlexpress.hub.domain.service;
 
 import com.owlexpress.hub.application.HubDistanceService;
+import com.owlexpress.hub.application.dto.response.HubProductIsEnoughResponseDto;
+import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.common.HubHelper;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
@@ -9,12 +11,15 @@ import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubIntervalInfoRepository;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
+import com.owlexpress.hub.presentation.dto.request.HubProductCheckRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -49,17 +54,17 @@ public class HubServiceImpl implements HubService {
         } else {
             //스포크 허브라면 받은 중앙 허브값 확인
             hubRepository.findByHubId(requestDto.getParentId())
-                         .ifPresent(findparentHub -> {
-                             //스포크허브와 중앙 허브 연결
-                             Hub spokeHub = requestDto.toEntity(findparentHub);
-                             //TODO :: passport - UserId
-                             spokeHub.createdEntity(1L);
-                             hubRepository.save(spokeHub);
-                         });
+                    .ifPresent(findparentHub -> {
+                        //스포크허브와 중앙 허브 연결
+                        Hub spokeHub = requestDto.toEntity(findparentHub);
+                        //TODO :: passport - UserId
+                        spokeHub.createdEntity(1L);
+                        hubRepository.save(spokeHub);
+                    });
         }
         //TODO :: passport - UserId
         Objects.requireNonNull(hub)
-               .createdEntity(1L);
+                .createdEntity(1L);
         hubRepository.save(hub);
         hubIntervalInfoRepository.deleteContainsHub(hub);
     }
@@ -68,15 +73,15 @@ public class HubServiceImpl implements HubService {
     @Transactional
     public void update(HubUpdateRequestDto requestDto) {
         Hub hub = hubRepository.findByHubId(requestDto.getHubId())
-                               .orElseThrow(HubNotFoundException::new);
+                .orElseThrow(HubNotFoundException::new);
 
         // TODO: 패스포트 토큰에서 값 뺴서 집어넣기
         hub.modifiedEntity(1L);
         hub.update(requestDto);
         //위도 경도에 변화가 있는 경우 기존 기록 지우고 최신화
         if (hub.getLocation()
-               .getX() != requestDto.getLatitude() || hub.getLocation()
-                                                         .getY() != requestDto.getLongitude()) {
+                .getX() != requestDto.getLatitude() || hub.getLocation()
+                .getY() != requestDto.getLongitude()) {
             hubIntervalInfoRepository.deleteContainsHub(hub);
             hubDistanceService.calculateHubDistances(hub);
         }
@@ -131,7 +136,7 @@ public class HubServiceImpl implements HubService {
     @Transactional
     public void update(HubProductUpdateRequestDto requestDto) {
         HubProduct hubProduct = hubRepository.findByHubProductId(requestDto.getHubProductId())
-                                             .orElseThrow(HubProductNotFoundException::new);
+                .orElseThrow(HubProductNotFoundException::new);
         hubProduct.updateEntity(requestDto);
 
         // TODO: PASSPORT 에서 값 뺴오기
@@ -141,7 +146,7 @@ public class HubServiceImpl implements HubService {
     @Override
     public HubProductFindResponseDto findHubProduct(UUID hubProductId) {
         HubProduct hubProduct = hubRepository.findByHubProductId(hubProductId)
-                                             .orElseThrow(HubProductNotFoundException::new);
+                .orElseThrow(HubProductNotFoundException::new);
 
         return HubProductFindResponseDto.fromEntity(hubProduct);
     }
@@ -179,12 +184,44 @@ public class HubServiceImpl implements HubService {
         // 2. 스포크 허브인 경우 (삭제 시 중앙 허브에 물품 추가)
         Hub centralHub = hub.getParentHub();
         hub.getHubProduct()
-           .forEach(product -> product.setHub(centralHub));
+                .forEach(product -> product.setHub(centralHub));
 
         // 스포크 허브 삭제
         hub.deleteEntity(1L);
 
         //허브가 들어간 경로 모두 삭제
         hubIntervalInfoRepository.deleteContainsHub(hub);
+    }
+
+    @Override
+    public List<HubProductIsEnoughResponseDto> checkHubProductStocks(
+            List<HubProductCheckRequestDto> requestDto
+    ) {
+        List<UUID> products = requestDto.stream()
+                .map(HubProductCheckRequestDto::getHubProductId)
+                .toList();
+
+        // 각 아이디별 재고 파악
+        Map<UUID, HubProductStockResponseDto> results = hubRepository.findHubProductStocks(
+                        products)
+                .stream()
+                .collect(Collectors.toMap(HubProductStockResponseDto::getHubProductId, dto -> dto));
+
+        return requestDto.stream()
+                .map(dto -> {
+                    UUID hubProductId = dto.getHubProductId();
+                    // 못찾았으면 품절처리를 위해 0 반환
+                    HubProductStockResponseDto orDefault = results.getOrDefault(hubProductId, null);
+
+                    boolean isEnough = true;
+                    if (orDefault == null || orDefault.getStock() < dto.getQuantity()) {
+                        isEnough = false;
+                    }
+
+                    return HubProductIsEnoughResponseDto.builder()
+                            .hubProductId(hubProductId)
+                            .isEnough(isEnough)
+                            .build();
+                }).toList();
     }
 }
