@@ -1,9 +1,11 @@
 package com.owlexpress.deliverymanager.presentation.controller;
 
+import com.owlexpress.deliverymanager.application.dto.response.AlarmCreateResponseDto;
 import com.owlexpress.deliverymanager.application.usecase.HubDeliveryManagerUsecase;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateHubDeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateHubDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindHubDeliveryResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class HubDeliveryManagerController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            @RequestHeader(name = "X-User-Passport") String passport,
+//            @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody CreateHubDeliveryManagerRequestDto createHubDeliveryManagerRequestDto
     ) {
         hubDeliveryManagerUsecase.create(createHubDeliveryManagerRequestDto);
@@ -107,5 +109,39 @@ public class HubDeliveryManagerController {
                                              .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+    }
+
+    @PostMapping("/assign")
+    public ResponseEntity<CommonDto<AlarmCreateResponseDto>> assign(
+            @RequestBody DeliveryManagerRequestDto deliveryManagerRequestDto
+    ) {
+
+        AlarmCreateResponseDto assign = hubDeliveryManagerUsecase.assign(deliveryManagerRequestDto);
+
+        CommonDto<AlarmCreateResponseDto> commonDto = CommonDto.<AlarmCreateResponseDto>builder()
+                                                               .status(HttpStatus.ACCEPTED)
+                                                               .code(HttpStatus.ACCEPTED.value())
+                                                               .message("담당자 배정 성공")
+                                                               .data(assign)
+                                                               .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
+    }
+
+    @PatchMapping("/return-hub/{deliveryManagerId}")
+    public ResponseEntity<CommonDto<Void>> returnHub(
+            @PathVariable UUID deliveryManagerId
+    ) {
+        hubDeliveryManagerUsecase.returnHub(deliveryManagerId);
+
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
+                                             .status(HttpStatus.ACCEPTED)
+                                             .code(HttpStatus.ACCEPTED.value())
+                                             .message("담당자 복귀 성공")
+                                             .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
     }
 }

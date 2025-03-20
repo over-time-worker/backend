@@ -10,4 +10,7 @@ public interface ConsumerDeliveryManagerJpaRepository extends JpaRepository<Cons
     boolean existsByAssignNumber(Integer assignNumber);
 
     Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberDesc();
+
+
+    Optional<ConsumerDeliveryManager> findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(UUID hubId);
 }

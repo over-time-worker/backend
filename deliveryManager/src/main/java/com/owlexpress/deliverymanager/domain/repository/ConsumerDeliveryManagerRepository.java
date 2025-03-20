@@ -22,4 +22,6 @@ public interface ConsumerDeliveryManagerRepository {
     );
 
     Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberDesc();
+
+    Optional<ConsumerDeliveryManager> findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(UUID hubId);
 }

@@ -1,11 +1,13 @@
 package com.owlexpress.deliverymanager.application.usecase;
 
+import com.owlexpress.deliverymanager.application.dto.response.AlarmCreateResponseDto;
 import com.owlexpress.deliverymanager.common.exception.ExceptionMessage;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
 import com.owlexpress.deliverymanager.domain.entity.HubDeliveryManager;
 import com.owlexpress.deliverymanager.domain.repository.HubDeliveryManagerRepository;
 import com.owlexpress.deliverymanager.infrastructure.config.DeliveryManagerSearchConfig;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateHubDeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateHubDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindHubDeliveryResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.owlexpress.deliverymanager.common.exception.ExceptionMessage.Manager_NOT_FOUND_MESSAGE;
@@ -121,5 +124,25 @@ public class HubDeliveryManagerUsecase {
                                            .orElseThrow(
                                                    () -> new HubDeliveryManagerException.HubDeliveryManagerNotFoundException(
                                                            Manager_NOT_FOUND_MESSAGE));
+    }
+    @Transactional
+    public AlarmCreateResponseDto assign(DeliveryManagerRequestDto deliveryManagerRequestDto) {
+        Optional<HubDeliveryManager> optionalManager = hubDeliveryManagerRepository.findFirstByOrderByAssignNumberDesc();
+
+        // 담당자가 없는 경우 예외 처리 또는 기본 응답
+        if (optionalManager.isEmpty()) {
+            throw new HubDeliveryManagerException.ConsumerEmptyException(ExceptionMessage.HUB_NOT_ENOUGH);
+        }
+        HubDeliveryManager manager = optionalManager.get();
+        manager.setIsAvaliable(false);
+
+        return AlarmCreateResponseDto.from(manager,deliveryManagerRequestDto);
+    }
+
+    @Transactional
+    public void returnHub(UUID deliveryManagerId) {
+        HubDeliveryManager hubDeliveryManager = getHubDeliveryManager(deliveryManagerId);
+        hubDeliveryManager.setIsAvaliable(true);
+
     }
 }
