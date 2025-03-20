@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryFindResponseDto {
+    private UUID deliveryId;
     private UUID orderId;
     private String productInfo;
     private UUID startHubId;
@@ -34,6 +35,7 @@ public class DeliveryFindResponseDto {
 
     @Builder
     public DeliveryFindResponseDto(
+            UUID deliveryId,
             UUID orderId,
             String productInfo,
             UUID startHubId,
@@ -52,6 +54,7 @@ public class DeliveryFindResponseDto {
             String consumerName,
             String shippingAddress
     ) {
+        this.deliveryId = deliveryId;
         this.orderId = orderId;
         this.productInfo = productInfo;
         this.startHubId = startHubId;
@@ -73,6 +76,7 @@ public class DeliveryFindResponseDto {
 
     public static DeliveryFindResponseDto toDto(Delivery delivery) {
         return DeliveryFindResponseDto.builder()
+                .deliveryId(delivery.getId())
                 .orderId(delivery.getOrderId())
                 .productInfo(delivery.getProductInfo())
                 .startHubId(delivery.getStartHubId())

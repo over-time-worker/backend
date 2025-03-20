@@ -61,7 +61,7 @@ public class AlarmQueryRepositoryImpl implements AlarmQueryRepository {
         }
 
         if (StringUtils.hasText(endDate)) {
-            booleanBuilder.and(alarm.createdAt.before(CommonUtil.StringToLocalDateTime(startDate)));
+            booleanBuilder.and(alarm.createdAt.before(CommonUtil.StringToLocalDateTime(endDate)));
         }
 
         if (StringUtils.hasText(deliveryUserId)) {

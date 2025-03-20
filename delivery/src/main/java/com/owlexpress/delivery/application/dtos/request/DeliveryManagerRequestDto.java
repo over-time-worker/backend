@@ -29,13 +29,12 @@ public class DeliveryManagerRequestDto {
     private LocalDateTime requestArrivalTime;
     private Double totalEstimateDistance;
     private Duration totalEstimateDurationTime;
-    List<HubListDto> hubList;
+    List<HubListDto> totalHubList;
 
     @Getter
     public static class HubListDto {
         UUID hubId;
         String hubName;
-        Double distance;
         Double estimateDistance;
         Duration estimateDurationTime;
     }
@@ -57,7 +56,7 @@ public class DeliveryManagerRequestDto {
             LocalDateTime requestArrivalTime,
             Double totalEstimateDistance,
             Duration totalEstimateDurationTime,
-            List<HubListDto> hubList
+            List<HubListDto> totalHubList
     ) {
         this.deliveryId = deliveryId;
         this.orderId = orderId;
@@ -74,7 +73,7 @@ public class DeliveryManagerRequestDto {
         this.requestArrivalTime = requestArrivalTime;
         this.totalEstimateDistance = totalEstimateDistance;
         this.totalEstimateDurationTime = totalEstimateDurationTime;
-        this.hubList = hubList;
+        this.totalHubList = totalHubList;
     }
 
     public static DeliveryManagerRequestDto toDto(Delivery delivery, DeliveryHistory deliveryHistory, List<HubListDto> hubListDtos) {
@@ -94,7 +93,7 @@ public class DeliveryManagerRequestDto {
                 .requestArrivalTime(delivery.getRequestArrivalTime())
                 .totalEstimateDistance(delivery.getTotalEstimateDistance())
                 .totalEstimateDurationTime(delivery.getTotalEstimateDurationTime())
-                .hubList(hubListDtos)
+                .totalHubList(hubListDtos)
                 .build();
 
     }

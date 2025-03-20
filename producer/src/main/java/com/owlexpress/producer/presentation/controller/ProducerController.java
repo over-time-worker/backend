@@ -3,7 +3,7 @@ package com.owlexpress.producer.presentation.controller;
 import com.owlexpress.producer.application.usecase.ProducerUsecase;
 import com.owlexpress.producer.common.CommonDto;
 import com.owlexpress.producer.common.dto.request.CreateProducerRequestDto;
-import com.owlexpress.producer.common.dto.request.UpdateProductRequestDto;
+import com.owlexpress.producer.common.dto.request.UpdateProducerRequestDto;
 import com.owlexpress.producer.domain.service.ProducerService;
 import com.owlexpress.producer.presentation.dto.response.ProducerResponseDto;
 import com.owlexpress.producer.presentation.dto.response.SearchProducerResponseDto;
@@ -43,12 +43,12 @@ public class ProducerController {
     @PutMapping("/{producerId}")
     public ResponseEntity<CommonDto<Void>> update(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @Valid @RequestBody UpdateProductRequestDto updateProductRequestDto,
+            @Valid @RequestBody UpdateProducerRequestDto updateProducerRequestDto,
             @PathVariable UUID producerId
 
     ) {
         producerUsecase.update(
-                updateProductRequestDto,
+                updateProducerRequestDto,
                 producerId
         );
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
