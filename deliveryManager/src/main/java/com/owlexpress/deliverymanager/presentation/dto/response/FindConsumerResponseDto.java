@@ -15,7 +15,7 @@ public class FindConsumerResponseDto {
     private String user_name;
     private String user_phone_number;
     private PlatformType platform_type;
-    private Long channelId;
+    private UUID channelId;
     private UUID hubId;
 
     @Builder
@@ -25,7 +25,7 @@ public class FindConsumerResponseDto {
             String user_name,
             String user_phone_number,
             PlatformType platform_type,
-            Long channelId,
+            UUID channelId,
             UUID hubId
     ) {
         this.userId = userId;
