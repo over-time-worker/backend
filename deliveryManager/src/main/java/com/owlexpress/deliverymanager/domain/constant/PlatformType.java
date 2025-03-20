@@ -1,4 +1,4 @@
-package com.owlexpress.deliverymanager.domain;
+package com.owlexpress.deliverymanager.domain.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.owlexpress.deliverymanager.presentation.dto.request;
 
-import com.owlexpress.deliverymanager.domain.PlatformType;
+import com.owlexpress.deliverymanager.domain.constant.PlatformType;
 import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import lombok.Builder;
 import lombok.Data;
