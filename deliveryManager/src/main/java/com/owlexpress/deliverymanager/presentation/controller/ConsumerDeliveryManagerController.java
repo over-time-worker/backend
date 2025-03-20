@@ -3,9 +3,7 @@ package com.owlexpress.deliverymanager.presentation.controller;
 import com.owlexpress.deliverymanager.application.usecase.ConsumerDeliveryManagerUsecase;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateConsumerDeliveryManagerRequestDto;
-import com.owlexpress.deliverymanager.presentation.dto.request.CreateHubDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateConsumerDeliveryManagerRequestDto;
-import com.owlexpress.deliverymanager.presentation.dto.request.UpdateHubDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindConsumerResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
@@ -38,7 +36,7 @@ public class ConsumerDeliveryManagerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
     }
 
-    @PutMapping("/{consumerDeliveryManagerId")
+    @PutMapping("/{consumerDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> update(
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId,
             @RequestBody UpdateConsumerDeliveryManagerRequestDto updateConsumerDeliveryManagerRequestDto

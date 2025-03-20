@@ -15,7 +15,7 @@ public class HubDeliveryManagerException extends RuntimeException {
     }
 
     public static class HubDeliveryManagerNameDuplicateException extends RuntimeException{
-        public ProducerNameDuplicateException(String message) {
+        public HubDeliveryManagerNameDuplicateException(String message) {
             super(message);
         }
     }

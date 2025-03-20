@@ -3,7 +3,6 @@ package com.owlexpress.deliverymanager.presentation.controller;
 import com.owlexpress.deliverymanager.application.usecase.HubDeliveryManagerUsecase;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateConsumerDeliveryManagerRequestDto;
-import com.owlexpress.deliverymanager.presentation.dto.request.UpdateConsumerDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateHubDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindHubDeliveryResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,7 @@ public class HubDeliveryManagerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
     }
 
-    @PutMapping("/{hubDeliveryManagerId")
+    @PutMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> update(
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId,
             UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
