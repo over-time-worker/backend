@@ -4,8 +4,10 @@ import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY
 import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_HISTORY_NOT_FOUND_MESSAGE;
 import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_NOT_FOUND_MESSAGE;
 
+import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
+import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
@@ -16,7 +18,6 @@ import com.owlexpress.delivery.domain.entity.Delivery;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import com.owlexpress.delivery.domain.entity.DeliveryHistory;
 import com.owlexpress.delivery.domain.repository.DeliveryRepository;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -116,25 +117,28 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public void completeHubDelivery(UUID deliveryId, UUID deliveryHistoryId) {
+    public void completeHubDelivery(UUID deliveryId, UUID deliveryHistoryId, DeliveryCompleteRequestDto requestDto) {
 
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
         // TODO : update By 적용
         delivery.updateDeliveryStatus(DeliveryStatus.ARRIVED_AT_HUB, 1L);
 
-        //TODO : 실제 이동 거리,시간 받아서 update
         List<DeliveryHistory> deliveryHistoryList = delivery.getDeliveryHistories();
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, deliveryHistoryList);
         // TODO : update By 적용
-        delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.COMPLETE ,1L);
+        delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,1L);
 
         // TODO : 배송 담당자 서비스에 FeignClient로 배송 담당자 반환 처리
         //반환 실패시 예외 처리
 
-        // TODO : 모든 허브 list 가져 온 후 (sequnce asc) : 배송 담당자 요청시 현재 허브정도, 다음 허브 정보 가공해서 넘겨야함 (요청사항 및 상품 정보 등등)
         // 꺼내온 허브가 마지막 순서라면 ?
         if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 1) {
 
+            DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
+                    delivery,
+                    deliveryHistory,
+                    delivery.getDeliveryHistories()
+            );
             // TODO : 배송 담당자 서비스에 FeignClient로 업체 배송 담당자 요청
             // 응답 예외 처리
 
@@ -148,18 +152,16 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public void completeCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId) {
+    public void completeCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId, DeliveryCompleteRequestDto requestDto) {
         // TODO : 배송 담당자 서비스에 FeignClient로 배송 담당자 반환 처리
         //반환 실패시 예외 처리
 
-        //TODO : 실제 이동 거리,시간 받아서 update
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
         // TODO : update By 적용
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETE, 1L);
-
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
         // TODO : update By 적용
-        delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.COMPLETE ,1L);
+        delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE , requestDto, 1L);
     }
 
     @Transactional
@@ -174,6 +176,11 @@ public class DeliveryServiceImpl implements DeliveryService {
          delivery.updateDeliverHistoryList(deliveryHistoryList);
          deliveryRepository.save(delivery);
 
+        DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
+                delivery,
+                deliveryHistoryList.get(0),
+                delivery.getDeliveryHistories()
+        );
         // TODO : 배송 담당자 service로 첫 배송 담당자 배정 요청
         // 예외 응답 처리
     }

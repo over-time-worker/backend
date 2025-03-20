@@ -9,6 +9,7 @@ import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.ST
 import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.UPDATE_DELIVERY_SUCCESS;
 
 import com.owlexpress.delivery.application.dtos.CommonDto;
+import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
@@ -162,9 +163,10 @@ public class DeliveryController {
     @PatchMapping("/hub/{delivery_id}/{delivery_history_id}/complete")
     public ResponseEntity<CommonDto<Void>> completeHubDelivery(
             @PathVariable("delivery_id") UUID deliveryId,
-            @PathVariable("delivery_history_id") UUID deliveryHistoryId
+            @PathVariable("delivery_history_id") UUID deliveryHistoryId,
+            @RequestBody DeliveryCompleteRequestDto completeRequestDto
     ) {
-        deliveryService.completeHubDelivery(deliveryId, deliveryHistoryId);
+        deliveryService.completeHubDelivery(deliveryId, deliveryHistoryId, completeRequestDto);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
@@ -178,9 +180,10 @@ public class DeliveryController {
     @PatchMapping("/company/{delivery_id}/{delivery_history_id}/complete")
     public ResponseEntity<CommonDto<Void>> completeCompanyDelivery(
             @PathVariable("delivery_id") UUID deliveryId,
-            @PathVariable("delivery_history_id") UUID deliveryHistoryId
+            @PathVariable("delivery_history_id") UUID deliveryHistoryId,
+            @RequestBody DeliveryCompleteRequestDto completeRequestDto
     ) {
-        deliveryService.completeCompanyDelivery(deliveryId, deliveryHistoryId);
+        deliveryService.completeCompanyDelivery(deliveryId, deliveryHistoryId, completeRequestDto);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()

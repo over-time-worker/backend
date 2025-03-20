@@ -37,6 +37,32 @@ public class DeliveryManagerRequestDto {
         String hubName;
         Double estimateDistance;
         Duration estimateDurationTime;
+
+        @Builder
+        public HubListDto(
+                UUID hubId,
+                String hubName,
+                Double estimateDistance,
+                Duration estimateDurationTime
+        ) {
+            this.hubId = hubId;
+            this.hubName = hubName;
+            this.estimateDistance = estimateDistance;
+            this.estimateDurationTime = estimateDurationTime;
+        }
+
+        public static List<HubListDto> toHubListDtos(List<DeliveryHistory> deliveryHistories) {
+            return deliveryHistories.stream()
+                    .map(history -> {
+                        return HubListDto.builder()
+                                .hubId(history.getStartHubId())
+                                .hubName(history.getStartHubName())
+                                .estimateDistance(history.getEstimateDistance())
+                                .estimateDurationTime(history.getEstimateDurationTime())
+                                .build();
+                    })
+                    .toList();
+        }
     }
 
     @Builder
@@ -76,7 +102,7 @@ public class DeliveryManagerRequestDto {
         this.totalHubList = totalHubList;
     }
 
-    public static DeliveryManagerRequestDto toDto(Delivery delivery, DeliveryHistory deliveryHistory, List<HubListDto> hubListDtos) {
+    public static DeliveryManagerRequestDto toDeliveryManagerRequestDto(Delivery delivery, DeliveryHistory deliveryHistory, List<DeliveryHistory> deliveryistoryList) {
         return DeliveryManagerRequestDto.builder()
                 .deliveryId(delivery.getId())
                 .orderId(delivery.getOrderId())
@@ -93,7 +119,7 @@ public class DeliveryManagerRequestDto {
                 .requestArrivalTime(delivery.getRequestArrivalTime())
                 .totalEstimateDistance(delivery.getTotalEstimateDistance())
                 .totalEstimateDurationTime(delivery.getTotalEstimateDurationTime())
-                .totalHubList(hubListDtos)
+                .totalHubList(HubListDto.toHubListDtos(deliveryistoryList))
                 .build();
 
     }

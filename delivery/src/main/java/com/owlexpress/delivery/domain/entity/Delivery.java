@@ -1,6 +1,7 @@
 package com.owlexpress.delivery.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedOrderTypeException;
@@ -193,6 +194,10 @@ public class Delivery extends BaseEntity {
 
     public void updateDeliveryHistoryStatus(DeliveryHistory deliveryHistory, DeliveryStatus deliveryStatus, Long userId) {
         deliveryHistory.updateDeliveryStatus(deliveryStatus, userId);
+    }
+
+    public void updateDeliveryHistoryActualInfo(DeliveryHistory deliveryHistory, DeliveryStatus deliveryStatus, DeliveryCompleteRequestDto requestDto, Long userId) {
+        deliveryHistory.updateDeliveryHistoryActualInfo(deliveryStatus, requestDto, userId);
     }
 
     @RequiredArgsConstructor
