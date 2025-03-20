@@ -1,5 +1,7 @@
 package com.owlexpress.hub.domain.repository;
 
+import com.owlexpress.hub.domain.entity.Hub;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,4 +24,6 @@ public interface HubIntervalInfoRepository {
             UUID hubId,
             UUID hubId1
     );
+
+    void deleteContainsHub(Hub hub);
 }
