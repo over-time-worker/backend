@@ -23,7 +23,7 @@ public class ConsumerDeliveryManagerController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
+           @RequestBody CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
     ) {
         consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto);
 

@@ -4,9 +4,9 @@ import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerEx
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotFoundException;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException;
-import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDuplicateAssignNumber;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDeliveryManagerNameDuplicateException;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDeliveryManagerNotFoundException;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDuplicateAssignNumber;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubIsNotAvailableStatusException;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import feign.FeignException;
@@ -33,9 +33,6 @@ public class GlobalExceptionAdvice {
 
     public static final String PRODUCER_NOT_FOUND_EXCEPTION = "handleProducerNotFoundException : {}";
     public static final String PRODUCER_NAME_DUPLICATE_EXCEPTION = "handleProducerNameDuplicateException : {}";
-    public static final String PRODUCT_INFO_NOT_FOUND_EXCEPTION = "handleProductInfoNotFoundException : {}";
-    public static final String NOT_AUTHORIZED_EXCEPTION = "handleNotAuthorizedException : {}";
-    public static final String PRODUCT_INFO_NAME_DUPLICATE_EXCEPTION = "handleProductInfoNameDuplicateException : {}";
     public static final String FEIGN_EXCEPTION = "handleFeignException : {}";
     public static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
     public static final String CONSTRAINT_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
@@ -50,11 +47,11 @@ public class GlobalExceptionAdvice {
     public CommonDto<Object> handleProducerNotFoundException(HubDeliveryManagerNotFoundException e) {
         log.error(PRODUCER_NOT_FOUND_EXCEPTION, e.getMessage(), e);
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message(e.getMessage()) // Ensure the message is included
-                .data(null)
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
 
 
@@ -97,18 +94,6 @@ public class GlobalExceptionAdvice {
                         .build();
     }
 
-    @ExceptionHandler(ConsumerDeliveryManagerNotAvailableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CommonDto<Object> handleConsumerDeliveryManagerNotAvailableException(ConsumerDeliveryManagerNotAvailableException e) {
-        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
-
-        return CommonDto.builder()
-                        .status(HttpStatus.BAD_REQUEST)
-                        .code(HttpStatus.BAD_REQUEST.value())
-                        .message(e.getMessage()) // Ensure the message is included
-                        .data(null)
-                        .build();
-    }
     @ExceptionHandler(HubDuplicateAssignNumber.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleDuplicateAssignNumberException(HubDuplicateAssignNumber e) {
@@ -136,18 +121,17 @@ public class GlobalExceptionAdvice {
     }
 
 
-
     @ExceptionHandler(ConsumerDeliveryManagerNameDuplicateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleProducerNameDuplicateException(ConsumerDeliveryManagerNameDuplicateException e) {
         log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message(e.getMessage()) // Ensure the message is included
-                .data(null)
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(ConsumerDeliveryManagerNotAvailableException.class)
@@ -171,14 +155,13 @@ public class GlobalExceptionAdvice {
                          .filter(strategy -> strategy.supports(e))
                          .findFirst()
                          .map(strategy -> strategy.handleException(e))
-                         .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                                 CommonDto.<Void>builder()
-                                          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                          .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                                          .message("알 수 없는 Feign 오류 발생: " + e.getMessage())
-                                          .data(null)
-                                          .build()
-                         ));
+                         .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                        .body(CommonDto.<Void>builder()
+                                                                       .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                                       .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                                                       .message("알 수 없는 Feign 오류 발생: " + e.getMessage())
+                                                                       .data(null)
+                                                                       .build()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -190,7 +173,8 @@ public class GlobalExceptionAdvice {
                         .status(HttpStatus.BAD_REQUEST)
                         .code(HttpStatus.BAD_REQUEST.value())
                         .message("입력값이 유효하지 않습니다.")
-                        .data(e.getBindingResult().getFieldErrors()) // 어떤 필드가 오류인지 포함
+                        .data(e.getBindingResult()
+                               .getFieldErrors()) // 어떤 필드가 오류인지 포함
                         .build();
     }
 
@@ -200,11 +184,11 @@ public class GlobalExceptionAdvice {
         log.error(CONSTRAINT_VIOLATION_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message("입력값이 유효하지 않습니다.")
-                .data(e.getConstraintViolations()) // 어떤 제약 조건이 실패했는지 포함
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message("입력값이 유효하지 않습니다.")
+                        .data(e.getConstraintViolations()) // 어떤 제약 조건이 실패했는지 포함
+                        .build();
     }
 
     @ExceptionHandler(IllegalAccessException.class)
@@ -213,11 +197,11 @@ public class GlobalExceptionAdvice {
         log.error(FORBIDDEN_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.FORBIDDEN)
-                .code(HttpStatus.FORBIDDEN.value())
-                .message("권한이 없습니다.")
-                .data(null)
-                .build();
+                        .status(HttpStatus.FORBIDDEN)
+                        .code(HttpStatus.FORBIDDEN.value())
+                        .message("권한이 없습니다.")
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(DataAccessException.class)
@@ -226,11 +210,11 @@ public class GlobalExceptionAdvice {
         log.error(DATABASE_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("데이터베이스 오류가 발생했습니다.")
-                .data(null)
-                .build();
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .message("데이터베이스 오류가 발생했습니다.")
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(Exception.class)
@@ -239,11 +223,11 @@ public class GlobalExceptionAdvice {
         log.error(GENERIC_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("예기치 않은 오류가 발생했습니다.")
-                .data(null)
-                .build();
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .message("예기치 않은 오류가 발생했습니다.")
+                        .data(null)
+                        .build();
     }
 
 }

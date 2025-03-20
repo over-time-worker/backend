@@ -5,6 +5,8 @@ import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class CreateConsumerDeliveryManagerRequestDto {
     private Long userId;
@@ -13,6 +15,7 @@ public class CreateConsumerDeliveryManagerRequestDto {
     private String user_phone_number;
     private PlatformType platform_type;
     private Long channelId;
+    private UUID hubId;
 
     @Builder
     public CreateConsumerDeliveryManagerRequestDto(
@@ -21,7 +24,8 @@ public class CreateConsumerDeliveryManagerRequestDto {
             String user_name,
             String user_phone_number,
             PlatformType platform_type,
-            Long channelId
+            Long channelId,
+            UUID hubId
     ) {
         this.userId = userId;
         this.assign_number = assign_number;
@@ -29,6 +33,7 @@ public class CreateConsumerDeliveryManagerRequestDto {
         this.user_phone_number = user_phone_number;
         this.platform_type = platform_type;
         this.channelId = channelId;
+        this.hubId = hubId;
     }
 
     public ConsumerDeliveryManager toEntity(CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto) {
