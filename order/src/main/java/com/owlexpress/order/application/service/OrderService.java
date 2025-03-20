@@ -18,7 +18,7 @@ public interface OrderService {
 
     void updateOrder(UUID orderId, UpdateOrderRequestDto request, Long userId);
 
-    void deleteOrder(UUID OrderId, Long userId);
+    void deleteOrder(UUID orderId, Long userId);
 
     PagedModel<OrderSearchResponseDto> search (
             int page,
