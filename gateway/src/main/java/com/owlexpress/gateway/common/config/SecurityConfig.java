@@ -4,23 +4,45 @@ import com.owlexpress.gateway.common.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpec;
+import org.springframework.security.config.web.server.ServerHttpSecurity.FormLoginSpec;
+import org.springframework.security.config.web.server.ServerHttpSecurity.HttpBasicSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
+import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
-
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http.csrf(CsrfSpec::disable);
+    public SecurityWebFilterChain securityWebFilterChain(
+            ServerHttpSecurity http,
+            ReactiveAuthenticationManager jwtAuthenticationManager,
+            ServerAuthenticationConverter jwtAuthenticationConverter
+    ) {
+        AuthenticationWebFilter authenticationWebFilter =
+                new AuthenticationWebFilter(jwtAuthenticationManager);
 
+        authenticationWebFilter.setServerAuthenticationConverter(jwtAuthenticationConverter);
+
+        http.csrf(CsrfSpec::disable)
+                .formLogin(FormLoginSpec::disable)
+                .httpBasic(HttpBasicSpec::disable)
+                .securityContextRepository(
+                        NoOpServerSecurityContextRepository.getInstance()
+                ); // Session - stateless
+
+        // 생성한 필터 등록
+        http.addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         // 사용자
-        manageUserRole(http);
+        manageUserRoute(http);
         // 관리자
-        manageMasterRole(http);
+        manageMasterRoute(http);
         // 상품
         manageProductRoute(http);
         // AI
@@ -47,6 +69,13 @@ public class SecurityConfig {
         manageCartRoute(http);
         // 허브 간 이동 정보 관리
         manageHubDistanceRoute(http);
+
+        // auth 경로는 항상 허용
+        http.authorizeExchange(exchanges -> exchanges
+                .pathMatchers("api/auth/**").permitAll()
+                .anyExchange().authenticated()
+        );
+
         return http.build();
     }
 
@@ -236,12 +265,12 @@ public class SecurityConfig {
         );
     }
 
-    private static void manageMasterRole(ServerHttpSecurity http) {
+    private static void manageMasterRoute(ServerHttpSecurity http) {
         http.authorizeExchange(exchanges -> exchanges
                 .pathMatchers("/api/master/**").hasRole(Role.MASTER.getName()));
     }
 
-    private static void manageUserRole(ServerHttpSecurity http) {
+    private static void manageUserRoute(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> exchange
                 .pathMatchers(HttpMethod.DELETE, "/api/users/**").hasRole(Role.MASTER.getName())
                 .pathMatchers(HttpMethod.PUT, "/api/users/**").hasRole(Role.MASTER.getName())

@@ -1,10 +1,12 @@
 package com.owlexpress.hub.domain.service;
 
+import com.owlexpress.hub.application.HubDistanceService;
 import com.owlexpress.hub.common.HubHelper;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
+import com.owlexpress.hub.domain.repository.HubIntervalInfoRepository;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
@@ -30,8 +32,10 @@ import java.util.UUID;
 public class HubServiceImpl implements HubService {
 
     private final HubRepository hubRepository;
+    private final HubIntervalInfoRepository hubIntervalInfoRepository;
     private static final List<Integer> ALLOWED_SIZES = List.of(10, 30, 50);
     private static final Integer DEFAULT_SIZE = 10;
+    private final HubDistanceService hubDistanceService;
 
     @Override
     @Transactional
@@ -46,12 +50,17 @@ public class HubServiceImpl implements HubService {
     @Override
     @Transactional
     public void update(HubUpdateRequestDto requestDto) {
-        Hub origin = hubRepository.findByHubId(requestDto.getHubId())
+        Hub hub = hubRepository.findByHubId(requestDto.getHubId())
                 .orElseThrow(HubNotFoundException::new);
 
         // TODO: 패스포트 토큰에서 값 뺴서 집어넣기
-        origin.modifiedEntity(1L);
-        origin.update(requestDto);
+        hub.modifiedEntity(1L);
+        hub.update(requestDto);
+        //위도 경도에 변화가 있는 경우 기존 기록 지우고 최신화
+        if(hub.getLocation().getX() != requestDto.getLatitude() || hub.getLocation().getY() != requestDto.getLongitude()) {
+            hubIntervalInfoRepository.deleteContainsHub(hub);
+            hubDistanceService.calculateHubDistances(hub);
+        }
     }
 
     @Override
@@ -62,12 +71,13 @@ public class HubServiceImpl implements HubService {
             String q,
             String orderBy
     ) {
+        //TODO :: 사용하지 않는 코드 DIRECTION?
         Sort.Direction direction = sort.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC;
         if (!ALLOWED_SIZES.contains(size)) {
             size = DEFAULT_SIZE;
         }
-
-        PageRequest pageRequest = PageRequest.of(page, size);
+        Sort sortAndOrderBy = Sort.by(direction, orderBy); // direction 활용 추가
+        PageRequest pageRequest = PageRequest.of(page, size,sortAndOrderBy);
 
         return hubRepository.searchHub(pageRequest, q, sort, orderBy);
     }
@@ -93,8 +103,8 @@ public class HubServiceImpl implements HubService {
         if (!ALLOWED_SIZES.contains(size)) {
             size = DEFAULT_SIZE;
         }
-
-        PageRequest pageRequest = PageRequest.of(page, size);
+        Sort sortAndOrderBy = Sort.by(direction, orderBy); // direction 활용 추가
+        PageRequest pageRequest = PageRequest.of(page, size,sortAndOrderBy);
         return hubRepository.searchHubProduct(pageRequest, q, orderBy, sort);
     }
 

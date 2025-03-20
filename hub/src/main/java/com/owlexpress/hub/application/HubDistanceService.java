@@ -76,7 +76,7 @@ public class HubDistanceService {
                         UUID.randomUUID(),
                         startHub.getHubId(),
                         endHub.getHubId(),
-                        (double) routeOption.getSummary().getDistance(),
+                        routeOption.getSummary().getDistance(),
                         Duration.ofMillis(routeOption.getSummary().getDuration()),
                         LocalDateTime.parse(routeOption.getSummary().getDepartureTime())
                 );
@@ -243,5 +243,56 @@ public class HubDistanceService {
         double deltaY = hubLatitude - consumerLatitude;
 
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
+
+    @Transactional
+    public void calculateHubDistances(Hub startHub) {
+        List<Hub> allHubs = hubRepository.findAllWithIntervals();
+
+
+            for (Hub endHub : allHubs) {
+                if(startHub.equals(endHub)) {continue;}
+                if (startHub.getLocation() == null || endHub.getLocation() == null) {
+                    log.warn("️ 허브 위치 정보가 존재하지 않습니다. startHub={}, endHub={}", startHub.getName(), endHub.getName());
+                    continue;
+                }
+
+                Optional<Double> preStoredDistance = hubIntervalInfoRepository.findDistanceBetweenHubs(startHub.getHubId(), endHub.getHubId());
+                if (preStoredDistance.isPresent()) {
+                    log.info("찾은 데이터 거리 정보: {} → {} (거리: {}m)", startHub.getName(), endHub.getName(), preStoredDistance.get());
+                    continue;
+                }
+
+                DirectionsRequestDto requestDto = DirectionsRequestDto.fromEntity(startHub, endHub);
+                log.info(" API 요청 생성: startHub={}, endHub={}", startHub.getName(), endHub.getName());
+
+                DirectionsResponseDto responseDto = naverDirectionsClient.getDrivingRoute(requestDto).block();
+
+                if (responseDto == null || responseDto.getRoute() == null || responseDto.getRoute().isEmpty()) {
+                    log.error(" API 응답이 올바르지 않습니다. startHub={}, endHub={}", startHub.getName(), endHub.getName());
+                    throw new LocationNotExistException();
+                }
+
+                List<RouteOption> routeOptions = responseDto.getRoute().get("trafast");
+                if (routeOptions == null || routeOptions.isEmpty()) {
+                    log.warn("️ 경로 옵션이 없습니다. startHub={}, endHub={}", startHub.getName(), endHub.getName());
+                    continue;
+                }
+
+                RouteOption routeOption = routeOptions.get(0);
+                log.info(" 경로 데이터 확인: 거리={}m, 예상 시간={}ms", routeOption.getSummary().getDistance(), routeOption.getSummary().getDuration());
+
+                hubIntervalInfoRepository.save(
+                        UUID.randomUUID(),
+                        startHub.getHubId(),
+                        endHub.getHubId(),
+                        routeOption.getSummary().getDistance(),
+                        Duration.ofMillis(routeOption.getSummary().getDuration()),
+                        LocalDateTime.parse(routeOption.getSummary().getDepartureTime())
+                );
+                log.info("허브 간 거리 정보 저장 완료: {} → {} (거리: {}m, 예상 시간: {}ms)", startHub.getName(), endHub.getName(), routeOption.getSummary().getDistance(), routeOption.getSummary().getDuration());
+            }
+
+        log.info(" [END] 허브 간 거리 계산 완료");
     }
 }

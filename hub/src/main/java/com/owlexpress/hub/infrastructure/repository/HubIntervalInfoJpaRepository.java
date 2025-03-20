@@ -1,5 +1,6 @@
 package com.owlexpress.hub.infrastructure.repository;
 
+import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubIntervalInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -35,10 +36,14 @@ public interface HubIntervalInfoJpaRepository extends JpaRepository<HubIntervalI
     List<Object[]> findByStartHubByObject(@Param("startHubId") UUID startHubId);
 
     @Query("SELECT h.estimateDistance FROM HubIntervalInfo h " +
-            "WHERE (h.startHub.hubId = :hubId AND h.endHub.hubId = :hubId1) " +
-            "   OR (h.startHub.hubId = :hubId1 AND h.endHub.hubId = :hubId)")
+            "WHERE (h.startHub.hubId = :startHubId AND h.endHub.hubId = :endHubId) " +
+            "   OR (h.startHub.hubId = :endHubId AND h.endHub.hubId = :startHubId)")
     Optional<Double> findDistanceBetweenHubs(
             @Param("startHubId") UUID startHubId,
             @Param("endHubId") UUID endHubId
     );
+
+    @Modifying
+    @Query("DELETE FROM HubIntervalInfo WHERE startHub = :hub OR endHub = :hub")
+    void deleteHub(Hub hub);
 }

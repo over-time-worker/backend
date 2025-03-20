@@ -1,5 +1,7 @@
 package com.owlexpress.hub.domain.repository;
 
+import com.owlexpress.hub.domain.entity.Hub;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +21,9 @@ public interface HubIntervalInfoRepository {
     List<Object[]> findByStartHubByObject(UUID currentHub);
 
     Optional<Double> findDistanceBetweenHubs(
-            UUID hubId,
-            UUID hubId1
+            UUID startHub,
+            UUID endHub
     );
+
+    void deleteContainsHub(Hub hub);
 }
