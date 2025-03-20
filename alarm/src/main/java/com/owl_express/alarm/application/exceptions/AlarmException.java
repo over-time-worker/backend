@@ -8,12 +8,6 @@ public class AlarmException extends RuntimeException {
         }
     }
 
-    public static class OrderNotFoundException extends RuntimeException {
-        public OrderNotFoundException(String message) {
-            super(message);
-        }
-    }
-
     public static class AlarmNotFoundException extends RuntimeException {
         public AlarmNotFoundException(String message) {
             super(message);

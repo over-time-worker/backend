@@ -22,17 +22,11 @@ public class AlarmUsecase {
     public MessageCreateResponseDto getHubDeliverMessageFromAi(AlarmCreateRequestDto requestDto) {
         MessageCreateResponseDto messageCreateResponseDto;
 
-        try{
-
             CommonDto<MessageCreateResponseDto> responseEntity
                     = aiClient.createMessagesForHubDeliver(
                     HubDeliverMessageCreateRequestDto.alarmDtoToMessageDto(requestDto));
 
             messageCreateResponseDto = responseEntity.getData();
-
-        } catch (RuntimeException e) {
-            throw new AiFeignClientException(RETRY_MESSAGE);
-        }
 
         if(messageCreateResponseDto == null) {
             throw new AiFeignClientException(MESSAGE_CREATE_FAIL_MESSAGE);
@@ -44,17 +38,11 @@ public class AlarmUsecase {
     public MessageCreateResponseDto getCompanyDeliverMessageFromAi(AlarmCreateRequestDto requestDto) {
         MessageCreateResponseDto messageCreateResponseDto;
 
-        try{
-
             CommonDto<MessageCreateResponseDto> responseEntity
                     = aiClient.createMessagesForCompanyDeliver(
                     CompanyDeliverMessageCreateRequestDto.alarmDtoToMessageDto(requestDto));
 
             messageCreateResponseDto = responseEntity.getData();
-
-        } catch (RuntimeException e) {
-            throw new AiFeignClientException(RETRY_MESSAGE);
-        }
 
         if(messageCreateResponseDto == null) {
             throw new AiFeignClientException(MESSAGE_CREATE_FAIL_MESSAGE);

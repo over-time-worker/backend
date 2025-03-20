@@ -60,14 +60,7 @@ public class AlarmServiceImpl implements AlarmService {
     @Transactional
     public void createAlarmForHubDeliver(AlarmCreateRequestDto requestDto) {
         // TODO : ai 메세지 요청 feign client 통신 test
-//        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto);
-
-        //MockData
-        MessageCreateResponseDto messageCreateResponseDto
-                = MessageCreateResponseDto.builder()
-                .aiId(UUID.randomUUID())
-                .message("자 슬랙 메세지 전송 테스트 해보자 !")
-                .build();
+        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto);
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
@@ -101,14 +94,7 @@ public class AlarmServiceImpl implements AlarmService {
     @Transactional
     public AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto requestDto) {
         // TODO : ai 메세지 요청 feign client 통신 test
-//        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto);
-
-        //MockData
-        MessageCreateResponseDto messageCreateResponseDto
-                = MessageCreateResponseDto.builder()
-                .aiId(UUID.randomUUID())
-                .message("자 슬랙 메세지 전송 테스트 해보자 !")
-                .build();
+        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto);
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
