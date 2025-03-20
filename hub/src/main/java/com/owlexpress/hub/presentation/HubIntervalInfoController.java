@@ -6,10 +6,7 @@ import com.owlexpress.hub.presentation.dto.request.RouteRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubIntervalInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,15 +19,17 @@ public class HubIntervalInfoController {
 
     // 출발지 & 도착지 기준 최적 경로 조회
     @PostMapping("/route")
-    public ResponseEntity<List<RouteResponseDto>> findOptimalRoute(@RequestBody RouteRequestDto requestDto) {
+    public ResponseEntity<HubIntervalInfoResponse> findOptimalRoute(@RequestBody RouteRequestDto requestDto) {
         List<RouteResponseDto> route = hubDistanceService.findShortestPath(requestDto.getStartHubId(),
                                                                            requestDto.getConsumerId(),
                                                                            requestDto.getConsumerLongitude(),
                                                                            requestDto.getConsumerLatitude(),
                                                                            requestDto.getDepartureTime()
         );
-        HubIntervalInfoResponse.fromDTO(route);
+        HubIntervalInfoResponse hubIntervalInfoResponse = HubIntervalInfoResponse.fromDTO(route);
 
-        return ResponseEntity.ok(route);
+        return ResponseEntity.ok(hubIntervalInfoResponse);
     }
+
+
 }
