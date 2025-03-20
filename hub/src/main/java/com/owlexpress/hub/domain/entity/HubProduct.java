@@ -4,16 +4,14 @@ import com.owlexpress.hub.common.BaseEntity;
 import com.owlexpress.hub.common.ProductType;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "p_hub_product")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at is null")

@@ -36,7 +36,7 @@ public class HubFindResponseDto {
                 .managerId(hub.getUserId())
                 .hubManagerName(hub.getUserName())
                 .hubManagerPhoneNumber(hub.getUserPhoneNumber())
-                .parentHubId(hub.getParentHubId())
+                .parentHubId(hub.getParentHub().getHubId())
                 .build();
     }
 
