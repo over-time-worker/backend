@@ -18,6 +18,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/hub")
+//TODO:: passport 연결하기
 public class HubController {
 
     private final HubService hubService;
@@ -69,8 +70,20 @@ public class HubController {
                 .body(updated);
     }
 
-    @DeleteMapping
-    public void delete() {
+    @DeleteMapping("/{hubId}")
+    public ResponseEntity<CommonDto<Void>> delete(
+            @PathVariable("hubId") UUID hubId
+    ) {
+
+        hubService.delete(hubId);
+
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
+                                           .status(HttpStatus.ACCEPTED)
+                                           .code(HttpStatus.ACCEPTED.value())
+                                           .message(ResponseMessage.HUB_SEARCH_SUCCESS)
+                                           .build();
+
+        return ResponseEntity.ok(commonDto);
     }
 
     @GetMapping("/search")

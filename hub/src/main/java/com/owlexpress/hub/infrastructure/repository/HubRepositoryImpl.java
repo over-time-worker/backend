@@ -71,7 +71,12 @@ public class HubRepositoryImpl implements HubRepository {
 
     @Override
     public List<Hub> findAllCentralHub() {
-        return hubJpaRepository.findAllByParentHubIdIsNull();
+        return hubJpaRepository.findAllByParentHubIsNull();
+    }
+
+    @Override
+    public List<Hub> findAllByParentHub(Hub parentHubId) {
+        return hubJpaRepository.findAllByParentHub(parentHubId);
     }
 
 }

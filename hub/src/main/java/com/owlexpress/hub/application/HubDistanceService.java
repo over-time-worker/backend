@@ -122,7 +122,7 @@ public class HubDistanceService {
         log.info(" Nearest central hub found: {}", nearestCentralHub.getName());
 
         //  출발 허브가 스포크 허브라면 중앙 허브를 경유
-        if (startHub.getParentHubId() != null) {
+        if (startHub.getParentHub() != null) {
             log.info(" Finding first leg path: {} → {}", startHub.getName(), nearestCentralHub.getName());
             List<RouteResponseDto> firstLeg = hubPathFinder.findShortestPath(
                     startHub,
