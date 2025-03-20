@@ -46,7 +46,7 @@ public class CompanyDeliverMessageCreateRequestDto {
         this.requestArrivalTime = requestArrivalTime;
     }
 
-    public static CompanyDeliverMessageCreateRequestDto AlarmDtoToMessageDto(AlarmCreateRequestDto requestDto) {
+    public static CompanyDeliverMessageCreateRequestDto alarmDtoToMessageDto(AlarmCreateRequestDto requestDto) {
         return CompanyDeliverMessageCreateRequestDto.builder()
                 .deliverId(requestDto.getDeliverId())
                 .deliverName(requestDto.getDeliverName())

@@ -67,7 +67,7 @@ public class HubDeliverMessageCreateRequestDto {
         this.totalHubList = totalHubList;
     }
 
-    public static HubDeliverMessageCreateRequestDto AlarmDtoToMessageDto(AlarmCreateRequestDto requestDto) {
+    public static HubDeliverMessageCreateRequestDto alarmDtoToMessageDto(AlarmCreateRequestDto requestDto) {
         return HubDeliverMessageCreateRequestDto.builder()
                 .deliverId(requestDto.getDeliverId())
                 .deliverName(requestDto.getDeliverName())
