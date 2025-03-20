@@ -2,14 +2,19 @@ package com.owl_express.ai.application.service;
 
 import static com.owl_express.ai.common.exceptions.ExceptionMessage.MESSAGE_NOT_FOUND_MESSAGE;
 
-import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.request.CompanyDeliverMessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateRequestDto.HubListDto;
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import com.owl_express.ai.application.exceptions.AiException;
+import com.owl_express.ai.common.util.CommonUtil;
 import com.owl_express.ai.common.util.PageUtil;
 import com.owl_express.ai.domain.entity.Ai;
 import com.owl_express.ai.domain.repository.AiRepository;
+import java.time.Duration;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -36,24 +41,30 @@ public class AiServiceImpl implements AiService {
     @Value("${api.ai.url}")
     private String apiUrl;
 
-    @Value("${api.ai.request-base}")
-    private String baseRequest;
+    @Value("${api.ai.hub.request-base}")
+    private String hubRequestBase;
 
-    @Value("${api.ai.request-format}")
-    private String requestFormat;
+    @Value("${api.ai.hub.request-format}")
+    private String hubRequestFormat;
+
+    @Value("${api.ai.company.request-base}")
+    private String companyRequestBase;
+
+    @Value("${api.ai.company.request-format}")
+    private String companyRequestFormat;
 
     private static final String CONTENT_TYPE = "Content-Type";
 
     @Override
     public MessageCreateResponseDto createMessageForHubDeliver(
-            MessageCreateRequestDto messageCreateRequestDto
+            HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto
     ) {
-        String requestMessage = createRequestMessage(messageCreateRequestDto);
-        String responseMessage = callApi(requestMessage);
+        String requestMessage = createHubRequestMessage(hubDeliverMessageCreateRequestDto);
+        String responseMessage = callApi(hubRequestBase.replace("{request}", requestMessage));
 
         Ai aiMessage = Ai.builder()
-                .hubDeliverId(messageCreateRequestDto.getDeliverId())
-                .hubDeliverChannelId(messageCreateRequestDto.getDeliverChannelId())
+                .hubDeliverId(hubDeliverMessageCreateRequestDto.getDeliverId())
+                .hubDeliverChannelId(hubDeliverMessageCreateRequestDto.getDeliverChannelId())
                 .request(requestMessage)
                 .response(responseMessage)
                 .build();
@@ -67,14 +78,14 @@ public class AiServiceImpl implements AiService {
 
     @Override
     public MessageCreateResponseDto createMessageForCompanyDeliver(
-            MessageCreateRequestDto messageCreateRequestDto
+            CompanyDeliverMessageCreateRequestDto companyDeliverMessageCreateRequestDto
     ) {
-        String requestMessage = createRequestMessage(messageCreateRequestDto);
-        String responseMessage = callApi(requestMessage);
+        String requestMessage = createCompanyRequestMessage(companyDeliverMessageCreateRequestDto);
+        String responseMessage = callApi(companyRequestBase.replace("{request}", requestMessage));
 
         Ai aiMessage = Ai.builder()
-                .consumerDeliverId(messageCreateRequestDto.getDeliverId())
-                .consumerDeliverChannelId(messageCreateRequestDto.getDeliverChannelId())
+                .consumerDeliverId(companyDeliverMessageCreateRequestDto.getDeliverId())
+                .consumerDeliverChannelId(companyDeliverMessageCreateRequestDto.getDeliverChannelId())
                 .request(requestMessage)
                 .response(responseMessage)
                 .build();
@@ -103,22 +114,56 @@ public class AiServiceImpl implements AiService {
         return new PagedModel<>(paged);
     }
 
-    private String createRequestMessage(MessageCreateRequestDto messageCreateRequestDto) {
+    private String createHubRequestMessage(HubDeliverMessageCreateRequestDto messageCreateRequestDto) {
 
-        return requestFormat
-                .replace("{orderId}", messageCreateRequestDto.getOrderId())
+        String hubNameList = "[ " +
+                messageCreateRequestDto.getTotalHubList().stream()
+                        .map(HubListDto::getHubName)
+                        .collect(Collectors.joining(" "))
+                + " ]";
+
+        String hubDurationTimeList = "[ " +
+                messageCreateRequestDto.getTotalHubList().stream()
+                        .map(HubListDto::getEstimateDurationTime)
+                        .map(duration -> duration.toMillis() + "ms ")
+                        .limit(Math.max(0, messageCreateRequestDto.getTotalHubList().size() - 1))
+                        .collect(Collectors.joining(" "))
+                + " ]";
+
+        return hubRequestFormat
+                .replace("{orderId}", messageCreateRequestDto.getOrderId().toString())
                 .replace("{ordererName}", messageCreateRequestDto.getOrdererName())
                 .replace("{productInfo}", messageCreateRequestDto.getProductInfo())
-                .replace("{start}", messageCreateRequestDto.getStartHub())
-                .replace("{destination}", messageCreateRequestDto.getDestination())
+                .replace("{startHub}", messageCreateRequestDto.getStartHubName())
+                .replace("{endHub}", messageCreateRequestDto.getEndHubName())
+                .replace("{currentHub}", messageCreateRequestDto.getCurrentHubName())
+                .replace("{nextHub}", messageCreateRequestDto.getNextHubName())
+                .replace("{hubList}", hubNameList)
+                .replace("{durationTime}", hubDurationTimeList)
                 .replace("{deliverName}", messageCreateRequestDto.getDeliverName())
                 .replace("{orderDescription}", messageCreateRequestDto.getOrderDescription())
-                .replace("{departureDeadline}", messageCreateRequestDto.getDepartureDeadline());
+                .replace("{requestArrivalTime}", CommonUtil.LocalDateTimetoString(messageCreateRequestDto.getRequestArrivalTime()))
+                .replace("{totalDistance}", messageCreateRequestDto.getTotalEstimateDistance() + "m")
+                .replace("{totalDuration}", messageCreateRequestDto.getTotalEstimateDurationTime().toMillis() + "ms");
+
+
     }
 
-    private String callApi(String request) {
+    private String createCompanyRequestMessage(CompanyDeliverMessageCreateRequestDto messageCreateRequestDto) {
 
-        String body = baseRequest.replace("{request}", request);
+        return companyRequestFormat
+                .replace("{orderId}", messageCreateRequestDto.getOrderId().toString())
+                .replace("{ordererName}", messageCreateRequestDto.getOrdererName())
+                .replace("{productInfo}", messageCreateRequestDto.getProductInfo())
+                .replace("{startHub}", messageCreateRequestDto.getStartHubName())
+                .replace("{shippingAddress}", messageCreateRequestDto.getShippingAddress())
+                .replace("{deliverName}", messageCreateRequestDto.getDeliverName())
+                .replace("{orderDescription}", messageCreateRequestDto.getOrderDescription())
+                .replace("{requestArrivalTime}", CommonUtil.LocalDateTimetoString(messageCreateRequestDto.getRequestArrivalTime()));
+    }
+
+    private String callApi(String body) {
+
         String url = apiUrl + apiKey;
 
         JSONObject jsonObject = webClient.post()

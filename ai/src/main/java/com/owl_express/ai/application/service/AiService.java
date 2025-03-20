@@ -1,16 +1,18 @@
 package com.owl_express.ai.application.service;
 
-import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.request.CompanyDeliverMessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
-import com.owl_express.ai.domain.entity.Ai;
 import java.util.UUID;
 import org.springframework.data.web.PagedModel;
 
 public interface AiService {
-    MessageCreateResponseDto createMessageForHubDeliver(MessageCreateRequestDto messageCreateRequestDto);
+    MessageCreateResponseDto createMessageForHubDeliver(
+            HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto);
 
-    MessageCreateResponseDto createMessageForCompanyDeliver(MessageCreateRequestDto messageCreateRequestDto);
+    MessageCreateResponseDto createMessageForCompanyDeliver(
+            CompanyDeliverMessageCreateRequestDto companyDeliverMessageCreateRequestDto);
 
     MessageFindResponseDto find(UUID aiId);
 
