@@ -45,4 +45,9 @@ public class ConsumerDeliveryManagerRepositoryImpl implements ConsumerDeliveryMa
     public Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberDesc() {
         return consumerDeliveryManagerJpaRepository.findFirstByOrderByAssignNumberDesc();
     }
+
+    @Override
+    public Optional<ConsumerDeliveryManager> findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(UUID hubId) {
+        return consumerDeliveryManagerJpaRepository.findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(hubId);
+    }
 }

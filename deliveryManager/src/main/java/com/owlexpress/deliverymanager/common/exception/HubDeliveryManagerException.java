@@ -2,6 +2,12 @@ package com.owlexpress.deliverymanager.common.exception;
 
 public class HubDeliveryManagerException extends RuntimeException {
 
+    public static class ConsumerEmptyException extends RuntimeException {
+         public ConsumerEmptyException(String message) {
+            super(message);
+        }
+    }
+
     public static class NotAuthorizedException extends RuntimeException{
         public NotAuthorizedException(String message) {
             super(message);

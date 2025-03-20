@@ -1,5 +1,18 @@
 spring:
   application:
-    name: user
+    name: user-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5431/overtime
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: create
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:19080/eureka
+
 server:
   port: 19083

@@ -1,6 +1,6 @@
 package com.owlexpress.deliverymanager.presentation.dto.response;
 
-import com.owlexpress.deliverymanager.domain.PlatformType;
+import com.owlexpress.deliverymanager.domain.constant.PlatformType;
 import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +15,7 @@ public class FindConsumerResponseDto {
     private String user_name;
     private String user_phone_number;
     private PlatformType platform_type;
-    private Long channelId;
+    private UUID channelId;
     private UUID hubId;
 
     @Builder
@@ -25,7 +25,7 @@ public class FindConsumerResponseDto {
             String user_name,
             String user_phone_number,
             PlatformType platform_type,
-            Long channelId,
+            UUID channelId,
             UUID hubId
     ) {
         this.userId = userId;

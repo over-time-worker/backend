@@ -30,4 +30,9 @@ public class ConsumerDeliveryManagerException extends RuntimeException {
         public HubNotFoundException(String message) {
         }
     }
+
+    public static class ConsumerEmptyException extends Throwable {
+        public ConsumerEmptyException(String message) {
+        }
+    }
 }

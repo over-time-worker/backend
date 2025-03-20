@@ -1,13 +1,16 @@
 package com.owlexpress.deliverymanager.application.usecase;
 
+import com.owlexpress.deliverymanager.application.dto.response.AlarmCreateResponseDto;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException;
 import com.owlexpress.deliverymanager.common.exception.ExceptionMessage;
-import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
+import com.owlexpress.deliverymanager.domain.dto.response.HubFindResponseDto;
 import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import com.owlexpress.deliverymanager.domain.repository.ConsumerDeliveryManagerRepository;
+import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import com.owlexpress.deliverymanager.infrastructure.config.DeliveryManagerSearchConfig;
 import com.owlexpress.deliverymanager.infrastructure.feignClient.HubClient;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateConsumerDeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateConsumerDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindConsumerResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -143,5 +146,38 @@ public class ConsumerDeliveryManagerUsecase {
                                                 .orElseThrow(
                                                         () -> new ConsumerDeliveryManagerNotFoundException(
                                                                 Manager_NOT_FOUND_MESSAGE));
+    }
+
+    @Transactional
+    public AlarmCreateResponseDto assign(DeliveryManagerRequestDto deliveryManagerRequestDto) throws HubNotFoundException, ConsumerEmptyException {
+        CommonDto<HubFindResponseDto> hubFindResponseDtoCommonDto = hubClient.find(
+                deliveryManagerRequestDto.getCurrentHubId());
+
+        // 허브가 존재하는지 확인
+        if (hubFindResponseDtoCommonDto == null || hubFindResponseDtoCommonDto.getData() == null) {
+            throw new HubNotFoundException(ExceptionMessage.HUB_NOT_FOUND);
+        }
+
+        // 가장 낮은 assignNumber를 가진 isAvailable = true인 담당자 조회
+        UUID hubId = hubFindResponseDtoCommonDto.getData()
+                                                .getHubId();
+        Optional<ConsumerDeliveryManager> optionalManager =
+                consumerDeliveryManagerRepository.findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(hubId);
+
+        // 담당자가 없는 경우 예외 처리 또는 기본 응답
+        if (optionalManager.isEmpty()) {
+            throw new ConsumerDeliveryManagerException.ConsumerEmptyException(ExceptionMessage.CONSUMER_NOT_ENOUGH+hubId);
+        }
+        ConsumerDeliveryManager manager = optionalManager.get();
+        manager.setIsAvaliable(false);
+
+
+        // DTO 변환 및 반환
+        return AlarmCreateResponseDto.from(manager,deliveryManagerRequestDto);
+    }
+
+    @Transactional
+    public void returnHub(UUID deliveryManagerId) {
+        getConsumerDeliveryManager(deliveryManagerId).setIsAvaliable(true);
     }
 }

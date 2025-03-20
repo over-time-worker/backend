@@ -1,11 +1,12 @@
 package com.owlexpress.deliverymanager.presentation.controller;
 
+import com.owlexpress.deliverymanager.application.dto.response.AlarmCreateResponseDto;
 import com.owlexpress.deliverymanager.application.usecase.ConsumerDeliveryManagerUsecase;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.HubNotFoundException;
-import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateConsumerDeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateConsumerDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindConsumerResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class ConsumerDeliveryManagerController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-           @RequestBody CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
+            @RequestBody CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
     ) throws HubNotFoundException {
         consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto);
 
@@ -35,7 +36,8 @@ public class ConsumerDeliveryManagerController {
                                              .message("업체 배송 관리자 생성 성공")
                                              .build();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(commonDto);
     }
 
     @PutMapping("/{consumerDeliveryManagerId}")
@@ -51,24 +53,27 @@ public class ConsumerDeliveryManagerController {
                                              .message("업체 배송 관리자 수정 성공")
                                              .build();
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
     }
 
     @GetMapping("/{consumerDeliveryManagerId}")
     public ResponseEntity<CommonDto<FindConsumerResponseDto>> find(
             //TODO:: passport 연결 후에는 UUID받을 필요 없음
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId
-    ){
-        FindConsumerResponseDto findConsumerResponseDto = consumerDeliveryManagerUsecase.find(consumerDeliveryManagerId);
+    ) {
+        FindConsumerResponseDto findConsumerResponseDto = consumerDeliveryManagerUsecase.find(
+                consumerDeliveryManagerId);
 
         CommonDto<FindConsumerResponseDto> commonDto = CommonDto.<FindConsumerResponseDto>builder()
-                                         .status(HttpStatus.OK)
-                                         .code(HttpStatus.OK.value())
-                                         .message("업체 배송 관리자 조회 성공")
-                                         .data(findConsumerResponseDto)
-                                         .build();
+                                                                .status(HttpStatus.OK)
+                                                                .code(HttpStatus.OK.value())
+                                                                .message("업체 배송 관리자 조회 성공")
+                                                                .data(findConsumerResponseDto)
+                                                                .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(commonDto);
+        return ResponseEntity.status(HttpStatus.OK)
+                             .body(commonDto);
     }
 
     @GetMapping("/search")
@@ -79,14 +84,15 @@ public class ConsumerDeliveryManagerController {
             @RequestParam(name = "q", defaultValue = "") String q,
             @RequestParam(name = "orderBy", defaultValue = "createdAt") String orderBy
     ) {
-        PagedModel<FindConsumerResponseDto> searchResult = consumerDeliveryManagerUsecase.search(page, size, sort, q, orderBy);
+        PagedModel<FindConsumerResponseDto> searchResult = consumerDeliveryManagerUsecase.search(
+                page, size, sort, q, orderBy);
 
         CommonDto<PagedModel<FindConsumerResponseDto>> commonDto = CommonDto.<PagedModel<FindConsumerResponseDto>>builder()
-                                                     .status(HttpStatus.OK)
-                                                     .code(HttpStatus.OK.value())
-                                                     .message("허브 배송관리자 조회 성공")
-                                                     .data(searchResult)
-                                                     .build();
+                                                                            .status(HttpStatus.OK)
+                                                                            .code(HttpStatus.OK.value())
+                                                                            .message("허브 배송관리자 조회 성공")
+                                                                            .data(searchResult)
+                                                                            .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                              .body(commonDto);
@@ -104,6 +110,40 @@ public class ConsumerDeliveryManagerController {
                                              .message("업체 배송 관리자 삭제 성공")
                                              .build();
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
+    }
+
+    @GetMapping("/assign")
+    public ResponseEntity<CommonDto<AlarmCreateResponseDto>> assign(
+            @RequestBody DeliveryManagerRequestDto deliveryManagerRequestDto
+    ) throws HubNotFoundException, ConsumerDeliveryManagerException.ConsumerEmptyException {
+        AlarmCreateResponseDto assign = consumerDeliveryManagerUsecase.assign(deliveryManagerRequestDto);
+
+        CommonDto<AlarmCreateResponseDto> commonDto = CommonDto.<AlarmCreateResponseDto>builder()
+                                                               .status(HttpStatus.ACCEPTED)
+                                                               .code(HttpStatus.ACCEPTED.value())
+                                                               .message("담당자 배정 성공")
+                                                               .data(assign)
+                                                               .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
+    }
+
+    @PatchMapping("/return-hub/{deliveryManagerId}")
+    public ResponseEntity<CommonDto<Void>> returnHub(
+            @PathVariable UUID deliveryManagerId
+    ) {
+        consumerDeliveryManagerUsecase.returnHub(deliveryManagerId);
+
+        CommonDto<Void> commonDto = CommonDto.<Void>builder()
+                                             .status(HttpStatus.ACCEPTED)
+                                             .code(HttpStatus.ACCEPTED.value())
+                                             .message("담당자 복귀 성공")
+                                             .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
     }
 }
