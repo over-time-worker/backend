@@ -17,7 +17,7 @@ public interface HubIntervalInfoJpaRepository extends JpaRepository<HubIntervalI
     INSERT INTO p_hub_interval_info 
     (hub_interval_id, start_hub_id, end_hub_id, estimate_distance, duration_of_time, estimate_time, created_at, modified_at) 
     VALUES (:hubIntervalId, :startHubId, :endHubId, :estimateDistance, 
-            MAKE_INTERVAL(0, 0, 0, CAST(:hour AS INTEGER), CAST(:minute AS INTEGER), CAST(:second AS INTEGER)), 
+            MAKE_INTERVAL(0, 0, 0, 0, CAST(:hour AS INTEGER), CAST(:minute AS INTEGER), CAST(:second AS INTEGER)), 
             :estimateTime, NOW(), NOW())
     """, nativeQuery = true)
     void insertHubIntervalInfo(

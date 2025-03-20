@@ -1,15 +1,21 @@
 package com.owlexpress.producer.common.exception;
 
 import com.owlexpress.producer.common.CommonDto;
+import com.owlexpress.producer.common.exception.ProducerException.NotAuthorizedException;
+import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import static com.owlexpress.producer.common.exception.ProducerException.ProducerNameDuplicateException;
 import static com.owlexpress.producer.common.exception.ProducerException.ProducerNotFoundException;
@@ -18,13 +24,27 @@ import static com.owlexpress.producer.common.exception.ProductInfoException.*;
 @ControllerAdvice
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionAdvice {
 
+    public static final String PRODUCER_NOT_FOUND_EXCEPTION = "handleProducerNotFoundException : {}";
+    public static final String PRODUCER_NAME_DUPLICATE_EXCEPTION = "handleProducerNameDuplicateException : {}";
+    public static final String PRODUCT_INFO_NOT_FOUND_EXCEPTION = "handleProductInfoNotFoundException : {}";
+    public static final String NOT_AUTHORIZED_EXCEPTION = "handleNotAuthorizedException : {}";
+    public static final String PRODUCT_INFO_NAME_DUPLICATE_EXCEPTION = "handleProductInfoNameDuplicateException : {}";
+    public static final String FEIGN_EXCEPTION = "handleFeignException : {}";
+    public static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
+    public static final String CONSTRAINT_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
+    public static final String FORBIDDEN_EXCEPTION = "handleForbiddenException : {}";
+    public static final String DATABASE_EXCEPTION = "handleDatabaseException : {}";
+    public static final String GENERIC_EXCEPTION = "handleGenericException : {}";
+
+    private final List<FeignExceptionHandlerStrategy> strategies;
 
     @ExceptionHandler(ProducerNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleProducerNotFoundException(ProducerNotFoundException e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(PRODUCER_NOT_FOUND_EXCEPTION, e.getMessage(), e);
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .code(HttpStatus.BAD_REQUEST.value())
@@ -36,7 +56,7 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(ProducerNameDuplicateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleProducerNameDuplicateException(ProducerNameDuplicateException e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -49,7 +69,19 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(ProductInfoNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleProductInfoNotFoundException(ProductInfoNotFoundException e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(PRODUCT_INFO_NOT_FOUND_EXCEPTION, e.getMessage(), e);
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+
+    @ExceptionHandler(NotAuthorizedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleNotAuthorizedException(NotAuthorizedException e) {
+        log.error(NOT_AUTHORIZED_EXCEPTION, e.getMessage(), e);
         return CommonDto.builder()
                         .status(HttpStatus.BAD_REQUEST)
                         .code(HttpStatus.BAD_REQUEST.value())
@@ -61,7 +93,7 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(ProductInfoNameDuplicateExceptoin.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleProductInfoNameDuplicateException(ProductInfoNameDuplicateExceptoin e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(PRODUCT_INFO_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
                         .status(HttpStatus.BAD_REQUEST)
@@ -71,23 +103,41 @@ public class GlobalExceptionAdvice {
                         .build();
     }
 
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<CommonDto<Void>> handleValidationException(FeignException e) {
+        log.error(FEIGN_EXCEPTION, e.getMessage(), e);
+
+        return strategies.stream()
+                         .filter(strategy -> strategy.supports(e))
+                         .findFirst()
+                         .map(strategy -> strategy.handleException(e))
+                         .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                                 CommonDto.<Void>builder()
+                                          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                          .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                          .message("알 수 없는 Feign 오류 발생: " + e.getMessage())
+                                          .data(null)
+                                          .build()
+                         ));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleValidationException(MethodArgumentNotValidException e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(METHOD_ARGUMENT_NOT_VALID_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message("입력값이 유효하지 않습니다.")
-                .data(e.getBindingResult().getFieldErrors()) // 어떤 필드가 오류인지 포함
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message("입력값이 유효하지 않습니다.")
+                        .data(e.getBindingResult().getFieldErrors()) // 어떤 필드가 오류인지 포함
+                        .build();
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleConstraintViolationException(ConstraintViolationException e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(CONSTRAINT_VIOLATION_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
@@ -100,7 +150,7 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(IllegalAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public CommonDto<Object> handleForbiddenException(IllegalAccessException e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(FORBIDDEN_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
                 .status(HttpStatus.FORBIDDEN)
@@ -113,7 +163,7 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(DataAccessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public CommonDto<Object> handleDatabaseException(DataAccessException e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(DATABASE_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -126,7 +176,7 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public CommonDto<Object> handleGenericException(Exception e) {
-        log.error("error ={}", e.getMessage(), e);
+        log.error(GENERIC_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
