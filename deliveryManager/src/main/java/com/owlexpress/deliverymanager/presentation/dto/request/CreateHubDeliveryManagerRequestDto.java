@@ -31,10 +31,12 @@ public class CreateHubDeliveryManagerRequestDto {
         this.channelId = channelId;
     }
 
-    public HubDeliveryManager toEntity(CreateHubDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto) {
+    public HubDeliveryManager toEntity(CreateHubDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto,
+                                       int newAssignNumber
+    ) {
         return HubDeliveryManager.builder()
                           .userId(createConsumerDeliveryManagerRequestDto.getUserId())
-                          .assignNumber(createConsumerDeliveryManagerRequestDto.getAssign_number())
+                          .assignNumber(newAssignNumber)
                           .userName(createConsumerDeliveryManagerRequestDto.getUser_name())
                           .userPhoneNumber(createConsumerDeliveryManagerRequestDto.getUser_phone_number())
                           .platformType(createConsumerDeliveryManagerRequestDto.getPlatform_type())

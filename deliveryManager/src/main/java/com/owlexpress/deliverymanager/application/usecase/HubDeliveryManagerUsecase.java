@@ -29,8 +29,16 @@ public class HubDeliveryManagerUsecase {
 
     @Transactional
     public void create(CreateHubDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto) {
+        // 가장 높은 assignNumber 가져오기
+        int lastAssignNumber = hubDeliveryManagerRepository
+                .findFirstByOrderByAssignNumberDesc()
+                .map(HubDeliveryManager::getAssignNumber)  // 가장 큰 assignNumber 조회
+                .orElse(0);  // 값이 없으면 0
+
+        // 새로운 assignNumber 설정
+        int newAssignNumber = lastAssignNumber + 1;
         HubDeliveryManager hubDeliveryManager = createConsumerDeliveryManagerRequestDto.toEntity(
-                createConsumerDeliveryManagerRequestDto);
+                createConsumerDeliveryManagerRequestDto,newAssignNumber);
 
         hubDeliveryManagerRepository.save(hubDeliveryManager);
 

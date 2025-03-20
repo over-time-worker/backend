@@ -11,4 +11,5 @@ public interface HubDeliveryManagerQueryDslRepository {
             String orderBy,
             PageRequest pageRequest
     );
+
 }

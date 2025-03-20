@@ -40,4 +40,9 @@ public class ConsumerDeliveryManagerRepositoryImpl implements ConsumerDeliveryMa
     ) {
         return consumerDeliveryManagerQueryDslRepository.search(sort,q,orderBy,pageRequest);
     }
+
+    @Override
+    public Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberDesc() {
+        return consumerDeliveryManagerJpaRepository.findFirstByOrderByAssignNumberDesc();
+    }
 }

@@ -20,4 +20,6 @@ public interface ConsumerDeliveryManagerRepository {
             String orderBy,
             PageRequest pageRequest
     );
+
+    Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberDesc();
 }

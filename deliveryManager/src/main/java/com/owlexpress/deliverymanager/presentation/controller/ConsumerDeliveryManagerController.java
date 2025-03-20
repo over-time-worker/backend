@@ -2,6 +2,8 @@ package com.owlexpress.deliverymanager.presentation.controller;
 
 import com.owlexpress.deliverymanager.application.usecase.ConsumerDeliveryManagerUsecase;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException;
+import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.HubNotFoundException;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateConsumerDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateConsumerDeliveryManagerRequestDto;
@@ -24,7 +26,7 @@ public class ConsumerDeliveryManagerController {
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
            @RequestBody CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
-    ) {
+    ) throws HubNotFoundException {
         consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
