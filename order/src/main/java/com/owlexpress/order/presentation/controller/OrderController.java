@@ -53,9 +53,9 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
     }
 
-    @GetMapping("/{orderId}")
+    @GetMapping("/{order_id}")
     public ResponseEntity<CommonDto<GetOrderResponseDto>> findOrder(
-        @PathVariable("orderId") UUID orderId
+        @PathVariable("order_id") UUID orderId
     ){
         GetOrderResponseDto response = orderService.findOrder(orderId);
 
@@ -99,9 +99,9 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(commonDto);
     }
 
-    @PatchMapping("/{orderId}")
+    @PatchMapping("/{order_id}")
     public ResponseEntity<CommonDto<Void>> update(
-            @PathVariable("orderId") UUID orderId,
+            @PathVariable("order_id") UUID orderId,
             @RequestBody UpdateOrderRequestDto requestDto
     ){
         Long userId = 1L;
@@ -119,9 +119,9 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
     }
 
-    @DeleteMapping("/{orderId}")
+    @DeleteMapping("/{order_id}")
     public ResponseEntity<CommonDto<Void>> delete(
-            @PathVariable("orderId") UUID orderId
+            @PathVariable("order_id") UUID orderId
     ){
         Long userId = 1L;
 
