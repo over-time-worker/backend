@@ -10,16 +10,17 @@ import org.springframework.util.StringUtils;
 public class PageUtil {
 
     public static Pageable getPageable(int page, int size, String sort, String orderBy) {
+        Sort sortAndOrderBy = Sort.by(SortBy.getOrderBy(sort).getSortBy());
 
-        Sort sortAndOrderBy = Sort.by(SortBy.getOrderBy(sort).getSortBy()).ascending();
         if(StringUtils.hasText(orderBy)) {
             if(orderBy.equalsIgnoreCase("ASC")) {
-                sortAndOrderBy.ascending();
+                sortAndOrderBy = sortAndOrderBy.ascending();
             } else {
-                sortAndOrderBy.descending();
+                sortAndOrderBy = sortAndOrderBy.descending();
             }
+        } else {
+            sortAndOrderBy = sortAndOrderBy.ascending();
         }
-
         return PageRequest.of(page - 1 , getSize(size), sortAndOrderBy);
     }
 
