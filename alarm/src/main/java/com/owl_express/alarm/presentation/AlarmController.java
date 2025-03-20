@@ -39,7 +39,7 @@ public class AlarmController {
 
     @PostMapping("/hub-delivery")
     public ResponseEntity<CommonDto<Void>> createAlarmForHubDeliver(
-            @Valid @RequestBody AlarmCreateRequestDto alarmCreateRequestDto
+            @RequestBody AlarmCreateRequestDto alarmCreateRequestDto
     ) {
         alarmService.createAlarmForHubDeliver(alarmCreateRequestDto);
 
@@ -54,7 +54,7 @@ public class AlarmController {
 
     @PostMapping("/company-delivery")
     public ResponseEntity<CommonDto<AlarmCreateResponseDto>> createAlarmForCompanyDeliver(
-            @Valid @RequestBody AlarmCreateRequestDto alarmCreateRequestDto
+            @RequestBody AlarmCreateRequestDto alarmCreateRequestDto
     ) {
         AlarmCreateResponseDto response = alarmService.createAlarmForCompanyDeliver(alarmCreateRequestDto);
 
