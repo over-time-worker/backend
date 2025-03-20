@@ -21,5 +21,7 @@ public interface HubJpaRepository extends JpaRepository<Hub, UUID> {
     LEFT JOIN FETCH si.endHub
     """)    List<Hub> findAllWithIntervals();
 
-    List<Hub> findAllByParentHubIdIsNull();
+    List<Hub> findAllByParentHubIsNull();
+
+    List<Hub> findAllByParentHub(Hub parentHub);
 }

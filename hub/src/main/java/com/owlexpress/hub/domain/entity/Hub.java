@@ -4,10 +4,7 @@ import com.owlexpress.hub.common.BaseEntity;
 import com.owlexpress.hub.common.util.GeoUtil;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLRestriction;
 import org.locationtech.jts.geom.Point;
@@ -17,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "p_hub")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,8 +46,9 @@ public class Hub extends BaseEntity {
     @Column(name = "user_phone_number", length = 15)
     private String userPhoneNumber;
 
-    @Column(name = "parent_id")
-    private UUID parentHubId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Hub parentHub;
 
     @OneToMany(mappedBy = "hub", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private List<HubProduct> hubProduct = new ArrayList<>();
@@ -69,7 +68,7 @@ public class Hub extends BaseEntity {
             Long userId,
             String userName,
             String userPhoneNumber,
-            UUID parentHubId
+            Hub parentHub
     ) {
         this.hubId = hubId;
         this.name = name;
@@ -78,7 +77,7 @@ public class Hub extends BaseEntity {
         this.userId = userId;
         this.userName = userName;
         this.userPhoneNumber = userPhoneNumber;
-        this.parentHubId = parentHubId;
+        this.parentHub = parentHub;
     }
 
     public void update(HubUpdateRequestDto requestDto) {
@@ -98,7 +97,7 @@ public class Hub extends BaseEntity {
 
         this.userPhoneNumber = requestDto.getUserPhoneNumber();
 
-        this.parentHubId = requestDto.getParentId();
+        this.parentHub = Hub.builder().hubId(requestDto.getHubId()).build();
     }
 
 }

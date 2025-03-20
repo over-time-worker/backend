@@ -31,4 +31,6 @@ public interface HubService {
     void update(HubProductUpdateRequestDto requestDto);
 
     HubProductFindResponseDto findHubProduct(UUID hubProductId);
+
+    void delete(UUID hubId);
 }

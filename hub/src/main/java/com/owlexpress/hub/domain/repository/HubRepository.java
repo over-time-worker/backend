@@ -31,4 +31,6 @@ public interface HubRepository {
     Optional<Hub> findById(UUID startHubId);
 
     List<Hub> findAllCentralHub();
+
+    List<Hub> findAllByParentHub(Hub parentHubId);
 }
