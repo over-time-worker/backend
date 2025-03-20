@@ -1,0 +1,52 @@
+package com.owlexpress.deliverymanager.domain.dto.response;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class HubFindResponseDto {
+
+    private UUID hubId;
+
+    private String name;
+
+    private String hubAddress;
+
+    private Double latitude;
+    private Double longitude;
+
+    private Long managerId;
+
+    private String hubManagerName;
+    private String hubManagerPhoneNumber;
+    private UUID parentHubId;
+
+    @Builder
+    public HubFindResponseDto(
+            UUID hubId,
+            String name,
+            String hubAddress,
+            Double latitude,
+            Double longitude,
+            Long managerId,
+            String hubManagerName,
+            String hubManagerPhoneNumber,
+            UUID parentHubId
+    ) {
+        this.hubId = hubId;
+        this.name = name;
+        this.hubAddress = hubAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.managerId = managerId;
+        this.hubManagerName = hubManagerName;
+        this.hubManagerPhoneNumber = hubManagerPhoneNumber;
+        this.parentHubId = parentHubId;
+    }
+}

@@ -1,10 +1,12 @@
 package com.owlexpress.hub.infrastructure.repository;
 
+import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +79,11 @@ public class HubRepositoryImpl implements HubRepository {
     @Override
     public List<Hub> findAllByParentHub(Hub parentHubId) {
         return hubJpaRepository.findAllByParentHub(parentHubId);
+    }
+
+    @Override
+    public List<HubProductStockResponseDto> findHubProductStocks(List<UUID> products) {
+        return hubJpaRepository.findProductsWithStock(products);
     }
 
 }

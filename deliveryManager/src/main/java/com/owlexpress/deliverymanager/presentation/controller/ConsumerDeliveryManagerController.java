@@ -1,6 +1,9 @@
 package com.owlexpress.deliverymanager.presentation.controller;
 
 import com.owlexpress.deliverymanager.application.usecase.ConsumerDeliveryManagerUsecase;
+import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException;
+import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.HubNotFoundException;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.CreateConsumerDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateConsumerDeliveryManagerRequestDto;
@@ -22,10 +25,9 @@ public class ConsumerDeliveryManagerController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
-    ) {
-
-        consumerDeliveryManagerUsecase.create(consumerDeliveryManagerUsecase);
+           @RequestBody CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
+    ) throws HubNotFoundException {
+        consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.CREATED)
@@ -40,7 +42,7 @@ public class ConsumerDeliveryManagerController {
     public ResponseEntity<CommonDto<Void>> update(
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId,
             @RequestBody UpdateConsumerDeliveryManagerRequestDto updateConsumerDeliveryManagerRequestDto
-    ) {
+    ) throws ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException {
         consumerDeliveryManagerUsecase.update(updateConsumerDeliveryManagerRequestDto, consumerDeliveryManagerId);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -93,7 +95,7 @@ public class ConsumerDeliveryManagerController {
     @DeleteMapping("/{consumerDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> delete(
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId
-    ){
+    ) throws ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException {
 
         consumerDeliveryManagerUsecase.delete(consumerDeliveryManagerId);
         CommonDto<Void> commonDto = CommonDto.<Void>builder()

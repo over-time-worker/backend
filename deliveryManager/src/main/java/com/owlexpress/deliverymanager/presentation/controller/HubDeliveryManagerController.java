@@ -1,8 +1,9 @@
 package com.owlexpress.deliverymanager.presentation.controller;
 
 import com.owlexpress.deliverymanager.application.usecase.HubDeliveryManagerUsecase;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
-import com.owlexpress.deliverymanager.presentation.dto.request.CreateConsumerDeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.presentation.dto.request.CreateHubDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateHubDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindHubDeliveryResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,9 @@ public class HubDeliveryManagerController {
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
             @RequestHeader(name = "X-User-Passport") String passport,
-            CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
+            @RequestBody CreateHubDeliveryManagerRequestDto createHubDeliveryManagerRequestDto
     ) {
-        hubDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto);
+        hubDeliveryManagerUsecase.create(createHubDeliveryManagerRequestDto);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.CREATED)
@@ -39,9 +40,9 @@ public class HubDeliveryManagerController {
     @PutMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> update(
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId,
-            UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
-    ) {
-        hubDeliveryManagerUsecase.update(updateHubDeliveryManagerRequestDto);
+            @RequestBody  UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
+    ) throws HubDeliveryManagerException.HubDuplicateAssignNumber {
+        hubDeliveryManagerUsecase.update(updateHubDeliveryManagerRequestDto,hubDeliveryManagerId);
 
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -58,7 +59,7 @@ public class HubDeliveryManagerController {
             @PathVariable("hubDeliveryManagerId") UUID consumerDeliveryManagerId
     ){
 
-        FindHubDeliveryResponseDto findHubDeliveryResponseDto = hubDeliveryManagerUsecase.get(consumerDeliveryManagerId);
+        FindHubDeliveryResponseDto findHubDeliveryResponseDto = hubDeliveryManagerUsecase.find(consumerDeliveryManagerId);
 
 
         CommonDto<FindHubDeliveryResponseDto> commonDto = CommonDto.<FindHubDeliveryResponseDto>builder()
@@ -95,7 +96,7 @@ public class HubDeliveryManagerController {
     @DeleteMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> delete(
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId
-    ){
+    ) throws HubDeliveryManagerException.HubIsNotAvailableStatusException {
         hubDeliveryManagerUsecase.delete(hubDeliveryManagerId);
 
 
