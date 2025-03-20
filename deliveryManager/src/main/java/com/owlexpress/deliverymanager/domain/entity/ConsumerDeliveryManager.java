@@ -1,6 +1,6 @@
 package com.owlexpress.deliverymanager.domain.entity;
 
-import com.owlexpress.deliverymanager.domain.PlatformType;
+import com.owlexpress.deliverymanager.domain.constant.PlatformType;
 import com.owlexpress.deliverymanager.infrastructure.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -40,10 +40,11 @@ public class ConsumerDeliveryManager extends BaseEntity {
     private Integer assignNumber;
 
     @Column(name = "platform_type")
+    @Enumerated(EnumType.STRING)
     private PlatformType platformType;
 
     @Column(name = "channel_id")
-    private Long channelId;
+    private UUID channelId;
 
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;
@@ -56,7 +57,7 @@ public class ConsumerDeliveryManager extends BaseEntity {
             String userName,
             String userPhoneNumber,
             PlatformType platformType,
-            Long channelId,
+            UUID channelId,
             Boolean isAvaliable
     ) {
         this.consumerDeliveryManagerId = consumerDeliveryManagerId;

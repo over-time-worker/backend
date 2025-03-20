@@ -26,19 +26,37 @@ VALUES
     ('99999999-9999-9999-9999-999999999997', '경상북도 허브', '경상북도 포항시', ST_GeomFromText('POINT(129.3634 36.0190)', 4326), 1017, '한채영', '010-7777-9999', '33333333-3333-3333-3333-333333333333', NOW(), NOW()),
     ('99999999-9999-9999-9999-999999999996', '경상남도 허브', '경상남도 창원시', ST_GeomFromText('POINT(128.6811 35.2278)', 4326), 1018, '노지훈', '010-8888-0000', '33333333-3333-3333-3333-333333333333', NOW(), NOW())
     ON CONFLICT (hub_id) DO NOTHING;
--- #
--- # -- 중앙 허브 (Central Hubs) 더미 데이터 (3개)
--- # INSERT INTO p_hub (hub_id, name, hub_address, location, user_id, user_name, user_phone_number, parent_id, created_at, modified_at)
--- # VALUES
--- #     ('11111111-1111-1111-1111-111111111111', '서울 중앙 허브', '서울특별시 강남구', ST_GeomFromText('POINT(127.0276 37.4979)', 4326), 1001, '김철수', '010-1111-2222', NULL, NOW(), NOW()),
--- #     ('22222222-2222-2222-2222-222222222222', '부산 중앙 허브', '부산광역시 해운대구', ST_GeomFromText('POINT(129.1580 35.1605)', 4326), 1002, '이영희', '010-2222-3333', NULL, NOW(), NOW()),
--- #     ('33333333-3333-3333-3333-333333333333', '대구 중앙 허브', '대구광역시 수성구', ST_GeomFromText('POINT(128.6130 35.8574)', 4326), 1003, '박민수', '010-3333-4444', NULL, NOW(), NOW())
--- # ON CONFLICT (hub_id) DO NOTHING;
--- #
--- # -- 스포크 허브 (Spoke Hubs) 더미 데이터 (3개)
--- # INSERT INTO p_hub (hub_id, name, hub_address, location, user_id, user_name, user_phone_number, parent_id, created_at, modified_at)
--- # VALUES
--- #     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '경기남부 허브', '경기도 수원시', ST_GeomFromText('POINT(127.0286 37.2636)', 4326), 1011, '김민재', '010-1111-3333', '11111111-1111-1111-1111-111111111111', NOW(), NOW()),
--- #     ('dddddddd-dddd-dddd-dddd-dddddddddddd', '충청남도 허브', '충청남도 천안시', ST_GeomFromText('POINT(127.1190 36.8151)', 4326), 1013, '박지훈', '010-3333-5555', '33333333-3333-3333-3333-333333333333', NOW(), NOW()),
--- #     ('ffffffff-ffff-ffff-ffff-ffffffffffff', '전라북도 허브', '전라북도 전주시', ST_GeomFromText('POINT(127.1500 35.8242)', 4326), 1015, '정하영', '010-5555-7777', '22222222-2222-2222-2222-222222222222', NOW(), NOW())
--- # ON CONFLICT (hub_id) DO NOTHING;
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; -- generate_v4 사용 가능
+INSERT INTO p_hub_product (hub_product_id, hub_id, producer_id, producer_name, product_id, product_name, product_type, product_stock, created_at, modified_at)
+
+VALUES
+    -- 서울 중앙 허브 상품
+    (uuid_generate_v4(), '11111111-1111-1111-1111-111111111111', uuid_generate_v4(), '삼성전자', uuid_generate_v4(), '갤럭시 S24', 'NORMAL', 100, NOW(), NOW()),
+    (uuid_generate_v4(), '11111111-1111-1111-1111-111111111111', uuid_generate_v4(), 'LG전자', uuid_generate_v4(), 'LG 냉장고', 'NORMAL', 50, NOW(), NOW()),
+
+    -- 부산 중앙 허브 상품
+    (uuid_generate_v4(), '22222222-2222-2222-2222-222222222222', uuid_generate_v4(), '농심', uuid_generate_v4(), '신라면', 'NORMAL', 500, NOW(), NOW()),
+    (uuid_generate_v4(), '22222222-2222-2222-2222-222222222222', uuid_generate_v4(), '오뚜기', uuid_generate_v4(), '3분 카레', 'NORMAL', 300, NOW(), NOW()),
+
+    -- 대구 중앙 허브 상품
+    (uuid_generate_v4(), '33333333-3333-3333-3333-333333333333', uuid_generate_v4(), '한샘', uuid_generate_v4(), '책상 세트', 'NORMAL', 80, NOW(), NOW()),
+
+    -- 광주 중앙 허브 상품
+    (uuid_generate_v4(), '55555555-5555-5555-5555-555555555555', uuid_generate_v4(), '코웨이', uuid_generate_v4(), '정수기', 'NORMAL', 120, NOW(), NOW()),
+
+    -- 대전 중앙 허브 상품
+    (uuid_generate_v4(), '66666666-6666-6666-6666-666666666666', uuid_generate_v4(), 'CJ제일제당', uuid_generate_v4(), '햇반', 'FRESH', 700, NOW(), NOW()),
+
+    -- 스포크 허브 상품 (경기남부 허브)
+    (uuid_generate_v4(), 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', uuid_generate_v4(), '네스프레소', uuid_generate_v4(), '커피머신', 'NORMAL', 30, NOW(), NOW()),
+
+    -- 스포크 허브 상품 (충청남도 허브)
+    (uuid_generate_v4(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', uuid_generate_v4(), '매일유업', uuid_generate_v4(), '우유', 'NORMAL', 400, NOW(), NOW()),
+
+    -- 스포크 허브 상품 (전라북도 허브)
+    (uuid_generate_v4(), 'ffffffff-ffff-ffff-ffff-ffffffffffff', uuid_generate_v4(), '이케아', uuid_generate_v4(), '책장', 'NORMAL', 50, NOW(), NOW()),
+
+    -- 스포크 허브 상품 (경상남도 허브)
+    (uuid_generate_v4(), '99999999-9999-9999-9999-999999999996', uuid_generate_v4(), '쿠쿠', uuid_generate_v4(), '전기밥솥', 'NORMAL', 60, NOW(), NOW())
+ON CONFLICT (hub_product_id) DO NOTHING;

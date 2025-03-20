@@ -1,6 +1,6 @@
 package com.owlexpress.deliverymanager.presentation.dto.request;
 
-import com.owlexpress.deliverymanager.domain.PlatformType;
+import com.owlexpress.deliverymanager.domain.constant.PlatformType;
 import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ public class CreateConsumerDeliveryManagerRequestDto {
     private String user_name;
     private String user_phone_number;
     private PlatformType platform_type;
-    private Long channelId;
+    private UUID channelId;
     private UUID hubId;
 
     @Builder
@@ -24,7 +24,7 @@ public class CreateConsumerDeliveryManagerRequestDto {
             String user_name,
             String user_phone_number,
             PlatformType platform_type,
-            Long channelId,
+            UUID channelId,
             UUID hubId
     ) {
         this.userId = userId;
@@ -45,7 +45,7 @@ public class CreateConsumerDeliveryManagerRequestDto {
                 .userName(createConsumerDeliveryManagerRequestDto.getUser_name())
                                .userPhoneNumber(createConsumerDeliveryManagerRequestDto.getUser_phone_number())
                 .platformType(createConsumerDeliveryManagerRequestDto.getPlatform_type())
-                .channelId(createConsumerDeliveryManagerRequestDto.channelId)
+                .channelId(createConsumerDeliveryManagerRequestDto.getChannelId())
                 .build();
 
     }

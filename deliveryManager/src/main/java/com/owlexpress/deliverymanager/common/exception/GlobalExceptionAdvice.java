@@ -4,10 +4,7 @@ import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerEx
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotFoundException;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException;
-import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDeliveryManagerNameDuplicateException;
-import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDeliveryManagerNotFoundException;
-import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubDuplicateAssignNumber;
-import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.HubIsNotAvailableStatusException;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.*;
 import com.owlexpress.deliverymanager.infrastructure.CommonDto;
 import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
@@ -137,6 +134,18 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(ConsumerDeliveryManagerNotAvailableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleNotAvailableException(ConsumerDeliveryManagerNotAvailableException e) {
+        log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+    @ExceptionHandler(ConsumerEmptyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleConsumerEmptyException(ConsumerEmptyException e) {
         log.error(PRODUCER_NAME_DUPLICATE_EXCEPTION, e.getMessage(), e);
 
         return CommonDto.builder()
