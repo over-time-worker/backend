@@ -6,15 +6,12 @@ import static com.owlexpress.order.domain.entity.QOrderProduct.orderProduct;
 import com.owlexpress.order.common.util.CommonUtil;
 import com.owlexpress.order.common.util.QueryUtil;
 import com.owlexpress.order.domain.entity.Order;
+import com.owlexpress.order.domain.entity.OrderProduct;
 import com.owlexpress.order.presentation.dto.response.GetOrderProductResponseDto;
 import com.owlexpress.order.presentation.dto.response.OrderSearchResponseDto;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,10 +27,10 @@ public class OrderQueryDSLRepositoryImpl implements OrderQueryDSLRepository {
 
     @Override
     public Page<OrderSearchResponseDto> search(Pageable pageable, String startDate, String endDate) {
-
-        // 1. 주문 엔티티 페이징 조회
+        // 1. 주문 + 주문 상품 조인 조회
         List<Order> orders = jpaQueryFactory
                 .selectFrom(order)
+                .leftJoin(order.orderProducts, orderProduct).fetchJoin()
                 .where(
                         order.deletedAt.isNull(),
                         createDateCondition(startDate, endDate)
@@ -43,38 +40,12 @@ public class OrderQueryDSLRepositoryImpl implements OrderQueryDSLRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 2. 주문 ID 목록 추출
-        List<UUID> orderIds = orders.stream()
-                .map(Order::getOrderId)
-                .collect(Collectors.toList());
-
-        // 3. 주문 상품 조회 (In 절 사용)
-        Map<UUID, List<GetOrderProductResponseDto>> orderProductMap = jpaQueryFactory
-                .select(
-                        Projections.constructor(
-                            GetOrderProductResponseDto.class,
-                            orderProduct.orderProductId,
-                            orderProduct.orderId,
-                            orderProduct.productId,
-                            orderProduct.quantity,
-                            orderProduct.productName,
-                            orderProduct.productType,
-                            orderProduct.amount,
-                            orderProduct.price
-                        )
-                )
-                .from(orderProduct)
-                .where(orderProduct.orderId.in(orderIds))
-                .fetch()
-                .stream()
-                .collect(Collectors.groupingBy(GetOrderProductResponseDto::getOrderId));
-
-        // 4. DTO 변환
+        // 2. DTO 변환
         List<OrderSearchResponseDto> content = orders.stream()
-                .map(order -> convertToDto(order, orderProductMap))
+                .map(order -> convertToDto(order, order.getOrderProducts()))
                 .collect(Collectors.toList());
 
-        // 5. 전체 개수 조회
+        // 3. 전체 개수 조회
         long total = jpaQueryFactory
                 .select(order.count())
                 .from(order)
@@ -87,10 +58,7 @@ public class OrderQueryDSLRepositoryImpl implements OrderQueryDSLRepository {
         return new PageImpl<>(content, pageable, total);
     }
 
-    private OrderSearchResponseDto convertToDto(
-            Order order,
-            Map<UUID, List<GetOrderProductResponseDto>> orderProductMap
-    ) {
+    private OrderSearchResponseDto convertToDto(Order order, List<OrderProduct> orderProducts) {
         return OrderSearchResponseDto.builder()
                 .orderId(order.getOrderId())
                 .userId(order.getUserId())
@@ -105,10 +73,25 @@ public class OrderQueryDSLRepositoryImpl implements OrderQueryDSLRepository {
                 .orderStatus(order.getOrderStatus())
                 .productInfo(order.getProductInfo())
                 .orderProducts(
-                        orderProductMap.getOrDefault(order.getOrderId(), Collections.emptyList())
+                        orderProducts.stream()
+                                .map(this::convertToProductDto) // OrderProduct → GetOrderProductResponseDto 변환
+                                .collect(Collectors.toList())
                 )
                 .createdAt(order.getCreatedAt())
                 .modifiedAt(order.getModifiedAt())
+                .build();
+    }
+
+    private GetOrderProductResponseDto convertToProductDto(OrderProduct orderProduct) {
+        return GetOrderProductResponseDto.builder()
+                .orderProductId(orderProduct.getOrderProductId())
+                .orderId(orderProduct.getOrderId())
+                .productId(orderProduct.getProductId())
+                .quantity(orderProduct.getQuantity())
+                .productName(orderProduct.getProductName())
+                .productType(orderProduct.getProductType())
+                .amount(orderProduct.getAmount())
+                .price(orderProduct.getPrice())
                 .build();
     }
 
