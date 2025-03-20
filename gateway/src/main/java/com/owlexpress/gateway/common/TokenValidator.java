@@ -33,9 +33,8 @@ public class TokenValidator {
      * 토큰 상태 검증 메서드
      *
      * @param token 전달받은 JWT 토큰
-     * @return - IS_VALID : 액세스 토큰 정상, 사용 가능 <br>
-     * - IS_EXPIRED : 액세스 토큰 만료됨, 재발급 필요 <br>
-     * - IS_NOT_VALID : 액세스 토큰 사용 불가능, 재인증 필요
+     * @return - IS_VALID : 액세스 토큰 정상, 사용 가능 <br> - IS_EXPIRED : 액세스 토큰 만료됨, 재발급 필요 <br> -
+     * IS_NOT_VALID : 액세스 토큰 사용 불가능, 재인증 필요
      */
     public TokenStatus validateAccessToken(String token) {
         try {
@@ -71,9 +70,9 @@ public class TokenValidator {
         }
     }
 
-    // userUUID 추출
-    public String getUserId(String accessToken) {
-        return parseClaims(accessToken).getSubject();
+    // userId 추출
+    public Long getUserId(String accessToken) {
+        return Long.valueOf(parseClaims(accessToken).getSubject());
     }
 
     /**
