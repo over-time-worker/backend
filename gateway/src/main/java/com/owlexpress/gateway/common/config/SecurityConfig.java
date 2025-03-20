@@ -54,6 +54,8 @@ public class SecurityConfig {
         managerDeliveryRoute(http);
         // 알림
         manageAlarmRoute(http);
+        // 허브 간 이동 정보 관리
+        manageHubIntervalInfoRoute(http);
         // 주문
         manageOrderRoute(http);
         // 허브 상품
@@ -68,8 +70,6 @@ public class SecurityConfig {
         manageConsumerRoute(http);
         // 장바구니
         manageCartRoute(http);
-        // 허브 간 이동 정보 관리
-        manageHubIntervalInfoRoute(http);
 
         // auth 경로는 항상 허용
         http.authorizeExchange(exchanges -> exchanges
@@ -82,7 +82,7 @@ public class SecurityConfig {
 
     private static void manageHubIntervalInfoRoute(ServerHttpSecurity http) {
         http.authorizeExchange(exchanges -> exchanges
-                .pathMatchers(HttpMethod.GET, "api/hub-interval-info/**").permitAll()
+                .pathMatchers("api/hub-interval-info/**").permitAll()
         );
     }
 
