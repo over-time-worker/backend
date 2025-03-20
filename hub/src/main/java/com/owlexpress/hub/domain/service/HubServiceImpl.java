@@ -76,8 +76,8 @@ public class HubServiceImpl implements HubService {
         if (!ALLOWED_SIZES.contains(size)) {
             size = DEFAULT_SIZE;
         }
-
-        PageRequest pageRequest = PageRequest.of(page, size);
+        Sort sortAndOrderBy = Sort.by(direction, orderBy); // direction 활용 추가
+        PageRequest pageRequest = PageRequest.of(page, size,sortAndOrderBy);
 
         return hubRepository.searchHub(pageRequest, q, sort, orderBy);
     }
@@ -103,8 +103,8 @@ public class HubServiceImpl implements HubService {
         if (!ALLOWED_SIZES.contains(size)) {
             size = DEFAULT_SIZE;
         }
-
-        PageRequest pageRequest = PageRequest.of(page, size);
+        Sort sortAndOrderBy = Sort.by(direction, orderBy); // direction 활용 추가
+        PageRequest pageRequest = PageRequest.of(page, size,sortAndOrderBy);
         return hubRepository.searchHubProduct(pageRequest, q, orderBy, sort);
     }
 
