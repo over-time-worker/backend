@@ -1,7 +1,5 @@
 package com.owlexpress.hub.application;
 
-import com.owlexpress.hub.application.dto.response.OrderSearchResponseDto;
-import com.owlexpress.hub.application.dto.response.OrderSearchResponseDto.OrderProduct;
 import com.owlexpress.hub.common.HubHelper;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.domain.entity.Hub;
@@ -10,14 +8,12 @@ import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.infrastructure.client.OrderClient;
 import com.owlexpress.hub.infrastructure.client.ProductClient;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
-import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

@@ -5,15 +5,15 @@ import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -63,4 +63,15 @@ public class HubRepositoryImpl implements HubRepository {
     public List<Hub> findAllWithIntervals() {
         return hubJpaRepository.findAllWithIntervals();
     }
+
+    @Override
+    public Optional<Hub> findById(UUID startHubId) {
+        return hubJpaRepository.findById(startHubId);
+    }
+
+    @Override
+    public List<Hub> findAllCentralHub() {
+        return hubJpaRepository.findAllByParentHubIdIsNull();
+    }
+
 }
