@@ -20,13 +20,13 @@ public class HubDeliveryManagerException extends RuntimeException {
         }
     }
 
-    public static class IsNotAvailableStatusException extends Throwable {
-        public IsNotAvailableStatusException(String isNotAvailable) {
+    public static class HubIsNotAvailableStatusException extends Throwable {
+        public HubIsNotAvailableStatusException(String isNotAvailable) {
         }
     }
 
-    public static class DuplicateAssignNumber extends Throwable {
-        public DuplicateAssignNumber(String duplicateAssignNumber) {
+    public static class HubDuplicateAssignNumber extends Throwable {
+        public HubDuplicateAssignNumber(String duplicateAssignNumber) {
         }
     }
 }

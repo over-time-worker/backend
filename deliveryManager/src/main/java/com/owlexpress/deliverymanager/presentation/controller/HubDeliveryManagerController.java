@@ -41,7 +41,7 @@ public class HubDeliveryManagerController {
     public ResponseEntity<CommonDto<Void>> update(
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId,
             UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
-    ) throws HubDeliveryManagerException.DuplicateAssignNumber {
+    ) throws HubDeliveryManagerException.HubDuplicateAssignNumber {
         hubDeliveryManagerUsecase.update(updateHubDeliveryManagerRequestDto,hubDeliveryManagerId);
 
 
@@ -96,7 +96,7 @@ public class HubDeliveryManagerController {
     @DeleteMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> delete(
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId
-    ) throws HubDeliveryManagerException.IsNotAvailableStatusException {
+    ) throws HubDeliveryManagerException.HubIsNotAvailableStatusException {
         hubDeliveryManagerUsecase.delete(hubDeliveryManagerId);
 
 

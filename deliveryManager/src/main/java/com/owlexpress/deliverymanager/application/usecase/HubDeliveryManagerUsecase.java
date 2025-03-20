@@ -35,12 +35,12 @@ public class HubDeliveryManagerUsecase {
     public void update(
             UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto,
             UUID hubDeliveryManagerId
-    ) throws HubDeliveryManagerException.DuplicateAssignNumber {
+    ) throws HubDeliveryManagerException.HubDuplicateAssignNumber {
         HubDeliveryManager hubDeliveryManager = getHubDeliveryManager(hubDeliveryManagerId);
         if(!hubDeliveryManagerRepository.isExistAssign_number(updateHubDeliveryManagerRequestDto.getAssign_number())){
             updateHubDeliveryManagerRequestDto.update(hubDeliveryManager);
         }else{
-            throw new HubDeliveryManagerException.DuplicateAssignNumber(ExceptionMessage.DUPLICATE_ASSIGN_NUMBER);
+            throw new HubDeliveryManagerException.HubDuplicateAssignNumber(ExceptionMessage.DUPLICATE_ASSIGN_NUMBER);
         }
     }
 
@@ -58,10 +58,10 @@ public class HubDeliveryManagerUsecase {
         return null;
     }
 
-    public void delete(UUID consumerDeliveryManagerId) throws HubDeliveryManagerException.IsNotAvailableStatusException {
+    public void delete(UUID consumerDeliveryManagerId) throws HubDeliveryManagerException.HubIsNotAvailableStatusException {
         HubDeliveryManager hubDeliveryManager = getHubDeliveryManager(consumerDeliveryManagerId);
         if (!hubDeliveryManager.getIsAvaliable()) {
-            throw new HubDeliveryManagerException.IsNotAvailableStatusException(ExceptionMessage.IS_NOT_AVAILABLE);
+            throw new HubDeliveryManagerException.HubIsNotAvailableStatusException(ExceptionMessage.IS_NOT_AVAILABLE);
         }
         hubDeliveryManager.softDeleteData(1L);
     }

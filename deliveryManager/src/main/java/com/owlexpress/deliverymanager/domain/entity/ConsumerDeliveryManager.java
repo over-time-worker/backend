@@ -1,5 +1,7 @@
 package com.owlexpress.deliverymanager.domain.entity;
 
+import com.owlexpress.deliverymanager.domain.PlatformType;
+import com.owlexpress.deliverymanager.infrastructure.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -13,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_consumer_delivery_manager")
 @SQLRestriction("deleted_at is null")
-public class ConsumerDeliveryManager {
+public class ConsumerDeliveryManager extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,10 +37,10 @@ public class ConsumerDeliveryManager {
     private String userPhoneNumber;
 
     @Column(name = "assign_number")
-    private Long assignNumber;
+    private Integer assignNumber;
 
     @Column(name = "platform_type")
-    private String platformType;
+    private PlatformType platformType;
 
     @Column(name = "channel_id")
     private Long channelId;
@@ -50,10 +52,10 @@ public class ConsumerDeliveryManager {
     public ConsumerDeliveryManager(
             UUID consumerDeliveryManagerId,
             Long userId,
-            Long assignNumber,
+            Integer assignNumber,
             String userName,
             String userPhoneNumber,
-            String platformType,
+            PlatformType platformType,
             Long channelId,
             Boolean isAvaliable
     ) {
