@@ -19,6 +19,7 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(
             ServerHttpSecurity http,
@@ -68,28 +69,20 @@ public class SecurityConfig {
         // 장바구니
         manageCartRoute(http);
         // 허브 간 이동 정보 관리
-        manageHubDistanceRoute(http);
+        manageHubIntervalInfoRoute(http);
 
         // auth 경로는 항상 허용
         http.authorizeExchange(exchanges -> exchanges
                 .pathMatchers("api/auth/**").permitAll()
-                .anyExchange().authenticated()
+                .anyExchange().permitAll() // 임시 테스트용으로 풀기
         );
 
         return http.build();
     }
 
-    private static void manageHubDistanceRoute(ServerHttpSecurity http) {
+    private static void manageHubIntervalInfoRoute(ServerHttpSecurity http) {
         http.authorizeExchange(exchanges -> exchanges
-                .pathMatchers(HttpMethod.GET, "api/hub-distance/**").permitAll()
-                .pathMatchers("api/hub-distance/compute")
-                .hasAnyRole(
-                        Role.MASTER.getName(),
-                        Role.HUB_MANAGER.getName(),
-                        Role.HUB_DELIVERY_MANAGER.getName()
-                )
-                .pathMatchers("/api/hub-distance/**")
-                .hasRole(Role.MASTER.getName())
+                .pathMatchers(HttpMethod.GET, "api/hub-interval-info/**").permitAll()
         );
     }
 
