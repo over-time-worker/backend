@@ -85,6 +85,7 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
         List<HubProduct> hubProducts = queryFactory
                 .selectDistinct(hubProduct)
                 .from(hub)
+                .orderBy(orderSpecifier)
                 .join(hub.hubProduct, hubProduct)
                 .where(builder) // 특정 이름의 제품이 있는 허브만 조회
                 .fetch();
