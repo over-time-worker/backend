@@ -32,7 +32,7 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
                 // 실제 검증 후 인증 객체 생성
                 .map(jwt -> {
                     Role userRole = tokenValidator.getUserRole(jwt);
-                    String userId = tokenValidator.getUserId(jwt);
+                    Long userId = tokenValidator.getUserId(jwt);
                     return new UsernamePasswordAuthenticationToken(
                             userId,
                             authentication.getCredentials(),
