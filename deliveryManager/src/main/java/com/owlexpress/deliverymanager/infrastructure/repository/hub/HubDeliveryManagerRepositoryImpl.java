@@ -40,4 +40,9 @@ public class HubDeliveryManagerRepositoryImpl implements HubDeliveryManagerRepos
     ) {
         return hubDeliveryManagerQueryDslRepository.searchProducer(sort, q, orderBy, pageRequest);
     }
+
+    @Override
+    public Optional<HubDeliveryManager> findFirstByOrderByAssignNumberDesc() {
+        return hubDeliveryManagerJpaRepository.findFirstByOrderByAssignNumberDesc();
+    }
 }

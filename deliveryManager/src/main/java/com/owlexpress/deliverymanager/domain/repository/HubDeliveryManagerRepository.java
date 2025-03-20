@@ -20,4 +20,6 @@ public interface HubDeliveryManagerRepository {
             String orderBy,
             PageRequest pageRequest
     );
+
+    Optional<HubDeliveryManager> findFirstByOrderByAssignNumberDesc();
 }

@@ -23,4 +23,11 @@ public class ConsumerDeliveryManagerException extends RuntimeException {
         public ConsumerDeliveryManagerNotAvailableException(String message) {
         }
     }
+
+
+
+    public static class HubNotFoundException extends Throwable {
+        public HubNotFoundException(String message) {
+        }
+    }
 }

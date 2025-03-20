@@ -2,6 +2,7 @@ package com.owlexpress.deliverymanager.application.usecase;
 
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException;
 import com.owlexpress.deliverymanager.common.exception.ExceptionMessage;
+import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
 import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import com.owlexpress.deliverymanager.domain.repository.ConsumerDeliveryManagerRepository;
 import com.owlexpress.deliverymanager.infrastructure.config.DeliveryManagerSearchConfig;
@@ -21,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.*;
 import static com.owlexpress.deliverymanager.common.exception.ExceptionMessage.Manager_NOT_FOUND_MESSAGE;
 
 @Service
@@ -31,9 +33,21 @@ public class ConsumerDeliveryManagerUsecase {
     private final HubClient hubClient;
 
     @Transactional
-    public void create(CreateConsumerDeliveryManagerRequestDto consumerDeliveryManagerUsecase) {
+    public void create(CreateConsumerDeliveryManagerRequestDto consumerDeliveryManagerUsecase) throws HubNotFoundException {
+
+        // 허브가 존재하는지 확인 (존재하지 않으면 예외 발생)
+        boolean hubExists = Optional.ofNullable(hubClient.find(consumerDeliveryManagerUsecase.getHubId()))
+                                    .isPresent();
+        if (!hubExists) {
+            throw new HubNotFoundException(ExceptionMessage.HUB_NOT_FOUND);
+        }
+
+        int lastAssignNumber = consumerDeliveryManagerRepository.findFirstByOrderByAssignNumberDesc()
+                                                                .map(ConsumerDeliveryManager::getAssignNumber)  // 가장 큰 assignNumber 조회
+                                                                .orElse(0);
+        int newAssignNumber = lastAssignNumber + 1;
         ConsumerDeliveryManager consumerDeliveryManager = consumerDeliveryManagerUsecase.toEntity(
-                consumerDeliveryManagerUsecase);
+                consumerDeliveryManagerUsecase, newAssignNumber);
         consumerDeliveryManagerRepository.save(consumerDeliveryManager);
 
     }
@@ -43,26 +57,30 @@ public class ConsumerDeliveryManagerUsecase {
     public void update(
             UpdateConsumerDeliveryManagerRequestDto updateConsumerDeliveryManagerRequestDto,
             UUID consumerDeliveryManagerId
-    ) throws ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException {
+    ) throws ConsumerDuplicateAssignNumberException {
+        // 기존 배송 담당자 조회
         ConsumerDeliveryManager consumerDeliveryManager = getConsumerDeliveryManager(consumerDeliveryManagerId);
 
-        //이미 존재하는 번호이면 예외 발생
-        if (validateAssignNumber(updateConsumerDeliveryManagerRequestDto)) {
-            throw new ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException(
-                    ExceptionMessage.DUPLICATE_ASSIGN_NUMBER);
-            //기존 할당 번호와 다르다면 수정
-        } else if (!Objects.equals(consumerDeliveryManager.getAssignNumber(),
-                                   updateConsumerDeliveryManagerRequestDto.getAssignNumber()
-        ) && validateAssignNumber(updateConsumerDeliveryManagerRequestDto)) {
-            updateConsumerDeliveryManagerRequestDto.setAssignNumber(
-                    updateConsumerDeliveryManagerRequestDto.getAssignNumber());
+        // 할당 번호가 변경될 경우 중복 검사
+        Integer newAssignNumber = updateConsumerDeliveryManagerRequestDto.getAssignNumber();
+        if (!Objects.equals(consumerDeliveryManager.getAssignNumber(), newAssignNumber)) {
+            if (validateAssignNumber(updateConsumerDeliveryManagerRequestDto)) {
+                throw new ConsumerDuplicateAssignNumberException(
+                        ExceptionMessage.DUPLICATE_ASSIGN_NUMBER);
+            }
+            // 할당 번호 업데이트
+            consumerDeliveryManager.setAssignNumber(newAssignNumber);
         }
 
-        //허브가 존재하는지 클라이언트 통신후 정상이면 허브 변경
-        Optional.of(hubClient.find(consumerDeliveryManagerId))
-                .ifPresent(hubFindResponseDtoCommonDto -> consumerDeliveryManager.setHubId(
-                        hubFindResponseDtoCommonDto.getData()
-                                                   .getHubId()));
+        // 허브 존재 여부 확인 (존재하지 않으면 예외 발생)
+        UUID newHubId = updateConsumerDeliveryManagerRequestDto.getHubId();
+        if (newHubId != null) {
+            boolean hubExists = Optional.ofNullable(hubClient.find(newHubId)).isPresent();
+            if (!hubExists) {
+                throw new IllegalArgumentException("존재하지 않는 허브 ID입니다: " + newHubId);
+            }
+            consumerDeliveryManager.setHubId(newHubId);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -105,11 +123,11 @@ public class ConsumerDeliveryManagerUsecase {
     }
 
     @Transactional
-    public void delete(UUID consumerDeliveryManagerId) throws ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException {
+    public void delete(UUID consumerDeliveryManagerId) throws ConsumerDeliveryManagerNotAvailableException {
         ConsumerDeliveryManager consumerDeliveryManager = getConsumerDeliveryManager(consumerDeliveryManagerId);
 
         if (!consumerDeliveryManager.getIsAvaliable()) {
-            throw new ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException(
+            throw new ConsumerDeliveryManagerNotAvailableException(
                     ExceptionMessage.IS_NOT_AVAILABLE);
         }
         consumerDeliveryManager.softDeleteData(1L);
@@ -123,7 +141,7 @@ public class ConsumerDeliveryManagerUsecase {
     private ConsumerDeliveryManager getConsumerDeliveryManager(UUID consumerDeliveryManagerId) {
         return consumerDeliveryManagerRepository.findById(consumerDeliveryManagerId)
                                                 .orElseThrow(
-                                                        () -> new ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotFoundException(
+                                                        () -> new ConsumerDeliveryManagerNotFoundException(
                                                                 Manager_NOT_FOUND_MESSAGE));
     }
 }

@@ -36,10 +36,12 @@ public class CreateConsumerDeliveryManagerRequestDto {
         this.hubId = hubId;
     }
 
-    public ConsumerDeliveryManager toEntity(CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto) {
+    public ConsumerDeliveryManager toEntity(CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto,
+                                            int newAssignNumber
+    ) {
         return ConsumerDeliveryManager.builder()
                 .userId(createConsumerDeliveryManagerRequestDto.getUserId())
-                .assignNumber(createConsumerDeliveryManagerRequestDto.getAssign_number())
+                .assignNumber(newAssignNumber)
                 .userName(createConsumerDeliveryManagerRequestDto.getUser_name())
                                .userPhoneNumber(createConsumerDeliveryManagerRequestDto.getUser_phone_number())
                 .platformType(createConsumerDeliveryManagerRequestDto.getPlatform_type())
