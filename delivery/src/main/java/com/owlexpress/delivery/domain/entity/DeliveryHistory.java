@@ -1,5 +1,6 @@
 package com.owlexpress.delivery.domain.entity;
 
+import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
@@ -185,6 +186,13 @@ public class DeliveryHistory extends BaseEntity {
 
     public void updateDeliveryStatus(DeliveryStatus deliveryStatus, Long userId) {
         this.deliveryStatus = deliveryStatus;
+        this.modifiedEntity(userId);
+    }
+
+    public void updateDeliveryHistoryActualInfo(DeliveryStatus deliveryStatus, DeliveryCompleteRequestDto requestDto, Long userId) {
+        this.deliveryStatus = deliveryStatus;
+        this.actualDistance = requestDto.getActualDistance();
+        this.actualTime = requestDto.getActualTime();
         this.modifiedEntity(userId);
     }
 

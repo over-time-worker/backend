@@ -1,5 +1,6 @@
 package com.owlexpress.delivery.application.service;
 
+import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
@@ -24,9 +25,9 @@ public interface DeliveryService {
 
     void startCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId);
 
-    void completeHubDelivery(UUID deliveryId, UUID deliveryHistoryId);
+    void completeHubDelivery(UUID deliveryId, UUID deliveryHistoryId, DeliveryCompleteRequestDto deliveryCompleteRequestDto);
 
-    void completeCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId);
+    void completeCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId, DeliveryCompleteRequestDto deliveryCompleteRequestDto);
 
 //    DeliveryHistoryCreateResponseDto createDeliveryHistory(Delivery delivery, DeliveryCreateRequestDto deliveryCreateRequestDto, Long userId);
 }
