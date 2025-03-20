@@ -5,11 +5,11 @@ import static com.owl_express.ai.presentation.ApiResponseMessageConstant.FIND_ME
 import static com.owl_express.ai.presentation.ApiResponseMessageConstant.SEARCH_MESSAGE_SUCCESS;
 
 import com.owl_express.ai.application.dtos.CommonDto;
-import com.owl_express.ai.application.dtos.request.MessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.request.CompanyDeliverMessageCreateRequestDto;
+import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateRequestDto;
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import com.owl_express.ai.application.service.AiService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +34,9 @@ public class AiController {
 
     @PostMapping("/messages/hub")
     public ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForHubDeliver(
-            @Valid @RequestBody MessageCreateRequestDto requestDto
+            @RequestBody HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto
     ) {
-        MessageCreateResponseDto responseDto = aiService.createMessageForHubDeliver(requestDto);
+        MessageCreateResponseDto responseDto = aiService.createMessageForHubDeliver(hubDeliverMessageCreateRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<MessageCreateResponseDto>builder()
@@ -49,9 +49,9 @@ public class AiController {
 
     @PostMapping("/messages/company")
     public ResponseEntity<CommonDto<MessageCreateResponseDto>> createMessagesForCompanyDeliver(
-            @Valid @RequestBody MessageCreateRequestDto requestDto
+            @RequestBody CompanyDeliverMessageCreateRequestDto companyDeliverMessageCreateRequestDto
     ) {
-        MessageCreateResponseDto responseDto = aiService.createMessageForCompanyDeliver(requestDto);
+        MessageCreateResponseDto responseDto = aiService.createMessageForCompanyDeliver(companyDeliverMessageCreateRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<MessageCreateResponseDto>builder()

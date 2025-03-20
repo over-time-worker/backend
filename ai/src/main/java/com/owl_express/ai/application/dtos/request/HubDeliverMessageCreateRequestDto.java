@@ -1,6 +1,6 @@
-package com.owl_express.alarm.application.dtos.request;
+package com.owl_express.ai.application.dtos.request;
 
-import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto.HubListDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +26,7 @@ public class HubDeliverMessageCreateRequestDto {
     private String nextHubName;
     private String orderDescription;
     private String shippingAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     private Double totalEstimateDistance;
     private Duration totalEstimateDurationTime;
@@ -67,22 +68,14 @@ public class HubDeliverMessageCreateRequestDto {
         this.totalHubList = totalHubList;
     }
 
-    public static HubDeliverMessageCreateRequestDto alarmDtoToMessageDto(AlarmCreateRequestDto requestDto) {
-        return HubDeliverMessageCreateRequestDto.builder()
-                .deliverId(requestDto.getDeliverId())
-                .deliverName(requestDto.getDeliverName())
-                .deliverChannelId(requestDto.getDeliverChannelId())
-                .orderId(requestDto.getOrderId())
-                .productInfo(requestDto.getProductInfo())
-                .ordererName(requestDto.getOrdererName())
-                .startHubName(requestDto.getStartHubName())
-                .endHubName(requestDto.getEndHubName())
-                .orderDescription(requestDto.getOrderDescription())
-                .shippingAddress(requestDto.getShippingAddress())
-                .requestArrivalTime(requestDto.getRequestArrivalTime())
-                .totalEstimateDistance(requestDto.getTotalEstimateDistance())
-                .totalEstimateDurationTime(requestDto.getTotalEstimateDurationTime())
-                .totalHubList(requestDto.getTotalHubList())
-                .build();
+    @Getter
+    public static class HubListDto {
+
+        UUID hubId;
+        String hubName;
+        Double estimateDistance;
+        Duration estimateDurationTime;
+
     }
+
 }

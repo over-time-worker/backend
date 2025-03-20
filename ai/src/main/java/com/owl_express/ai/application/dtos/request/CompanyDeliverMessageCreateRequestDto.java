@@ -1,5 +1,6 @@
-package com.owl_express.alarm.application.dtos.request;
+package com.owl_express.ai.application.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -19,6 +20,7 @@ public class CompanyDeliverMessageCreateRequestDto {
     private String startHubName;
     private String orderDescription;
     private String shippingAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
 
     @Builder
@@ -44,20 +46,5 @@ public class CompanyDeliverMessageCreateRequestDto {
         this.orderDescription = orderDescription;
         this.shippingAddress = shippingAddress;
         this.requestArrivalTime = requestArrivalTime;
-    }
-
-    public static CompanyDeliverMessageCreateRequestDto alarmDtoToMessageDto(AlarmCreateRequestDto requestDto) {
-        return CompanyDeliverMessageCreateRequestDto.builder()
-                .deliverId(requestDto.getDeliverId())
-                .deliverName(requestDto.getDeliverName())
-                .deliverChannelId(requestDto.getDeliverChannelId())
-                .orderId(requestDto.getOrderId())
-                .productInfo(requestDto.getProductInfo())
-                .ordererName(requestDto.getOrdererName())
-                .startHubName(requestDto.getStartHubName())
-                .orderDescription(requestDto.getOrderDescription())
-                .shippingAddress(requestDto.getShippingAddress())
-                .requestArrivalTime(requestDto.getRequestArrivalTime())
-                .build();
     }
 }
