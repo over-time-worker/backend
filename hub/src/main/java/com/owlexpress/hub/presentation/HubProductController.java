@@ -106,7 +106,7 @@ public class HubProductController {
                 CommonDto.<Void>builder()
                         .status(HttpStatus.ACCEPTED)
                         .code(HttpStatus.ACCEPTED.value())
-                        .message("허브 상품 삭제 완료")
+                        .message(ResponseMessage.HUB_PRODUCT_DELETE_SUCCESS)
                         .data(null)
                         .build();
 
@@ -124,7 +124,7 @@ public class HubProductController {
                 CommonDto.<List<HubProductIsEnoughResponseDto>>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .message("허브 상품 삭제 완료")
+                        .message(ResponseMessage.HUB_PRODUCT_STOCK_CHECK_SUCCESS)
                         .data(isOrderPossibleByProductId)
                         .build();
 
