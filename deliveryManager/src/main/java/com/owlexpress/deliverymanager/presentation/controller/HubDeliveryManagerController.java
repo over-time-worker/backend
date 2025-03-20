@@ -24,7 +24,7 @@ public class HubDeliveryManagerController {
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
             @RequestHeader(name = "X-User-Passport") String passport,
-            CreateHubDeliveryManagerRequestDto createHubDeliveryManagerRequestDto
+            @RequestBody CreateHubDeliveryManagerRequestDto createHubDeliveryManagerRequestDto
     ) {
         hubDeliveryManagerUsecase.create(createHubDeliveryManagerRequestDto);
 
@@ -40,7 +40,7 @@ public class HubDeliveryManagerController {
     @PutMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> update(
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId,
-            UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
+            @RequestBody  UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
     ) throws HubDeliveryManagerException.HubDuplicateAssignNumber {
         hubDeliveryManagerUsecase.update(updateHubDeliveryManagerRequestDto,hubDeliveryManagerId);
 
