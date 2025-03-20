@@ -1,11 +1,10 @@
 package com.owlexpress.delivery.domain.entity;
 
-import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_HISTORY_NOT_FOUND_MESSAGE;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
-import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
-import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedOrderTypeException;
+import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,6 +27,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Type;
 
 @Getter
 @Entity
@@ -72,10 +72,11 @@ public class Delivery extends BaseEntity {
     @Column(name = "request_arrival_time")
     private LocalDateTime requestArrivalTime;
 
-    @Column(name = "total_estimate_duration_time")
+    @Column(name = "total_estimate_duration_time", columnDefinition = "INTERVAL")
+    @Type(PostgreSQLIntervalType.class)
     private Duration totalEstimateDurationTime;
 
-    @Column(name = "total_distance")
+    @Column(name = "total_estimate_distance")
     private Double totalEstimateDistance;
 
     @Enumerated(EnumType.STRING)
@@ -151,7 +152,6 @@ public class Delivery extends BaseEntity {
                 .startHubName(deliveryCreateRequestDto.getStartHubName())
                 .destinationHubId(deliveryCreateRequestDto.getDestinationHubId())
                 .destinationHubName(deliveryCreateRequestDto.getDestinationHubName())
-                .consumerDeliverId(deliveryCreateRequestDto.getConsumerDeliverId())
                 .orderType(deliveryCreateRequestDto.getOrderType())
                 .description(deliveryCreateRequestDto.getDescription())
                 .requestArrivalTime(deliveryCreateRequestDto.getRequestArrivalTime())
@@ -201,6 +201,16 @@ public class Delivery extends BaseEntity {
         FRESH("FRESH");
 
         private final String name;
+
+        @JsonCreator
+        public static OrderType getType(String type) {
+            for(OrderType ot : OrderType.values()) {
+                if(ot.name.equalsIgnoreCase(type)) {
+                    return ot;
+                }
+            }
+            throw new NotSupportedOrderTypeException("지원하지 않는 주문 상태 입니다." + type);
+        }
     }
 
     @RequiredArgsConstructor
@@ -213,10 +223,20 @@ public class Delivery extends BaseEntity {
 
         private final String name;
 
+        @JsonCreator
         public static DeliveryStatus getStatus(String status) {
             for(DeliveryStatus ds : DeliveryStatus.values()) {
                 if(ds.name.equalsIgnoreCase(status)) {
                     return ds;
+                }
+            }
+            throw new NotSupportedDeliveryStatusException("지원하지 않는 배송 상태 입니다." + status);
+        }
+
+        public static String validateStatus(String status) {
+            for(DeliveryStatus ds : DeliveryStatus.values()) {
+                if(ds.name.equalsIgnoreCase(status)) {
+                    return ds.name;
                 }
             }
             throw new NotSupportedDeliveryStatusException("지원하지 않는 배송 상태 입니다." + status);

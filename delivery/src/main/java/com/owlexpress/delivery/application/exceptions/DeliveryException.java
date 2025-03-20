@@ -26,6 +26,12 @@ public class DeliveryException extends RuntimeException {
         }
     }
 
+    public static class NotSupportedOrderTypeException extends RuntimeException {
+        public NotSupportedOrderTypeException(String message) {
+            super(message);
+        }
+    }
+
     public static class NotSupportedDeliveryStatusException extends RuntimeException {
         public NotSupportedDeliveryStatusException(String message) {
             super(message);

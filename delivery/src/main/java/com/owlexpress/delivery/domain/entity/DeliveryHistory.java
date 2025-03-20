@@ -3,7 +3,9 @@ package com.owlexpress.delivery.domain.entity;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
+import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -25,6 +27,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Type;
 import org.springframework.util.StringUtils;
 
 @Getter
@@ -34,6 +37,7 @@ import org.springframework.util.StringUtils;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryHistory extends BaseEntity {
     @Id
+    @Column(name = "delivery_history_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
@@ -59,16 +63,18 @@ public class DeliveryHistory extends BaseEntity {
     @Column(name = "shipping_address", length = 50)
     private String shippingAddress;
 
-    @Column(name = "estimate_distance", nullable = false)
+    @Column(name = "estimate_distance")
     private Double estimateDistance;
 
-    @Column(name = "estimate_duration_time", columnDefinition = "INTERVAL", nullable = false)
+    @Column(name = "estimate_duration_time",columnDefinition = "INTERVAL")
+    @Type(PostgreSQLIntervalType.class)
     private Duration estimateDurationTime;
 
     @Column(name = "actual_distance")
     private Double actualDistance;
 
-    @Column(name = "actual_time", columnDefinition = "INTERVAL", nullable = false)
+    @Column(name = "actual_time",columnDefinition = "INTERVAL")
+    @Type(PostgreSQLIntervalType.class)
     private Duration actualTime;
 
     @Enumerated(EnumType.STRING)
@@ -147,6 +153,7 @@ public class DeliveryHistory extends BaseEntity {
                     .destinationHubId(endHub.getHubId())
                     .destinationHubName(endHub.getHubName())
                     .shippingAddress(delivery.getShippingAddress())
+                    .deliveryStatus(DeliveryStatus.PENDING_AT_HUB)
                     .estimateDistance(startHub.getEstimateDistance())
                     .estimateDurationTime(startHub.getEstimateDurationTime())
                     .build();
@@ -161,6 +168,7 @@ public class DeliveryHistory extends BaseEntity {
                 .startHubId(lastHubListDto.getHubId())
                 .startHubName(lastHubListDto.getHubName())
                 .shippingAddress(delivery.getShippingAddress())
+                .deliveryStatus(DeliveryStatus.PENDING_AT_HUB)
                 .estimateDistance(lastHubListDto.getEstimateDistance())
                 .estimateDurationTime(lastHubListDto.getEstimateDurationTime())
                 .build();
@@ -170,7 +178,6 @@ public class DeliveryHistory extends BaseEntity {
 
         return deliveryHistoryList;
     }
-
 
     public void updateDelivery(Delivery delivery) {
         this.delivery = delivery;
