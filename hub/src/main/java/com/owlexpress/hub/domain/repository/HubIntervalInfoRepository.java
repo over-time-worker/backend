@@ -21,8 +21,8 @@ public interface HubIntervalInfoRepository {
     List<Object[]> findByStartHubByObject(UUID currentHub);
 
     Optional<Double> findDistanceBetweenHubs(
-            UUID hubId,
-            UUID hubId1
+            UUID startHub,
+            UUID endHub
     );
 
     void deleteContainsHub(Hub hub);
