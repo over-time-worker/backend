@@ -11,8 +11,8 @@ public interface UserService {
 
     UserSigninResponseDto signin (UserSigninRequestDto userSigninRequestDto);
 
-    GetUserInfoResponseDto find (Long userId);
+    GetUserInfoResponseDto find (String passport);
 
-    void changePassword (Long userId, UpdatePasswordRequestDto updatePasswordRequestDto);
+    void changePassword (String passport, UpdatePasswordRequestDto updatePasswordRequestDto);
 
 }

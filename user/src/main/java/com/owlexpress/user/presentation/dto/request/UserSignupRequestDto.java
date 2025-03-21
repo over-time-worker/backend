@@ -3,15 +3,13 @@ package com.owlexpress.user.presentation.dto.request;
 import com.owlexpress.user.domain.constant.PlatformType;
 import com.owlexpress.user.domain.constant.Role;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 @Getter
 public class UserSignupRequestDto {
     @NotBlank(message = "[notBlank:accountId]")
@@ -24,10 +22,30 @@ public class UserSignupRequestDto {
     private String phoneNumber;
     @NotBlank(message = "[notBlank:platformId]")
     private String platformId;
-    @NotBlank(message = "[notBlank:platformType]")
+    @NotNull(message = "[notNull:platformType]")
     private PlatformType platformType;
-    @NotBlank(message = "[notBlank:role]")
+    @NotNull(message = "[notNull:role]")
     private Role role;
-    @NotBlank(message = "[notBlank:isPublic]")
     private Boolean isPublic;
+
+    @Builder
+    public UserSignupRequestDto(
+            String accountId,
+            String password,
+            String username,
+            String phoneNumber,
+            String platformId,
+            PlatformType platformType,
+            Role role,
+            Boolean isPublic
+    ) {
+        this.accountId = accountId;
+        this.password = password;
+        this.username = username;
+        this.phoneNumber = phoneNumber;
+        this.platformId = platformId;
+        this.platformType = platformType;
+        this.role = role;
+        this.isPublic = isPublic;
+    }
 }

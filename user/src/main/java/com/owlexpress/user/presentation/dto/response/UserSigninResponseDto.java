@@ -2,13 +2,14 @@ package com.owlexpress.user.presentation.dto.response;
 
 import com.owlexpress.user.domain.constant.Role;
 import com.owlexpress.user.domain.entity.User;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
 public class UserSigninResponseDto {
