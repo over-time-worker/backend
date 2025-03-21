@@ -1,6 +1,7 @@
 package com.owlexpress.delivery.common.advice;
 
 import com.owlexpress.delivery.application.dtos.CommonDto;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliverReturnFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryManagerFeignClientException;
@@ -36,6 +37,7 @@ public class GlobalExceptionAdvice {
     public static final String DELIVERY_DELETE_FAIL_EXCEPTION = "handleDeliveryDeleteFailException : {}";
     public static final String NOT_SUPPORTED_ORDER_TYPE_EXCEPTION = "handleNotSupportedOrderTypeException : {}";
     public static final String FEIGN_EXCEPTION = "handleFeignException : {}";
+    public static final String DELIVER_RETURN_FAIL_EXCEPTION = "handleDeliveryReturnFailException : {}";
 
     private final List<FeignExceptionHandlerStrategy> strategies;
 
@@ -186,6 +188,21 @@ public class GlobalExceptionAdvice {
                                 .data(null)
                                 .build()
                 ));
+    }
+
+    @ExceptionHandler(DeliverReturnFailException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public CommonDto<Object> handleDeliverReturnFailException(
+            DeliverReturnFailException e) {
+
+        log.error(DELIVER_RETURN_FAIL_EXCEPTION, e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
     }
 
 }
