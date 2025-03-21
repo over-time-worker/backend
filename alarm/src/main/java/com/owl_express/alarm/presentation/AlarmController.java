@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,9 +40,10 @@ public class AlarmController {
 
     @PostMapping("/hub-delivery")
     public ResponseEntity<CommonDto<Void>> createAlarmForHubDeliver(
-            @RequestBody AlarmCreateRequestDto alarmCreateRequestDto
+            @RequestBody AlarmCreateRequestDto alarmCreateRequestDto,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        alarmService.createAlarmForHubDeliver(alarmCreateRequestDto);
+        alarmService.createAlarmForHubDeliver(alarmCreateRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<Void>builder()
@@ -54,9 +56,11 @@ public class AlarmController {
 
     @PostMapping("/company-delivery")
     public ResponseEntity<CommonDto<AlarmCreateResponseDto>> createAlarmForCompanyDeliver(
-            @RequestBody AlarmCreateRequestDto alarmCreateRequestDto
+            @RequestBody AlarmCreateRequestDto alarmCreateRequestDto,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        AlarmCreateResponseDto response = alarmService.createAlarmForCompanyDeliver(alarmCreateRequestDto);
+        AlarmCreateResponseDto response
+                = alarmService.createAlarmForCompanyDeliver(alarmCreateRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<AlarmCreateResponseDto>builder()
@@ -70,9 +74,10 @@ public class AlarmController {
     @DeleteMapping("/channel/{channel_id}/message/{message_id}")
     public ResponseEntity<CommonDto<Void>> delete(
             @NotNull(message = "[notNull:channel_id]") @PathVariable("channel_id") String channelId,
-            @NotNull(message = "[notNull:message_id]") @PathVariable("message_id") String messageId
+            @NotNull(message = "[notNull:message_id]") @PathVariable("message_id") String messageId,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        alarmService.delete(channelId, messageId);
+        alarmService.delete(channelId, messageId, passport);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()

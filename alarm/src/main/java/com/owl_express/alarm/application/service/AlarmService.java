@@ -10,11 +10,21 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface AlarmService {
-    void createAlarmForHubDeliver(AlarmCreateRequestDto alarmCreateRequestDto);
+    void createAlarmForHubDeliver(
+            AlarmCreateRequestDto alarmCreateRequestDto,
+            String passport
+            );
 
-    AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto alarmCreateRequestDto);
+    AlarmCreateResponseDto createAlarmForCompanyDeliver(
+            AlarmCreateRequestDto alarmCreateRequestDto,
+            String passport
+    );
 
-    void delete(String channelId, String messageId);
+    void delete(
+            String channelId,
+            String messageId,
+            String passport
+    );
 
     AlarmFindResponseDto find(UUID alarmId);
 

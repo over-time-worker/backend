@@ -9,10 +9,12 @@ import org.springframework.data.web.PagedModel;
 
 public interface AiService {
     MessageCreateResponseDto createMessageForHubDeliver(
-            HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto);
+            HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto,
+            String passport);
 
     MessageCreateResponseDto createMessageForCompanyDeliver(
-            CompanyDeliverMessageCreateRequestDto companyDeliverMessageCreateRequestDto);
+            CompanyDeliverMessageCreateRequestDto companyDeliverMessageCreateRequestDto,
+            String passport);
 
     MessageFindResponseDto find(UUID aiId);
 

@@ -14,6 +14,7 @@ import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.service.DeliveryService;
+import com.owlexpress.delivery.common.helper.PassportHelper;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,12 +37,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
+    private final PassportHelper passportHelper;
 
     @PostMapping()
     public ResponseEntity<CommonDto<Void>> create(
-            @RequestBody DeliveryCreateRequestDto deliveryCreateRequestDto
+            @RequestBody DeliveryCreateRequestDto deliveryCreateRequestDto,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.create(deliveryCreateRequestDto);
+        deliveryService.create(deliveryCreateRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonDto.<Void>builder()
@@ -54,9 +58,10 @@ public class DeliveryController {
     @PatchMapping("/{delivery_id}")
     public ResponseEntity<CommonDto<Void>> update(
             @PathVariable("delivery_id") UUID deliveryId,
-            @RequestBody DeliveryUpdateRequestDto deliveryUpdateRequestDto
+            @RequestBody DeliveryUpdateRequestDto deliveryUpdateRequestDto,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.update(deliveryId, deliveryUpdateRequestDto);
+        deliveryService.update(deliveryId, deliveryUpdateRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
@@ -69,9 +74,10 @@ public class DeliveryController {
 
     @DeleteMapping("/{delivery_id}")
     public ResponseEntity<CommonDto<Void>> delete(
-            @PathVariable("delivery_id") UUID deliveryId
+            @PathVariable("delivery_id") UUID deliveryId,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.delete(deliveryId);
+        deliveryService.delete(deliveryId, passport);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
@@ -131,9 +137,10 @@ public class DeliveryController {
     @PatchMapping("/hub/{delivery_id}/{delivery_history_id}")
     public ResponseEntity<CommonDto<Void>> startHubDelivery(
             @PathVariable("delivery_id") UUID deliveryId,
-            @PathVariable("delivery_history_id") UUID deliveryHistoryId
+            @PathVariable("delivery_history_id") UUID deliveryHistoryId,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.startHubDelivery(deliveryId, deliveryHistoryId);
+        deliveryService.startHubDelivery(deliveryId, deliveryHistoryId, passport);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
@@ -147,9 +154,10 @@ public class DeliveryController {
     @PatchMapping("/company/{delivery_id}/{delivery_history_id}")
     public ResponseEntity<CommonDto<Void>> startCompanyDelivery(
             @PathVariable("delivery_id") UUID deliveryId,
-            @PathVariable("delivery_history_id") UUID deliveryHistoryId
+            @PathVariable("delivery_history_id") UUID deliveryHistoryId,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.startCompanyDelivery(deliveryId, deliveryHistoryId);
+        deliveryService.startCompanyDelivery(deliveryId, deliveryHistoryId, passport);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
@@ -164,9 +172,10 @@ public class DeliveryController {
     public ResponseEntity<CommonDto<Void>> completeHubDelivery(
             @PathVariable("delivery_id") UUID deliveryId,
             @PathVariable("delivery_history_id") UUID deliveryHistoryId,
-            @RequestBody DeliveryCompleteRequestDto completeRequestDto
+            @RequestBody DeliveryCompleteRequestDto completeRequestDto,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.completeHubDelivery(deliveryId, deliveryHistoryId, completeRequestDto);
+        deliveryService.completeHubDelivery(deliveryId, deliveryHistoryId, completeRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()
@@ -181,9 +190,10 @@ public class DeliveryController {
     public ResponseEntity<CommonDto<Void>> completeCompanyDelivery(
             @PathVariable("delivery_id") UUID deliveryId,
             @PathVariable("delivery_history_id") UUID deliveryHistoryId,
-            @RequestBody DeliveryCompleteRequestDto completeRequestDto
+            @RequestBody DeliveryCompleteRequestDto completeRequestDto,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.completeCompanyDelivery(deliveryId, deliveryHistoryId, completeRequestDto);
+        deliveryService.completeCompanyDelivery(deliveryId, deliveryHistoryId, completeRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 CommonDto.<Void>builder()

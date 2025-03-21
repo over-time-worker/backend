@@ -8,6 +8,7 @@ import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateReques
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import com.owl_express.ai.application.exceptions.AiException;
+import com.owl_express.ai.common.helper.PassportHelper;
 import com.owl_express.ai.common.util.CommonUtil;
 import com.owl_express.ai.common.util.PageUtil;
 import com.owl_express.ai.domain.entity.Ai;
@@ -34,6 +35,7 @@ public class AiServiceImpl implements AiService {
 
     private final AiRepository aiRepository;
     private final WebClient webClient;
+    private final PassportHelper passportHelper;
 
     @Value("${api.ai.key}")
     private String apiKey;
@@ -57,7 +59,8 @@ public class AiServiceImpl implements AiService {
 
     @Override
     public MessageCreateResponseDto createMessageForHubDeliver(
-            HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto
+            HubDeliverMessageCreateRequestDto hubDeliverMessageCreateRequestDto,
+            String passport
     ) {
         String requestMessage = createHubRequestMessage(hubDeliverMessageCreateRequestDto);
         String responseMessage = callApi(hubRequestBase.replace("{request}", requestMessage));
@@ -69,8 +72,7 @@ public class AiServiceImpl implements AiService {
                 .response(responseMessage)
                 .build();
 
-        // TODO : user 정보로 교체
-        aiMessage.createdEntity(1L);
+        aiMessage.createdEntity(passportHelper.getPassportDto(passport).getUserId());
         Ai savedAiMessage = aiRepository.save(aiMessage);
 
         return MessageCreateResponseDto.toDto(savedAiMessage);
@@ -78,20 +80,21 @@ public class AiServiceImpl implements AiService {
 
     @Override
     public MessageCreateResponseDto createMessageForCompanyDeliver(
-            CompanyDeliverMessageCreateRequestDto companyDeliverMessageCreateRequestDto
+            CompanyDeliverMessageCreateRequestDto companyDeliverMessageCreateRequestDto,
+            String passport
     ) {
         String requestMessage = createCompanyRequestMessage(companyDeliverMessageCreateRequestDto);
         String responseMessage = callApi(companyRequestBase.replace("{request}", requestMessage));
 
         Ai aiMessage = Ai.builder()
-                .consumerDeliverId(companyDeliverMessageCreateRequestDto.getDeliverId())
+                .consumerDeliverId(companyDeliverMessageCreateRequestDto
+                        .getDeliverId())
                 .consumerDeliverChannelId(companyDeliverMessageCreateRequestDto.getDeliverChannelId())
                 .request(requestMessage)
                 .response(responseMessage)
                 .build();
 
-        // TODO : user 정보로 교체
-        aiMessage.createdEntity(1L);
+        aiMessage.createdEntity(passportHelper.getPassportDto(passport).getUserId());
         Ai savedAiMessage = aiRepository.save(aiMessage);
 
         return MessageCreateResponseDto.toDto(savedAiMessage);
