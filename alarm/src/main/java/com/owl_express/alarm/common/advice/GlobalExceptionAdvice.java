@@ -5,11 +5,15 @@ import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClient
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedMessageTypeException;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
-import com.owl_express.alarm.application.exceptions.AlarmException.OrderNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
+import com.owl_express.alarm.application.exceptions.FeignExceptionHandlerStrategy;
+import feign.FeignException;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionAdvice {
 
     public static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
@@ -27,6 +32,9 @@ public class GlobalExceptionAdvice {
     public static final String PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION = "handlePlatformTypeNotSupportedException : {}";
     public static final String MESSAGE_TYPE_NOT_SUPPORTED_EXCEPTION = "handleMessageTypeNotSupportedException : {}";
     public static final String SLACK_EXCEPTION = "handleSlackException : {}";
+    public static final String FEIGN_EXCEPTION = "handleValidationException : {} {}";
+
+    public final List<FeignExceptionHandlerStrategy> strategies;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -66,20 +74,6 @@ public class GlobalExceptionAdvice {
         return CommonDto.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message(e.getMessage())
-                .data(null)
-                .build();
-    }
-
-    @ExceptionHandler(OrderNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public CommonDto<Object> handleOrderNotFoundException(OrderNotFoundException e) {
-
-        log.error(ORDER_NOT_FOUND_EXCEPTION, e.getMessage());
-
-        return CommonDto.builder()
-                .status(HttpStatus.NOT_FOUND)
-                .code(HttpStatus.NOT_FOUND.value())
                 .message(e.getMessage())
                 .data(null)
                 .build();
@@ -139,6 +133,24 @@ public class GlobalExceptionAdvice {
                 .message(e.getMessage())
                 .data(null)
                 .build();
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<CommonDto<Void>> handleValidationException(FeignException e) {
+        log.error(FEIGN_EXCEPTION, e.getMessage(), e);
+
+        return strategies.stream()
+                .filter(strategy -> strategy.supports(e))
+                .findFirst()
+                .map(strategy -> strategy.handleException(e))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        CommonDto.<Void>builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .message("알 수 없는 Feign 오류 발생: " + e.getMessage())
+                                .data(null)
+                                .build()
+                ));
     }
 
 }

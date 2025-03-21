@@ -26,7 +26,7 @@ public class HubDeliverMessageCreateRequestDto {
     private String nextHubName;
     private String orderDescription;
     private String shippingAddress;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     private Double totalEstimateDistance;
     private Duration totalEstimateDurationTime;

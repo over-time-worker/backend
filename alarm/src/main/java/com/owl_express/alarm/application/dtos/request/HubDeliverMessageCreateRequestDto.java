@@ -1,5 +1,6 @@
 package com.owl_express.alarm.application.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto.HubListDto;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class HubDeliverMessageCreateRequestDto {
     private String nextHubName;
     private String orderDescription;
     private String shippingAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     private Double totalEstimateDistance;
     private Duration totalEstimateDurationTime;
@@ -77,6 +79,8 @@ public class HubDeliverMessageCreateRequestDto {
                 .ordererName(requestDto.getOrdererName())
                 .startHubName(requestDto.getStartHubName())
                 .endHubName(requestDto.getEndHubName())
+                .currentHubName(requestDto.getCurrentHubName())
+                .nextHubName(requestDto.getNextHubName())
                 .orderDescription(requestDto.getOrderDescription())
                 .shippingAddress(requestDto.getShippingAddress())
                 .requestArrivalTime(requestDto.getRequestArrivalTime())

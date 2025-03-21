@@ -23,7 +23,7 @@ public class DeliveryCreateRequestDto {
     private OrderType orderType;
     private String shippingAddress;
     private String description;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     private UUID consumerCompanyId;
     private String consumerPhoneNumber;

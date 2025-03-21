@@ -1,5 +1,6 @@
 package com.owl_express.alarm.application.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -47,6 +48,7 @@ public class AlarmCreateRequestDto {
     private String orderDescription;
     @NotNull(message = "[notNull:shippingAddress]")
     private String shippingAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     @NotNull(message = "[notNull:totalEstimateDistance]")
     private Double totalEstimateDistance;

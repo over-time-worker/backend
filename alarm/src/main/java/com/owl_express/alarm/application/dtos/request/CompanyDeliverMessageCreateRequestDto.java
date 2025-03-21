@@ -1,5 +1,6 @@
 package com.owl_express.alarm.application.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -19,6 +20,7 @@ public class CompanyDeliverMessageCreateRequestDto {
     private String startHubName;
     private String orderDescription;
     private String shippingAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
 
     @Builder
