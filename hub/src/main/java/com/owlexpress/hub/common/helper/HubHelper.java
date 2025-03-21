@@ -1,4 +1,4 @@
-package com.owlexpress.hub.common;
+package com.owlexpress.hub.common.helper;
 
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.domain.entity.Hub;

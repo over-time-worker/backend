@@ -38,9 +38,10 @@ public class HubController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
+            @RequestHeader("X-User-Passport") String passport,
             @RequestBody HubCreateRequestDto requestDto
     ) {
-        hubService.create(requestDto);
+        hubService.create(requestDto,passport);
 
         CommonDto<Void> created = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
@@ -55,9 +56,10 @@ public class HubController {
 
     @PutMapping
     public ResponseEntity<CommonDto<Void>> update(
+            @RequestHeader("X-User-Passport") String passport,
             @RequestBody HubUpdateRequestDto requestDto
     ) {
-        hubService.update(requestDto);
+        hubService.update(requestDto,passport);
 
         CommonDto<Void> updated = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
@@ -72,10 +74,11 @@ public class HubController {
 
     @DeleteMapping("/{hubId}")
     public ResponseEntity<CommonDto<Void>> delete(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("hubId") UUID hubId
     ) {
 
-        hubService.delete(hubId);
+        hubService.delete(hubId,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                            .status(HttpStatus.ACCEPTED)

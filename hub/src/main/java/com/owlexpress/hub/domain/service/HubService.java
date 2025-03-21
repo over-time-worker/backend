@@ -1,15 +1,9 @@
 package com.owlexpress.hub.domain.service;
 
-import com.owlexpress.hub.application.dto.response.HubProductIsEnoughResponseDto;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
-import com.owlexpress.hub.presentation.dto.request.HubProductCheckRequestDto;
-import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
-import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
-import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
-import java.util.List;
 import org.springframework.data.web.PagedModel;
 
 import java.util.UUID;
@@ -21,26 +15,19 @@ public interface HubService {
      */
     HubFindResponseDto find(UUID hubId);
 
-    void create(HubCreateRequestDto requestDto);
+    void create(HubCreateRequestDto requestDto,
+                String passport
+    );
 
-    void update(HubUpdateRequestDto requestDto);
+    void update(
+            HubUpdateRequestDto requestDto,
+            String passport
+    );
 
     PagedModel<HubSearchResponseDto> searchHub(int page, int size, String sort, String q,
-            String orderBy);
+                                               String orderBy);
 
-    /*
-     허브 상품
-     */
-    PagedModel<HubProductSearchResponseDto> searchHubProduct(int page, int size, String sort,
-            String q, String orderBy);
-
-    void update(HubProductUpdateRequestDto requestDto);
-
-    HubProductFindResponseDto findHubProduct(UUID hubProductId);
-
-    void delete(UUID hubId);
-
-    List<HubProductIsEnoughResponseDto> checkHubProductStocks(
-            List<HubProductCheckRequestDto> requestDto
+    void delete(UUID hubId,
+                String passport
     );
 }

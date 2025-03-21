@@ -1,7 +1,7 @@
 package com.owlexpress.hub.application.dto.response;
 
 
-import com.owlexpress.hub.common.ProductType;
+import com.owlexpress.hub.common.constant.ProductType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
