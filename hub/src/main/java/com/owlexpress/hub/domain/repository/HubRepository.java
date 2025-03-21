@@ -1,11 +1,11 @@
 package com.owlexpress.hub.domain.repository;
 
+import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
-import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 
@@ -40,4 +40,5 @@ public interface HubRepository {
 
     List<HubProductStockResponseDto> findHubProductStocks(List<UUID> products);
 
+    List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds);
 }

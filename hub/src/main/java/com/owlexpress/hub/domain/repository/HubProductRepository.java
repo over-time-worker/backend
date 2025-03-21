@@ -7,4 +7,8 @@ import java.util.UUID;
 
 public interface HubProductRepository {
     Optional<HubProduct> findByProductId(UUID productId);
+
+    HubProduct save(HubProduct hubProduct);
+
+    Optional<HubProduct> findByHubProductId(UUID hubProductId);
 }

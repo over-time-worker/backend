@@ -20,6 +20,7 @@ public class AlarmCreateResponseDto {
     private String deliverName;
     private String deliverChannelId;
     private String platformName;
+    private String deliverPhoneNumber;
     private UUID deliveryId;
     private UUID orderId;
     private String productInfo;
@@ -51,6 +52,7 @@ public class AlarmCreateResponseDto {
             Long deliverUserId,
             String deliverName,
             String deliverChannelId,
+            String deliverPhoneNumber,
             String platformName,
             UUID deliveryId,
             UUID orderId,
@@ -90,6 +92,7 @@ public class AlarmCreateResponseDto {
         this.totalEstimateDistance = totalEstimateDistance;
         this.totalHubList = totalHubList;
         this.totalEstimateDurationTime = totalEstimateDurationTime;
+        this.deliverPhoneNumber = deliverPhoneNumber;
     }
 
     @Getter
@@ -110,9 +113,12 @@ public class AlarmCreateResponseDto {
                                      .deliverId(manager.getConsumerDeliveryManagerId())
                                      .deliverUserId(manager.getUserId())
                                      .deliverName(manager.getUserName())
-                                     .deliverChannelId(manager.getChannelId().toString()) // Long -> String 변환 필요
-                                     .platformName(manager.getPlatformType().name()) // Enum -> String 변환
+                                     .deliverChannelId(manager.getChannelId()
+                                                              .toString()) // Long -> String 변환 필요
+                                     .platformName(manager.getPlatformType()
+                                                          .name()) // Enum -> String 변환
                                      .deliveryId(request.getDeliveryId())
+                                     .deliverPhoneNumber(manager.getUserPhoneNumber())
                                      .orderId(request.getOrderId())
                                      .productInfo(request.getProductInfo())
                                      .ordererName(request.getOrdererName())
@@ -139,8 +145,10 @@ public class AlarmCreateResponseDto {
                                      .deliverId(manager.getHubDeliveryManagerId())
                                      .deliverUserId(manager.getUserId())
                                      .deliverName(manager.getUserName())
-                                     .deliverChannelId(manager.getChannelId().toString()) // Long -> String 변환 필요
-                                     .platformName(manager.getPlatformType().name()) // Enum -> String 변환
+                                     .deliverChannelId(manager.getChannelId()
+                                                              .toString()) // Long -> String 변환 필요
+                                     .platformName(manager.getPlatformType()
+                                                          .name()) // Enum -> String 변환
                                      .deliveryId(request.getDeliveryId())
                                      .orderId(request.getOrderId())
                                      .productInfo(request.getProductInfo())

@@ -9,11 +9,13 @@ import com.owlexpress.hub.presentation.dto.CommonDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductCheckRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
+import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/hub/product")
 @RequiredArgsConstructor
+@Slf4j
 public class HubProductController {
 
     private final HubService hubService;
@@ -35,7 +38,7 @@ public class HubProductController {
             @RequestHeader("X-User-Passport") String passport,
             @RequestBody HubProductCreateRequestDto requestDto
     ) {
-        hubProductUseCase.create(requestDto,passport);
+        hubProductUseCase.create(requestDto, passport);
         CommonDto<Void> created = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
@@ -51,7 +54,7 @@ public class HubProductController {
             @RequestHeader("X-User-Passport") String passport,
             @RequestBody HubProductUpdateRequestDto requestDto
     ) {
-        hubProductService.update(requestDto,passport);
+        hubProductService.update(requestDto, passport);
         CommonDto<HubProductUpdateRequestDto> updated = CommonDto.<HubProductUpdateRequestDto>builder()
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
@@ -105,15 +108,16 @@ public class HubProductController {
     public ResponseEntity<CommonDto<HubProductFindResponseDto>> findHubProduct(
             @PathVariable("productId") UUID productId
     ) {
-        HubProductFindResponseDto hubProduct = hubProductService.findHubProductByProductId(productId);
+        HubProductFindResponseDto hubProduct = hubProductService.findHubProductByProductId(
+                productId);
 
         CommonDto<HubProductFindResponseDto> found =
                 CommonDto.<HubProductFindResponseDto>builder()
-                         .status(HttpStatus.OK)
-                         .code(HttpStatus.OK.value())
-                         .message(ResponseMessage.HUB_PRODUCT_FIND_SUCCESS)
-                         .data(hubProduct)
-                         .build();
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message(ResponseMessage.HUB_PRODUCT_FIND_SUCCESS)
+                        .data(hubProduct)
+                        .build();
 
         return ResponseEntity.ok(found);
     }
@@ -123,7 +127,7 @@ public class HubProductController {
             @RequestHeader("X-User-Passport") String passport,
             @PathVariable("hubProductId") UUID hubProductId
     ) {
-        hubProductUseCase.delete(hubProductId,passport);
+        hubProductUseCase.delete(hubProductId, passport);
         CommonDto<Void> deleted =
                 CommonDto.<Void>builder()
                         .status(HttpStatus.ACCEPTED)
@@ -148,6 +152,24 @@ public class HubProductController {
                         .code(HttpStatus.OK.value())
                         .message(ResponseMessage.HUB_PRODUCT_STOCK_CHECK_SUCCESS)
                         .data(isOrderPossibleByProductId)
+                        .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(found);
+    }
+
+    @PostMapping("/confirm-stock")
+    public ResponseEntity<CommonDto<?>> confirmStock(
+            @RequestBody OrderConfirmRequestDto requestDto
+            // TODO: Passport 받아서 consumerID 체크 고려
+        //    @RequestHeader("X-User-Passport") String passport
+            ) {
+        hubProductUseCase.confirmOrder(requestDto);
+        CommonDto<List<HubProductIsEnoughResponseDto>> found =
+                CommonDto.<List<HubProductIsEnoughResponseDto>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message(ResponseMessage.HUB_PRODUCT_STOCK_CHECK_SUCCESS)
+                        .data(null)
                         .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(found);
