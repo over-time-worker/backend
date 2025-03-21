@@ -3,17 +3,21 @@ package com.owlexpress.producer.domain.service;
 
 import com.owlexpress.producer.presentation.dto.request.CreateProductInfoRequestDto;
 import com.owlexpress.producer.presentation.dto.request.UpdateProductInfoRequestDto;
-import jakarta.validation.Valid;
 
 import java.util.UUID;
 
 public interface ProductInfoService {
-    void create(CreateProductInfoRequestDto createProductInfoRequestDto);
+    void create(CreateProductInfoRequestDto createProductInfoRequestDto,
+                String passport
+    );
 
     void update(
             UUID productId,
-            @Valid UpdateProductInfoRequestDto updateProductInfoRequestDto
+            UpdateProductInfoRequestDto updateProductInfoRequestDto,
+            String passport
     );
 
-    void delete(UUID productId);
+    void delete(UUID productId,
+                String passport
+    );
 }

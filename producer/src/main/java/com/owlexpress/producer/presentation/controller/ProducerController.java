@@ -9,6 +9,7 @@ import com.owlexpress.producer.presentation.dto.response.ProducerResponseDto;
 import com.owlexpress.producer.presentation.dto.response.SearchProducerResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +20,18 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/producers")
+@Slf4j
 public class ProducerController {
     private final ProducerUsecase producerUsecase;
     private final ProducerService producerService;
 
     @PostMapping()
     public ResponseEntity<CommonDto<Void>> create(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @Valid @RequestBody CreateProducerRequestDto createProducerRequestDto
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody CreateProducerRequestDto createProducerRequestDto
     ) {
-        producerUsecase.create(createProducerRequestDto);
+        producerUsecase.create(createProducerRequestDto, passport);
+        log.info("passport= {}", passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.CREATED)
@@ -42,14 +45,15 @@ public class ProducerController {
 
     @PutMapping("/{producerId}")
     public ResponseEntity<CommonDto<Void>> update(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @Valid @RequestBody UpdateProducerRequestDto updateProducerRequestDto,
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody UpdateProducerRequestDto updateProducerRequestDto,
             @PathVariable UUID producerId
 
     ) {
         producerUsecase.update(
                 updateProducerRequestDto,
-                producerId
+                producerId,
+                passport
         );
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)

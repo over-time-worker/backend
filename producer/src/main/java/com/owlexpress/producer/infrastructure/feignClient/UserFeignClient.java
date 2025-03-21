@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface UserFeignClient {
 
     //User정보 조회
-    @GetMapping("/{userId}")
+    @GetMapping("/api/users/{userId}")
     CommonDto<GetUserInfoResponseDto> get(
             //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable("userId") Long userId
