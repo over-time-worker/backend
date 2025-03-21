@@ -124,7 +124,10 @@ public class ProducerUsecase {
         Producer producer = producerHelper.getProducer(producerId);
 
         try {
-            productClient.delete(passport, producerId);
+            if (productClient.delete(passport, producerId)
+                             .getData()) {
+                producer.softDeleteData(passportDto.getUserId());
+            }
         } catch (FeignException.BadRequest badRequest) {
             producer.softDeleteData(passportDto.getUserId());
         }

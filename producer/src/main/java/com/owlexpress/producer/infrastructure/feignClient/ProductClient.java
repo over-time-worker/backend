@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface ProductClient {
 
     @DeleteMapping("api/products/{productsId}")
-     CommonDto<Void> delete(
+     CommonDto<Boolean> delete(
             @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID productsId
     );
