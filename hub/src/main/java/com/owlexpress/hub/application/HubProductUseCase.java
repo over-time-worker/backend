@@ -2,64 +2,65 @@ package com.owlexpress.hub.application;
 
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
-import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
+import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.helper.PassportHelper;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
+import com.owlexpress.hub.domain.repository.HubProductRepository;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.infrastructure.client.OrderClient;
 import com.owlexpress.hub.infrastructure.client.ProductClient;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto.Product;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class HubProductUseCase {
 
     private final HubRepository hubRepository;
     private final ProductClient productClient;
     private final OrderClient orderClient;
     private final PassportHelper passportHelper;
+    private final HubProductRepository hubProductRepository;
 
     public HubProduct create(HubProductCreateRequestDto requestDto,
-            String passport
+                             String passport
     ) {
+        log.info("producerId= {} " , requestDto.getProducerId());
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
         Hub hub = HubHelper.findByHubId(requestDto.getHubId(), hubRepository);
 
-        // TODO: 상품 있는지 체크
-
-        HubProduct hubProduct = requestDto.toEntityWithHub(hub);
+        HubProduct hubProduct = requestDto.toEntityWithHub(hub,requestDto);
         hubProduct.createdEntity(passportDto.getUserId());
+        hubProductRepository.save(hubProduct);
         hub.getHubProduct()
-                .add(hubProduct);
+           .add(hubProduct);
+
+        hubRepository.save(hub);
         return hubProduct;
     }
 
     @Transactional
     public void delete(UUID hubProductId,
-            String passport
+                       String passport
     ) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         HubProduct hubProduct = hubRepository.findByHubProductId(hubProductId)
-                .orElseThrow(HubProductNotFoundException::new);
+                                             .orElseThrow(HubProductNotFoundException::new);
 
         hubProduct.deleteEntity(passportDto.getUserId());
 
