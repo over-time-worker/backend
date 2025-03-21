@@ -1,5 +1,6 @@
 package com.owlexpress.hub.infrastructure.repository.hub;
 
+import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
@@ -83,6 +84,11 @@ public class HubRepositoryImpl implements HubRepository {
     @Override
     public List<HubProductStockResponseDto> findHubProductStocks(List<UUID> products) {
         return hubJpaRepository.findProductsWithStock(products);
+    }
+
+    @Override
+    public List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds) {
+        return hubQueryRepository.test(productIds);
     }
 
 }
