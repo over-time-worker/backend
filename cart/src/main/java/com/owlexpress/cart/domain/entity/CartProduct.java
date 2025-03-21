@@ -52,6 +52,9 @@ public class CartProduct extends BaseEntity {
     @Column(name = "product_type")
     private ProductType productType;
 
+    @Column(name = "is_sold_out")
+    private Boolean isSoldOut;
+
     @Builder
     public CartProduct(
             Cart cart,
@@ -59,7 +62,8 @@ public class CartProduct extends BaseEntity {
             String productName,
             BigDecimal productPrice,
             Integer productQuantity,
-            ProductType productType
+            ProductType productType,
+            Boolean isSoldOut
     ) {
         this.cart = cart;
         this.productId = productId;
@@ -67,7 +71,10 @@ public class CartProduct extends BaseEntity {
         this.productPrice = productPrice;
         this.productQuantity = productQuantity;
         this.productType = productType;
+        this.isSoldOut = isSoldOut;
     }
+
+    public void setIsSoldOut (Boolean isSoldOut) { this.isSoldOut = isSoldOut; }
 
     public void deleteCartProduct(Long userId) {
         super.softDeleteData(userId);
