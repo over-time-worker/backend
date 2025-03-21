@@ -2,6 +2,8 @@ package com.owlexpress.user.application.service;
 
 import static com.owlexpress.user.common.exception.ExceptionMessage.USER_NOT_FOUND_MESSAGE;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.owlexpress.user.common.PassportHelper;
 import com.owlexpress.user.common.util.PageUtil;
 import com.owlexpress.user.domain.entity.User;
 import com.owlexpress.user.domain.repository.UserRepository;
@@ -42,9 +44,11 @@ public class MasterServiceImpl implements MasterService {
     }
 
     @Override
-    public void delete(Long userId) {
-        User user = getUser(userId);
-        user.deleteUser(userId);
+    public void delete(String passport) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PassportHelper helper = objectMapper.convertValue(passport, PassportHelper.class);
+        User user = getUser(helper.getUserId());
+        user.deleteUser(helper.getUserId());
     }
 
     @Override

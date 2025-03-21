@@ -7,5 +7,8 @@ public class ApiResponseMessageConstant {
     public static final String GET_USER_INFO_SUCCESS = "회원 정보 조회 성공";
     public static final String UPDATE_USER_INFO_SUCCESS = "회원 정보 수정 성공";
     public static final String UPDATE_USER_PASSWORD_SUCCESS = "회원 비밀번호 변경 성공";
+    public static final String USER_SEARCH_SUCCESS = "회원 검색 성공";
+    public static final String USER_APPROVE_SUCCESS = "회원 가입 승인 성공";
+    public static final String USER_ROLE_UPDATE_SUCCESS = "회원 권한 변경 성공";
 
 }

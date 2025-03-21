@@ -12,15 +12,14 @@ import com.owlexpress.user.presentation.dto.request.UserSigninRequestDto;
 import com.owlexpress.user.presentation.dto.request.UserSignupRequestDto;
 import com.owlexpress.user.presentation.dto.response.GetUserInfoResponseDto;
 import com.owlexpress.user.presentation.dto.response.UserSigninResponseDto;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +31,8 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<CommonDto<Void>> signUp(
-            @Valid @RequestBody UserSignupRequestDto userSignupRequestDto
+            // TODO : FeignClient 연결 후 @Valid 검증
+            @RequestBody UserSignupRequestDto userSignupRequestDto
     ) {
         userService.signup(userSignupRequestDto);
 
@@ -48,7 +48,8 @@ public class UserController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<CommonDto<UserSigninResponseDto>> signIn(
-            @Valid @RequestBody UserSigninRequestDto userSigninRequestDto
+            // TODO : FeignClient 연결 후 @Valid 검증
+            @RequestBody UserSigninRequestDto userSigninRequestDto
     ) {
         UserSigninResponseDto signin = userService.signin(userSigninRequestDto);
 
@@ -64,10 +65,9 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<CommonDto<GetUserInfoResponseDto>> get(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @PathVariable("userId") Long userId
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        GetUserInfoResponseDto getUserInfoResponseDto = userService.find(userId);
+        GetUserInfoResponseDto getUserInfoResponseDto = userService.find(passport);
 
         CommonDto<GetUserInfoResponseDto> commonDto = CommonDto.<GetUserInfoResponseDto>builder()
                 .status(HttpStatus.OK)
@@ -81,12 +81,11 @@ public class UserController {
 
     @PatchMapping("/password")
     public ResponseEntity<CommonDto<Void>> patch(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @Valid @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto
     ) {
-        // TODO : Passport 적용 이후 Service로 전달 후 UserId 변환
-        Long userId = 1L;
-        userService.changePassword(userId, updatePasswordRequestDto);
+
+        userService.changePassword(passport, updatePasswordRequestDto);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)

@@ -11,7 +11,7 @@ public interface MasterService {
 
     void updateUserInfo (UpdateUserInfoRequestDto updateUserInfoRequestDto);
 
-    void delete(Long userId);
+    void delete(String passport);
 
     void approvalUser(ApprovalUserRequestDto approvalUserRequestDto);
 
