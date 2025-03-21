@@ -101,15 +101,17 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
         return new PageImpl<>(hubProducts, pageable, count);
     }
 
-    public List<HubProductInfoResponseDto> test(List<UUID> hubProductIds) {
+    public List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> hubProductIds) {
 
         return queryFactory.select(
                         Projections.constructor(
                                 HubProductInfoResponseDto.class,
                                 hubProduct.hub.hubId,
+                                hubProduct.hub.location,
                                 hubProduct.hubProductId,
+                                hubProduct.productName,
                                 hubProduct.productStock,
-                                hubProduct.hub.location
+                                hubProduct.productType
                         )
                 )
                 .from(hubProduct)

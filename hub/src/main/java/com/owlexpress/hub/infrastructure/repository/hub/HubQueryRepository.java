@@ -14,5 +14,5 @@ public interface HubQueryRepository {
 
     Page<HubProduct> searchHubProduct(Pageable pageable, String keyword, String orderBy, String sort);
 
-    List<HubProductInfoResponseDto> test(List<UUID> hubProductIds);
+    List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> hubProductIds);
 }

@@ -1,6 +1,7 @@
 package com.owlexpress.hub.application.dto.response;
 
 import com.owlexpress.hub.common.constant.ProductType;
+import com.owlexpress.hub.domain.entity.HubProduct;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,6 +17,7 @@ public class HubProductInfoResponseDto {
     private Point location;
     private UUID productId;
     private String productName;
+    private Long productStock;
     private ProductType productType;
 
     @Builder
@@ -24,13 +26,19 @@ public class HubProductInfoResponseDto {
             Point location,
             UUID productId,
             String productName,
+            Long productStock,
             ProductType productType
     ) {
         this.hubId = hubId;
         this.location = location;
         this.productId = productId;
         this.productName = productName;
+        this.productStock = productStock;
         this.productType = productType;
     }
 
+    public HubProduct toEntity() {
+        // TODO: HubProduct 엔티티로 변환
+        return null;
+    }
 }
