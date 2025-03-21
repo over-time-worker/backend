@@ -1,19 +1,22 @@
 package com.owlexpress.cart.application.service;
 
 import com.owlexpress.cart.presentation.dto.request.AddCartProductRequestDto;
+import com.owlexpress.cart.presentation.dto.request.CartProductDeleteRequestDto;
 import com.owlexpress.cart.presentation.dto.response.CartResponseDto;
 import java.util.UUID;
 
 public interface CartService {
-    void create(UUID consumerId, AddCartProductRequestDto addCartProductRequestDto, Long userId);
+    void create(UUID consumerId, AddCartProductRequestDto addCartProductRequestDto, String passport);
 
-    void increase(UUID cartId, UUID cartProductId, Long userId);
+    void increase(UUID cartId, UUID cartProductId, String passport);
 
-    void decrease(UUID cartId, UUID cartProductId, Long userId);
+    void decrease(UUID cartId, UUID cartProductId, String passport);
 
-    void deleteCartProduct(UUID cartId, UUID cartProductId, Long userId);
+    void deleteCartProduct(UUID cartId, UUID cartProductId, String passport);
 
-    void deleteCart(UUID cartId, Long userId);
+    void deleteCart(UUID cartId, String passport);
 
-    CartResponseDto find(UUID consumerId);
+    CartResponseDto find(String passport, UUID consumerId);
+
+    void deleteCartProductsFromOrder(UUID consumerId, String passport, CartProductDeleteRequestDto requestDto);
 }

@@ -34,6 +34,7 @@ public class CartResponseDto {
                         .productQuantity(cp.getProductQuantity())
                         .productPrice(cp.getProductPrice())
                         .productType(cp.getProductType())
+                        .isSoldOut(cp.getIsSoldOut())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -47,5 +48,6 @@ public class CartResponseDto {
         private Integer productQuantity;
         private BigDecimal productPrice;
         private ProductType productType;
+        private Boolean isSoldOut;
     }
 }

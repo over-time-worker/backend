@@ -10,6 +10,7 @@ import static com.owlexpress.cart.presentation.dto.ApiResponseMessageConstant.FI
 import com.owlexpress.cart.application.service.CartService;
 import com.owlexpress.cart.common.CommonDto;
 import com.owlexpress.cart.presentation.dto.request.AddCartProductRequestDto;
+import com.owlexpress.cart.presentation.dto.request.CartProductDeleteRequestDto;
 import com.owlexpress.cart.presentation.dto.response.CartResponseDto;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,11 +35,10 @@ public class CartController {
     @PostMapping("/{consumerId}")
     public ResponseEntity<CommonDto<Void>> create(
             @PathVariable("consumerId") UUID consumerId,
+            @RequestHeader("X-User-Passport") String passport,
             @RequestBody AddCartProductRequestDto addCartProductRequestDto
     ){
-        // TODO : gateway passport userId 적용
-        Long userId = 1L;
-        cartService.create(consumerId, addCartProductRequestDto, userId);
+        cartService.create(consumerId, addCartProductRequestDto, passport);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
@@ -52,10 +53,11 @@ public class CartController {
 
     @GetMapping("/{consumerId}")
     public ResponseEntity<CommonDto<CartResponseDto>> find(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("consumerId") UUID consumerId
     ) {
 
-        CartResponseDto cartResponseDto = cartService.find(consumerId);
+        CartResponseDto cartResponseDto = cartService.find(passport, consumerId);
 
         CommonDto<CartResponseDto> commonDto = CommonDto
                 .<CartResponseDto>builder()
@@ -70,11 +72,11 @@ public class CartController {
 
     @PatchMapping("/{cartId}/increase/{cartProductId}")
     public ResponseEntity<CommonDto<Void>> increase(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("cartId") UUID cartId,
             @PathVariable("cartProductId") UUID cartProductId
     ) {
-        Long userId = 1L;
-        cartService.increase(cartId, cartProductId, userId);
+        cartService.increase(cartId, cartProductId, passport);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
@@ -89,11 +91,11 @@ public class CartController {
 
     @PatchMapping("/{cartId}/decrease/{cartProductId}")
     public ResponseEntity<CommonDto<Void>> decrease(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("cartId") UUID cartId,
             @PathVariable("cartProductId") UUID cartProductId
     ) {
-        Long userId = 1L;
-        cartService.decrease(cartId, cartProductId, userId);
+        cartService.decrease(cartId, cartProductId, passport);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
@@ -109,10 +111,10 @@ public class CartController {
     @DeleteMapping("/{cartId}/{cartProductId}")
     public ResponseEntity<CommonDto<Void>> deleteCartProduct(
             @PathVariable("cartId") UUID cartId,
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("cartProductId") UUID cartProductId
     ) {
-        Long userId = 1L;
-        cartService.deleteCartProduct(cartId, cartProductId, userId);
+        cartService.deleteCartProduct(cartId, cartProductId, passport);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
@@ -127,11 +129,30 @@ public class CartController {
 
     @DeleteMapping("/{cartId}")
     public ResponseEntity<CommonDto<Void>> deleteCart(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("cartId") UUID cartId
     ) {
         // TODO : 장바구니 삭제는 MASTER의 consumer 계정 삭제시 수행
-        Long userId = 1L;
-        cartService.deleteCart(cartId, userId);
+        cartService.deleteCart(cartId, passport);
+
+        CommonDto<Void> commonDto = CommonDto
+                .<Void>builder()
+                .status(HttpStatus.ACCEPTED)
+                .code(HttpStatus.ACCEPTED.value())
+                .message(CART_DELETE_SUCCESS_MESSAGE)
+                .data(null)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+    }
+
+    @DeleteMapping("/{consumerId}")
+    public ResponseEntity<CommonDto<Void>> deleteCartProducts(
+            @PathVariable("consumerId") UUID consumerId,
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody CartProductDeleteRequestDto requestDto
+    ) {
+        cartService.deleteCartProductsFromOrder(consumerId, passport, requestDto);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
