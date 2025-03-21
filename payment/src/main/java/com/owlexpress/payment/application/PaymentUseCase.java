@@ -1,7 +1,9 @@
 package com.owlexpress.payment.application;
 
+import com.owlexpress.payment.application.dto.PassportDto;
 import com.owlexpress.payment.application.dto.response.OrderFindResponseDto;
 import com.owlexpress.payment.application.dto.response.PaymentFindResponseDto;
+import com.owlexpress.payment.common.PassportHelper;
 import com.owlexpress.payment.common.exception.PaymentException;
 import com.owlexpress.payment.common.exception.PaymentException.OrderDoesNotMatchException;
 import com.owlexpress.payment.common.exception.PaymentException.OrderNotFoundException;
@@ -33,26 +35,27 @@ public class PaymentUseCase {
     private final WebClient webClient;
     private final PaymentRepository paymentRepository;
     private final OrderClient orderClient;
+    private final PassportHelper passportHelper;
 
-    public void createPayment(PaymentCreateRequestDto requestDto) {
+    public void createPayment(PaymentCreateRequestDto requestDto, String passport) {
         Payment payment = requestDto.toEntity();
         // TODO : 결제사 승인 요청
 
-        // TODO : PASSPORT에서 값 추출
-        payment.createdEntity(1L);
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
+
+        payment.createdEntity(passportDto.getUserId());
         paymentRepository.save(payment);
 
     }
 
     @Transactional
-    public void deletePayment(PaymentDeleteRequestDto requestDto) {
+    public void deletePayment(PaymentDeleteRequestDto requestDto, String passport) {
         Payment payment = paymentRepository.findByTransactionId(requestDto.getTransactionId())
                 .orElseThrow(PaymentNotFoundException::new);
 
-        // TODO: 결제사 취소 요청
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
 
-        // TODO: PASSPORT에서 값 추출
-        payment.deleteEntity(1L);
+        payment.deleteEntity(passportDto.getUserId());
     }
 
     public PaymentFindResponseDto find(UUID orderId) {

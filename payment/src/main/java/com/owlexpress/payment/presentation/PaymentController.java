@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,9 +29,10 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            @RequestBody PaymentCreateRequestDto requestDto
+            @RequestBody PaymentCreateRequestDto requestDto,
+            @RequestHeader("X-User-Passport") String passport
     ) {
-        paymentUseCase.createPayment(requestDto);
+        paymentUseCase.createPayment(requestDto, passport);
 
         CommonDto<Void> created = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
@@ -43,8 +45,11 @@ public class PaymentController {
     }
 
     @DeleteMapping
-    public ResponseEntity<CommonDto<Void>> delete(@RequestBody PaymentDeleteRequestDto requestDto) {
-        paymentUseCase.deletePayment(requestDto);
+    public ResponseEntity<CommonDto<Void>> delete(
+            @RequestBody PaymentDeleteRequestDto requestDto,
+            @RequestHeader("X-User-Passport") String passport
+    ) {
+        paymentUseCase.deletePayment(requestDto, passport);
 
         CommonDto<Void> deleted = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
