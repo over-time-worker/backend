@@ -15,6 +15,16 @@ public class HubProductRepositoryImpl implements HubProductRepository {
 
     @Override
     public Optional<HubProduct> findByProductId(UUID productId) {
-        return hubProductJpaRepository.findById(productId);
+        return hubProductJpaRepository.findByProductId(productId);
+    }
+
+    @Override
+    public HubProduct save(HubProduct hubProduct) {
+        return hubProductJpaRepository.save(hubProduct);
+    }
+
+    @Override
+    public Optional<HubProduct> findByHubProductId(UUID hubProductId) {
+        return hubProductJpaRepository.findById(hubProductId);
     }
 }

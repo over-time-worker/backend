@@ -5,9 +5,7 @@ import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
 import com.owlexpress.hub.common.exception.HubException;
 import com.owlexpress.hub.common.exception.HubProductException;
-import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.helper.PassportHelper;
-import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubIntervalInfoRepository;
 import com.owlexpress.hub.domain.repository.HubProductRepository;
@@ -25,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -86,7 +83,7 @@ public class HubProductServiceImpl implements HubProductService {
     @Override
     @Transactional(readOnly = true)
     public HubProductFindResponseDto findHubProduct(UUID hubProductId) {
-        HubProduct hubProduct = hubRepository.findByHubProductId(hubProductId)
+        HubProduct hubProduct = hubProductRepository.findByHubProductId(hubProductId)
                                              .orElseThrow(HubProductException.HubProductNotFoundException::new);
 
         return HubProductFindResponseDto.fromEntity(hubProduct);

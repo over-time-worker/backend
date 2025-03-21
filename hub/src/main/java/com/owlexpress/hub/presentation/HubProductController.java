@@ -15,6 +15,7 @@ import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/hub/product")
 @RequiredArgsConstructor
+@Slf4j
 public class HubProductController {
 
     private final HubService hubService;
