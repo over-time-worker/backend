@@ -1,6 +1,6 @@
 package com.owlexpress.hub.presentation.dto.request;
 
-import com.owlexpress.hub.common.ProductType;
+import com.owlexpress.hub.common.constant.ProductType;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import jakarta.validation.constraints.NotBlank;

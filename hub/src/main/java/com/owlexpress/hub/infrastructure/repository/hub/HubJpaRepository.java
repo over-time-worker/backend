@@ -1,9 +1,8 @@
-package com.owlexpress.hub.infrastructure.repository;
+package com.owlexpress.hub.infrastructure.repository.hub;
 
 import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
-import java.util.Map;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -35,4 +34,5 @@ public interface HubJpaRepository extends JpaRepository<Hub, UUID> {
             WHERE hp.hubProductId in :productIds
             """)
     List<HubProductStockResponseDto> findProductsWithStock(List<UUID> productIds);
+
 }

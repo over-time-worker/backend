@@ -1,4 +1,4 @@
-package com.owlexpress.hub.common;
+package com.owlexpress.hub.common.constant;
 
 import lombok.RequiredArgsConstructor;
 

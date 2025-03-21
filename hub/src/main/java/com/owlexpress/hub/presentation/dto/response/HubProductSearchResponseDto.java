@@ -1,6 +1,6 @@
 package com.owlexpress.hub.presentation.dto.response;
 
-import com.owlexpress.hub.common.ProductType;
+import com.owlexpress.hub.common.constant.ProductType;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import lombok.AccessLevel;
 import lombok.Builder;

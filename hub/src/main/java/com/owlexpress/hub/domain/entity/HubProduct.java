@@ -1,7 +1,7 @@
 package com.owlexpress.hub.domain.entity;
 
 import com.owlexpress.hub.common.BaseEntity;
-import com.owlexpress.hub.common.ProductType;
+import com.owlexpress.hub.common.constant.ProductType;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;

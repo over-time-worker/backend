@@ -39,4 +39,5 @@ public interface HubRepository {
     List<Hub> findAllByParentHub(Hub parentHubId);
 
     List<HubProductStockResponseDto> findHubProductStocks(List<UUID> products);
+
 }

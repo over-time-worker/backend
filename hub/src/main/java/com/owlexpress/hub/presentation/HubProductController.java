@@ -3,6 +3,7 @@ package com.owlexpress.hub.presentation;
 import com.owlexpress.hub.application.HubProductUseCase;
 import com.owlexpress.hub.application.dto.response.HubProductIsEnoughResponseDto;
 import com.owlexpress.hub.common.Constant.ResponseMessage;
+import com.owlexpress.hub.domain.service.HubProductService;
 import com.owlexpress.hub.domain.service.HubService;
 import com.owlexpress.hub.presentation.dto.CommonDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductCheckRequestDto;
@@ -26,13 +27,15 @@ import java.util.UUID;
 public class HubProductController {
 
     private final HubService hubService;
+    private final HubProductService hubProductService;
     private final HubProductUseCase hubProductUseCase;
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
+            @RequestHeader("X-User-Passport") String passport,
             @RequestBody HubProductCreateRequestDto requestDto
     ) {
-        hubProductUseCase.create(requestDto);
+        hubProductUseCase.create(requestDto,passport);
         CommonDto<Void> created = CommonDto.<Void>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
@@ -45,9 +48,10 @@ public class HubProductController {
 
     @PutMapping
     public ResponseEntity<CommonDto<HubProductUpdateRequestDto>> update(
+            @RequestHeader("X-User-Passport") String passport,
             @RequestBody HubProductUpdateRequestDto requestDto
     ) {
-        hubService.update(requestDto);
+        hubProductService.update(requestDto,passport);
         CommonDto<HubProductUpdateRequestDto> updated = CommonDto.<HubProductUpdateRequestDto>builder()
                 .status(HttpStatus.ACCEPTED)
                 .code(HttpStatus.ACCEPTED.value())
@@ -66,7 +70,7 @@ public class HubProductController {
             @RequestParam(name = "orderBy", defaultValue = "createdAt") String orderBy,
             @RequestParam(name = "q", defaultValue = "") String q
     ) {
-        PagedModel<HubProductSearchResponseDto> products = hubService.searchHubProduct(
+        PagedModel<HubProductSearchResponseDto> products = hubProductService.searchHubProduct(
                 page, size, sort, q, orderBy);
         CommonDto<PagedModel<HubProductSearchResponseDto>> Searched =
                 CommonDto.<PagedModel<HubProductSearchResponseDto>>builder()
@@ -84,7 +88,7 @@ public class HubProductController {
     public ResponseEntity<CommonDto<HubProductFindResponseDto>> find(
             @PathVariable("hubProductId") UUID hubProductId
     ) {
-        HubProductFindResponseDto hubProduct = hubService.findHubProduct(hubProductId);
+        HubProductFindResponseDto hubProduct = hubProductService.findHubProduct(hubProductId);
 
         CommonDto<HubProductFindResponseDto> found =
                 CommonDto.<HubProductFindResponseDto>builder()
@@ -97,11 +101,29 @@ public class HubProductController {
         return ResponseEntity.ok(found);
     }
 
+    @GetMapping("/{productId}/product")
+    public ResponseEntity<CommonDto<HubProductFindResponseDto>> findHubProduct(
+            @PathVariable("productId") UUID productId
+    ) {
+        HubProductFindResponseDto hubProduct = hubProductService.findHubProductByProductId(productId);
+
+        CommonDto<HubProductFindResponseDto> found =
+                CommonDto.<HubProductFindResponseDto>builder()
+                         .status(HttpStatus.OK)
+                         .code(HttpStatus.OK.value())
+                         .message(ResponseMessage.HUB_PRODUCT_FIND_SUCCESS)
+                         .data(hubProduct)
+                         .build();
+
+        return ResponseEntity.ok(found);
+    }
+
     @DeleteMapping("/{hubProductId}")
     public ResponseEntity<CommonDto<Void>> delete(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("hubProductId") UUID hubProductId
     ) {
-        hubProductUseCase.delete(hubProductId);
+        hubProductUseCase.delete(hubProductId,passport);
         CommonDto<Void> deleted =
                 CommonDto.<Void>builder()
                         .status(HttpStatus.ACCEPTED)
@@ -118,7 +140,7 @@ public class HubProductController {
             @RequestBody List<HubProductCheckRequestDto> requestDto
     ) {
         List<HubProductIsEnoughResponseDto> isOrderPossibleByProductId =
-                hubService.checkHubProductStocks(requestDto);
+                hubProductService.checkHubProductStocks(requestDto);
 
         CommonDto<List<HubProductIsEnoughResponseDto>> found =
                 CommonDto.<List<HubProductIsEnoughResponseDto>>builder()

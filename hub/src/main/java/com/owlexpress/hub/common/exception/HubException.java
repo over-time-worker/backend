@@ -16,4 +16,10 @@ public class HubException {
             super(ErrorMessage.ROUTE_NOT_FOUND_EXCEPTION);
         }
     }
+
+    public static class HubProductNotFoundException extends RuntimeException {
+        public HubProductNotFoundException() {
+            super(ErrorMessage.HUB_PRODUCT_NOT_FOUND_EXCEPTION);
+        }
+    }
 }
