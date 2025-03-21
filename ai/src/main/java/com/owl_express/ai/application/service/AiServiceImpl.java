@@ -8,6 +8,7 @@ import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateReques
 import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
 import com.owl_express.ai.application.exceptions.AiException;
+import com.owl_express.ai.application.exceptions.AiException.MessageNotFoundException;
 import com.owl_express.ai.common.helper.PassportHelper;
 import com.owl_express.ai.common.util.CommonUtil;
 import com.owl_express.ai.common.util.PageUtil;
@@ -104,7 +105,7 @@ public class AiServiceImpl implements AiService {
     public MessageFindResponseDto find(UUID aiId) {
 
         Ai ai = aiRepository.findById(aiId).orElseThrow(
-                () -> new AiException.MessageNotFoundException(MESSAGE_NOT_FOUND_MESSAGE));
+                () -> new MessageNotFoundException(MESSAGE_NOT_FOUND_MESSAGE));
 
         return MessageFindResponseDto.toDto(ai);
 
@@ -115,6 +116,15 @@ public class AiServiceImpl implements AiService {
         Pageable pageable = PageUtil.getPageable(page, size, sort, orderBy);
         Page<MessageFindResponseDto> paged = aiRepository.searchMessages(pageable, keyword);
         return new PagedModel<>(paged);
+    }
+
+    @Override
+    public void delete(UUID aiId, String passport) {
+        Ai ai = aiRepository.findById(aiId).orElseThrow(
+                () -> new MessageNotFoundException(MESSAGE_NOT_FOUND_MESSAGE));
+
+        ai.deleteEntity(passportHelper.getPassportDto(passport).getUserId());
+        aiRepository.save(ai);
     }
 
     private String createHubRequestMessage(HubDeliverMessageCreateRequestDto messageCreateRequestDto) {

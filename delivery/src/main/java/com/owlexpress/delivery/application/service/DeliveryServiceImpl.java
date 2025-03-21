@@ -9,6 +9,7 @@ import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
+import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
@@ -36,6 +37,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final PassportHelper passportHelper;
+    private final DeliveryUsecase deliveryUsecase;
 
     @Override
     @Transactional
@@ -72,14 +74,10 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         Delivery delivery = getDeliveryById(deliveryId);
 
-        if(delivery.getDeliveryStatus().equals(DeliveryStatus.PENDING_AT_HUB)) {
-            delivery.deleteDelivery(userId);
-            // TODO : 주문 서비스에 주문 삭제 요청
-            //요청 실패시 예외처리
-
-        } else {
+        if(!delivery.getDeliveryStatus().equals(DeliveryStatus.PENDING_AT_HUB)) {
             throw new DeliveryDeleteFailException(DELIVERY_DELETE_FAIL_MESSAGE);
         }
+        delivery.deleteDelivery(userId);
     }
 
     @Override
@@ -155,24 +153,23 @@ public class DeliveryServiceImpl implements DeliveryService {
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, deliveryHistoryList);
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,userId);
 
-        // TODO : 배송 담당자 서비스에 FeignClient로 배송 담당자 반환 처리
-        //반환 실패시 예외 처리
+        deliveryUsecase.returnHubDeliverToDeliveryManager(deliveryHistory.getDeliverId());
 
-        // 꺼내온 허브가 마지막 순서라면 ?
+        DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
+                delivery,
+                deliveryHistory,
+                delivery.getDeliveryHistories()
+        );
+
         if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 1) {
 
-            DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
-                    delivery,
-                    deliveryHistory,
-                    delivery.getDeliveryHistories()
-            );
-            // TODO : 배송 담당자 서비스에 FeignClient로 업체 배송 담당자 요청
-            // 응답 예외 처리
+            AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto);
+            delivery.updateCompanyDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
 
             delivery.updateCompanyDeliver(UUID.randomUUID(), userId);
         } else {
-            // TODO : 배송 담당자 서비스에 FeignClient로 허브 배송 담당자 요청
-            // 요청 실패시 예외 처리
+            AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto);
+            delivery.updateHubDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
         }
     }
 
@@ -184,9 +181,6 @@ public class DeliveryServiceImpl implements DeliveryService {
             DeliveryCompleteRequestDto requestDto,
             String passport
     ) {
-        // TODO : 배송 담당자 서비스에 FeignClient로 배송 담당자 반환 처리
-        //반환 실패시 예외 처리
-
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
@@ -194,6 +188,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE , requestDto, userId);
+
+        deliveryUsecase.returnCompanyDeliverToDeliveryManager(deliveryHistory.getDeliverId());
     }
 
     @Transactional
@@ -206,15 +202,19 @@ public class DeliveryServiceImpl implements DeliveryService {
          List<DeliveryHistory> deliveryHistoryList = DeliveryHistory.createDeliveryHistoryList(delivery, hubListDtos, userId);
 
          delivery.updateDeliverHistoryList(deliveryHistoryList);
-         deliveryRepository.save(delivery);
 
-        DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
+         DeliveryHistory firstDeliveryHistory = deliveryHistoryList.get(0);
+
+         DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
                 delivery,
-                deliveryHistoryList.get(0),
+                 firstDeliveryHistory,
                 delivery.getDeliveryHistories()
-        );
-        // TODO : 배송 담당자 service로 첫 배송 담당자 배정 요청
-        // 예외 응답 처리
+         );
+
+         AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto);
+         delivery.updateHubDeliverInfo(firstDeliveryHistory, alarmCreateResponseDto, userId);
+
+         deliveryRepository.save(delivery);
     }
 
     private Delivery getDeliveryById(UUID deliveryId) {

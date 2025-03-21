@@ -1,17 +1,21 @@
 package com.owlexpress.delivery.common.advice;
 
 import com.owlexpress.delivery.application.dtos.CommonDto;
-import com.owlexpress.delivery.application.exceptions.DeliveryException;
-import com.owlexpress.delivery.application.exceptions.DeliveryException.AlarmFeignClientException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryManagerFeignClientException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryNotFoundException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedOrderTypeException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
+import com.owlexpress.delivery.application.exceptions.FeignExceptionHandlerStrategy;
+import feign.FeignException;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,17 +23,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionAdvice {
 
     public static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
     public static final String CONSTRAIN_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
-    public static final String ALARM_FEIGN_CLIENT_EXCEPTION = "handleAlarmFeignClientException : {}";
+    public static final String DELIVERY_MANAGER_FEIGN_CLIENT_EXCEPTION = "handleDeliveryManagerFeignClientException : {}";
     public static final String DELIVERY_NOT_FOUND_EXCEPTION = "handleDeliveryNotFoundException : {}";
     public static final String DELIVERY_HISTORY_NOT_FOUND_EXCEPTION = "handleDeliveryHistoryNotFoundException : {}";
     public static final String PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION = "handlePlatformTypeNotSupportedException : {}";
     public static final String DELIVERY_STATUS_NOT_SUPPORTED_EXCEPTION = "handleNotSupportedDeliveryStatusException : {}";
     public static final String DELIVERY_DELETE_FAIL_EXCEPTION = "handleDeliveryDeleteFailException : {}";
     public static final String NOT_SUPPORTED_ORDER_TYPE_EXCEPTION = "handleNotSupportedOrderTypeException : {}";
+    public static final String FEIGN_EXCEPTION = "handleFeignException : {}";
+
+    private final List<FeignExceptionHandlerStrategy> strategies;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -60,11 +68,11 @@ public class GlobalExceptionAdvice {
 
     }
 
-    @ExceptionHandler(AlarmFeignClientException.class)
+    @ExceptionHandler(DeliveryManagerFeignClientException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public CommonDto<Object> handleAlarmFeignClientException(AlarmFeignClientException e) {
+    public CommonDto<Object> handleDeliveryManagerFeignClientException(DeliveryManagerFeignClientException e) {
 
-        log.error(ALARM_FEIGN_CLIENT_EXCEPTION, e.getMessage());
+        log.error(DELIVERY_MANAGER_FEIGN_CLIENT_EXCEPTION, e.getMessage());
 
         return CommonDto.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -160,6 +168,24 @@ public class GlobalExceptionAdvice {
                 .message(e.getMessage())
                 .data(null)
                 .build();
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<CommonDto<Void>> handleFeignException(FeignException e) {
+        log.error(FEIGN_EXCEPTION, e.getMessage(), e);
+
+        return strategies.stream()
+                .filter(strategy -> strategy.supports(e))
+                .findFirst()
+                .map(strategy -> strategy.handleException(e))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        CommonDto.<Void>builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .message("알 수 없는 Feign 오류 발생: " + e.getMessage())
+                                .data(null)
+                                .build()
+                ));
     }
 
 }

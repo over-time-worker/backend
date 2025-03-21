@@ -19,4 +19,6 @@ public interface AiService {
     MessageFindResponseDto find(UUID aiId);
 
     PagedModel<MessageFindResponseDto> search(int page, int size, String sort, String orderBy, UUID keyword);
+
+    void delete(UUID aiId, String passport);
 }

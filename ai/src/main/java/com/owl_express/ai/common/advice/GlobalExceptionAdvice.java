@@ -1,6 +1,7 @@
 package com.owl_express.ai.common.advice;
 
 import com.owl_express.ai.application.dtos.CommonDto;
+import com.owl_express.ai.application.exceptions.AiException.MessageNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ public class GlobalExceptionAdvice {
 
     private static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
     private static final String CONSTRAINT_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
+    private static final String MESSAGE_NOT_FOUND_EXCEPTION = "handleMessageNotFoundException : {}";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -44,6 +46,21 @@ public class GlobalExceptionAdvice {
         return CommonDto.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .data(null)
+                .build();
+
+    }
+
+    @ExceptionHandler(MessageNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public CommonDto<Object> handleMessageNotFoundException(MessageNotFoundException e) {
+
+        log.error(MESSAGE_NOT_FOUND_EXCEPTION, e.getMessage());
+
+        return CommonDto.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .code(HttpStatus.NOT_FOUND.value())
                 .message(e.getMessage())
                 .data(null)
                 .build();
