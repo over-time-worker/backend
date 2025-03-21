@@ -4,6 +4,7 @@ import com.owlexpress.auth.application.dto.request.UserLoginRequestDto;
 import com.owlexpress.auth.application.dto.response.UserInfoResponseDto;
 import com.owlexpress.auth.common.TokenProvider;
 import com.owlexpress.auth.infrastructure.UserClient;
+import com.owlexpress.auth.presentation.dto.CommonDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String signIn(UserLoginRequestDto userLoginRequestDto) {
-//        UserInfoResponseDto responseDto = userClient.sigIn(userLoginRequestDto);
-        return provider.generateAccessToken(1L, "MASTER");
+        UserInfoResponseDto responseDto = userClient.sigIn(userLoginRequestDto).getData();
+        return provider.generateAccessToken(responseDto.getUserId(), responseDto.getRole());
     }
 }

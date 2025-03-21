@@ -31,7 +31,7 @@ public class AddPassportHeaderGatewayFilter implements GlobalFilter, Ordered {
 
     private final Set<String> ALLOWED_UNAUTHORIZED_REQUEST = Set.of(
             "/api/auth/sign-in",
-            "/api/users/signup"
+            "/api/users/sign-up"
     );
 
     @Override
