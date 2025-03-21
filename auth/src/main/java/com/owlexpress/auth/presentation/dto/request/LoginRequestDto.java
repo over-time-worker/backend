@@ -8,18 +8,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class LoginRequestDto {
 
     private String username;
     private String password;
 
+    @Builder
+    public LoginRequestDto(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
     // TODO: application 계층과 의존성 분리하기
     public UserLoginRequestDto toUserLoginRequestDto() {
         return UserLoginRequestDto.builder()
-                .username(this.username)
+                .accountId(this.username)
                 .password(this.password)
                 .build();
     }
