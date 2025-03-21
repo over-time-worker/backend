@@ -1,5 +1,6 @@
 package com.owlexpress.payment.application.dto.response;
 
+import com.owlexpress.payment.application.constant.ProductType;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -13,12 +14,12 @@ import lombok.NoArgsConstructor;
 public class OrderFindResponseDto {
 
     private BigDecimal totalPrice;
-    private List<Product> products;
+    private List<Product> orderProducts;
 
     @Builder
-    public OrderFindResponseDto(BigDecimal totalPrice, List<Product> products) {
+    public OrderFindResponseDto(BigDecimal totalPrice, List<Product> orderProducts) {
         this.totalPrice = totalPrice;
-        this.products = products;
+        this.orderProducts = orderProducts;
     }
 
     @Getter
@@ -27,28 +28,37 @@ public class OrderFindResponseDto {
 
         private UUID productId;
         private String productName;
-        private Long amount;
         private BigDecimal price;
+        private Long quantity;
+        private ProductType productType;
 
-        public Product(UUID productId, String productName, Long amount, BigDecimal price) {
+        public Product(
+                UUID productId,
+                String productName,
+                BigDecimal price,
+                Long quantity,
+                ProductType productType
+        ) {
             this.productId = productId;
             this.productName = productName;
-            this.amount = amount;
             this.price = price;
+            this.quantity = quantity;
+            this.productType = productType;
         }
     }
 
     public PaymentFindResponseDto toPaymentFindResponseDto() {
         return PaymentFindResponseDto.builder()
                 .totalPrice(this.totalPrice)
-                .productList(
-                        products.stream()
+                .orderProducts(
+                        orderProducts.stream()
                                 .map(product ->
                                         PaymentFindResponseDto.Order.builder()
                                                 .productId(product.getProductId())
                                                 .productName(product.getProductName())
+                                                .productType(product.getProductType())
                                                 .price(product.getPrice())
-                                                .quantity(product.getAmount())
+                                                .quantity(product.getQuantity())
                                                 .build()
                                 ).toList()
                 ).build();
