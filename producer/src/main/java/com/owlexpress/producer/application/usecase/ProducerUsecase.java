@@ -13,6 +13,7 @@ import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.repository.ProducerRepository;
 import com.owlexpress.producer.infrastructure.feignClient.ProductClient;
 import com.owlexpress.producer.infrastructure.feignClient.UserFeignClient;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -37,8 +38,9 @@ public class ProducerUsecase {
     private final PassportHelper passportHelper;
 
     @Transactional
-    public void create(CreateProducerRequestDto createProducerRequestDto,
-                       String passport
+    public void create(
+            CreateProducerRequestDto createProducerRequestDto,
+            String passport
     ) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
@@ -82,7 +84,9 @@ public class ProducerUsecase {
                                                                 .build();
 
             producer.getProductInfos()
-                    .forEach(productInfo -> productClient.update(updateProductDto, productInfo.getProductId()));
+                    .forEach(productInfo -> productClient.update(passport, updateProductDto,
+                                                                 productInfo.getProductId()
+                    ));
         }
 
 
@@ -93,7 +97,6 @@ public class ProducerUsecase {
             Producer producer,
             UpdateProducerRequestDto dto
     ) {
-        //TODO:: 데이터를 어떤것만 가져올지 정책적으로 정한 후에 코드 수정하기
         Optional.ofNullable(dto.getBusinessNumber())
                 .ifPresent(producer::setBusinessNumber);
         Optional.ofNullable(dto.getCompanyName())
@@ -113,13 +116,18 @@ public class ProducerUsecase {
     }
 
     @Transactional
-    public void delete(UUID producerId) {
+    public void delete(
+            UUID producerId,
+            String passport
+    ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         Producer producer = producerHelper.getProducer(producerId);
 
-            //1. 상품 삭제 처리 ->허브 상품쪽 알아서 이벤트 날아가므로 추가 작업 필요없음
-            productClient.delete(producerId);
-            // 모두 성공시 회사 softDelete
-            producer.softDeleteData(1L);
+        try {
+            productClient.delete(passport, producerId);
+        } catch (FeignException.BadRequest badRequest) {
+            producer.softDeleteData(passportDto.getUserId());
+        }
 
     }
 
