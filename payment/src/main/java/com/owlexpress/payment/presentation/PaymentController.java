@@ -32,6 +32,7 @@ public class PaymentController {
             @RequestBody PaymentCreateRequestDto requestDto,
             @RequestHeader("X-User-Passport") String passport
     ) {
+        // TODO : 주문에서 요청 넘어오면 정보 담아서 -> 허브 간 이동거리로 정보 전달
         paymentUseCase.createPayment(requestDto, passport);
 
         CommonDto<Void> created = CommonDto.<Void>builder()
