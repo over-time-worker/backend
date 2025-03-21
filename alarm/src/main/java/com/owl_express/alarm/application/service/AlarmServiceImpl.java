@@ -14,6 +14,7 @@ import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
+import com.owl_express.alarm.common.helper.PassportHelper;
 import com.owl_express.alarm.common.util.CommonUtil;
 import com.owl_express.alarm.common.util.PageUtil;
 import com.owl_express.alarm.domain.entity.Alarm;
@@ -52,13 +53,17 @@ public class AlarmServiceImpl implements AlarmService {
 
     private final AlarmRepository alarmRepository;
     private final AlarmUsecase alarmUsecase;
+    private final PassportHelper passportHelper;
 
     @Value("${slack.token}")
     private String slackBotToken;
 
     @Override
     @Transactional
-    public void createAlarmForHubDeliver(AlarmCreateRequestDto requestDto) {
+    public void createAlarmForHubDeliver(
+            AlarmCreateRequestDto requestDto,
+            String passport
+    ) {
         // TODO : ai 메세지 요청 feign client 통신 test
         MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto);
 
@@ -84,15 +89,17 @@ public class AlarmServiceImpl implements AlarmService {
                     .messageType(MessageType.NORMAL)
                     .build();
 
-            // TODO : UserId 넣어주기
-            alarm.createdEntity(1L);
+            alarm.createdEntity(passportHelper.getPassportDto(passport).getUserId());
             alarmRepository.save(alarm);
         }
     }
 
     @Override
     @Transactional
-    public AlarmCreateResponseDto createAlarmForCompanyDeliver(AlarmCreateRequestDto requestDto) {
+    public AlarmCreateResponseDto createAlarmForCompanyDeliver(
+            AlarmCreateRequestDto requestDto,
+            String passport
+    ) {
         // TODO : ai 메세지 요청 feign client 통신 test
         MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto);
 
@@ -119,8 +126,7 @@ public class AlarmServiceImpl implements AlarmService {
                     .messageId(platformMessageId)
                     .build();
 
-            // TODO : UserId 넣어주기
-            alarm.createdEntity(1L);
+            alarm.createdEntity(passportHelper.getPassportDto(passport).getUserId());
             alarmRepository.save(alarm);
 
             return AlarmCreateResponseDto.toDto(alarm, platformMessageId);
@@ -129,14 +135,17 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
-    public void delete(String channelId, String messageId) {
+    public void delete(
+            String channelId,
+            String messageId,
+            String passport
+    ) {
         deleteMessage(channelId, messageId);
 
         Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
                 () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
-        // TODO : UserId 넣어주기
-        alarm.deleteEntity(1L);
+        alarm.deleteEntity(passportHelper.getPassportDto(passport).getUserId());
         alarmRepository.save(alarm);
     }
 
