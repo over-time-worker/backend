@@ -59,15 +59,17 @@ public class HubProductCreateRequestDto {
         this.productStock = productStock;
     }
 
-    public HubProduct toEntityWithHub(Hub hub) {
+    public HubProduct toEntityWithHub(Hub hub,
+                                      HubProductCreateRequestDto requestDto
+    ) {
         return HubProduct.builder()
                 .hub(hub)
-                .producerId(this.producerId)
-                .producerName(this.producerName)
-                .productId(this.productId)
-                .productName(this.productName)
-                .productType(this.productType)
-                .productStock(this.productStock)
+                .producerId(requestDto.getProducerId())
+                .producerName(requestDto.getProducerName())
+                .productId(requestDto.getProductId())
+                .productName(requestDto.getProductName())
+                .productType(requestDto.getProductType())
+                .productStock(requestDto.getProductStock())
                 .build();
     }
 }
