@@ -94,8 +94,17 @@ public class HubProductUseCase {
          */
 
         Point consumerLocation = requestDto.getLocation();
+        List<Product> orderProducts = requestDto.getOrderProducts();
+
+        Map<UUID, Product> productByProductId = new HashMap<>();
+
+        orderProducts.forEach(
+                product -> productByProductId.put(product.getProductId(), product)
+        );
+
         // 상품 아이디 추출
-        List<UUID> productIds = requestDto.getOrderProducts().stream()
+
+        List<UUID> productIds = orderProducts.stream()
                 .map(Product::getProductId)
                 .toList();
 
@@ -110,12 +119,59 @@ public class HubProductUseCase {
                         );
 
         // 수령업체에서 가장 가까운 허브부터 검색
-        PriorityQueue<HubProductInfoResponseDto> hubProductSetByDistance =
+        PriorityQueue<List<HubProductInfoResponseDto>> hubProductSetByDistance =
                 new PriorityQueue<>(Comparator.comparing(
-                        hp -> hp.getLocation().distance(consumerLocation)
+                        // 각 허브마다 최소 한 개의 원소는 보장됨
+                        hp -> hp.get(0).getLocation().distance(consumerLocation)
                 ));
 
+        hubProductSetByDistance.addAll(hubProductSetByHub.values());
 
+        while (!hubProductSetByDistance.isEmpty()) {
+            List<HubProductInfoResponseDto> currentHub = hubProductSetByDistance.poll();
+
+            // 상품 개수가 맞지 않으면 볼 필요 X
+            if (currentHub.size() != orderProducts.size()) {
+                continue;
+            }
+
+            List<HubProductInfoResponseDto> toBeReduced = new ArrayList<>();
+
+            // O(N)
+            for (HubProductInfoResponseDto hubProductInfo : currentHub) {
+
+                Product orderProduct = productByProductId.getOrDefault(
+                        hubProductInfo.getProductId(),
+                        null
+                );
+
+                // 상품 ID가 다르거나 재고가 안맞으면 넘어감
+                if (
+                        orderProduct == null
+                                || orderProduct.getQuantity() > hubProductInfo.getProductStock()) {
+                    continue;
+                }
+
+                // 트랜잭션 분리 고려 (Propatgion.REQUIRES_NEW) -> 실제 재고 감소 로직은 여기서 처리?
+
+                toBeReduced.add(hubProductInfo); // 감소시킬 재고도 기록해줘야 함.
+                break;
+            }
+
+            // 감소시킬 재고가 모두 있으면
+            if (toBeReduced.size() == orderProducts.size()) {
+                for (HubProductInfoResponseDto hubProduct : toBeReduced) {
+                    // TODO: HubProduct 엔티티로 변환 후 재고 감소 로직 실행.
+                }
+
+                /*
+                TODO: HubProduct 엔티티 saveAll()로 저장. 왜? 현재는 DTO 프로젝션으로 조회해왔기 떄문에 영속성 컨텍스트에 엔티티 X
+                    그렇기 때문에 저장을 직접 수행해줘야 함.
+                 */
+
+            }
+
+        }
 
 
     }

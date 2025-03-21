@@ -88,7 +88,7 @@ public class HubRepositoryImpl implements HubRepository {
 
     @Override
     public List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds) {
-        return hubQueryRepository.test(productIds);
+        return hubQueryRepository.findAllHubProductsInOrders(productIds);
     }
 
 }
