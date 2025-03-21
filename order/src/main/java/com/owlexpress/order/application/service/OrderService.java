@@ -10,17 +10,18 @@ import java.util.UUID;
 import org.springframework.data.web.PagedModel;
 
 public interface OrderService {
-    CreateOrderResponseDto createOrder(Long userId ,CreateOrderRequestDto request);
+    CreateOrderResponseDto createOrder(String passport ,CreateOrderRequestDto request);
 
-    GetOrderResponseDto findOrder(UUID orderId);
+    GetOrderResponseDto findOrder(UUID orderId, String passport);
 
     void updateOrderStatus(UUID orderId,UpdateOrderStatusRequestDto request);
 
-    void updateOrder(UUID orderId, UpdateOrderRequestDto request, Long userId);
+    void updateOrder(UUID orderId, UpdateOrderRequestDto request, String passport);
 
-    void deleteOrder(UUID orderId, Long userId);
+    void deleteOrder(UUID orderId, String passport);
 
     PagedModel<OrderSearchResponseDto> search (
+            String passport,
             int page,
             int size,
             String sort,

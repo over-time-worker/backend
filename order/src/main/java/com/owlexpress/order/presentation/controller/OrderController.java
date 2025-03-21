@@ -7,7 +7,7 @@ import static com.owlexpress.order.presentation.dto.ApiResponseMessageConstant.S
 import static com.owlexpress.order.presentation.dto.ApiResponseMessageConstant.UPDATE_ORDER_SUCCESS_MESSAGE;
 
 import com.owlexpress.order.application.service.OrderService;
-import com.owlexpress.order.common.CommonDto;
+import com.owlexpress.order.common.dto.CommonDto;
 import com.owlexpress.order.presentation.dto.request.CreateOrderRequestDto;
 import com.owlexpress.order.presentation.dto.request.UpdateOrderRequestDto;
 import com.owlexpress.order.presentation.dto.response.CreateOrderResponseDto;
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,11 +37,10 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<CommonDto<CreateOrderResponseDto>> createOrder(
+            @RequestHeader("X-User-Passport") String passport,
             @RequestBody CreateOrderRequestDto request
     ) {
-        Long userId = 1L;
-
-        CreateOrderResponseDto responseDto = orderService.createOrder(userId, request);
+        CreateOrderResponseDto responseDto = orderService.createOrder(passport, request);
 
         CommonDto<CreateOrderResponseDto> commonDto = CommonDto
                 .<CreateOrderResponseDto>builder()
@@ -55,9 +55,10 @@ public class OrderController {
 
     @GetMapping("/{order_id}")
     public ResponseEntity<CommonDto<GetOrderResponseDto>> findOrder(
-        @PathVariable("order_id") UUID orderId
+            @RequestHeader("X-User-Passport") String passport,
+            @PathVariable("order_id") UUID orderId
     ){
-        GetOrderResponseDto response = orderService.findOrder(orderId);
+        GetOrderResponseDto response = orderService.findOrder(orderId, passport);
 
         CommonDto<GetOrderResponseDto> commonDto = CommonDto
                 .<GetOrderResponseDto>builder()
@@ -72,6 +73,7 @@ public class OrderController {
 
     @GetMapping("/search")
     public ResponseEntity<CommonDto<PagedModel<OrderSearchResponseDto>>> search(
+            @RequestHeader("X-User-Passport") String passport,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "sort", defaultValue = "createdAt") String sort,
@@ -80,6 +82,7 @@ public class OrderController {
             @RequestParam(name = "end_date", required = false) String endDate
     ){
         PagedModel<OrderSearchResponseDto> response = orderService.search(
+                passport,
                 page,
                 size,
                 sort,
@@ -101,12 +104,12 @@ public class OrderController {
 
     @PatchMapping("/{order_id}")
     public ResponseEntity<CommonDto<Void>> update(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("order_id") UUID orderId,
             @RequestBody UpdateOrderRequestDto requestDto
     ){
-        Long userId = 1L;
 
-        orderService.updateOrder(orderId, requestDto, userId);
+        orderService.updateOrder(orderId, requestDto, passport);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
@@ -121,11 +124,11 @@ public class OrderController {
 
     @DeleteMapping("/{order_id}")
     public ResponseEntity<CommonDto<Void>> delete(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable("order_id") UUID orderId
     ){
-        Long userId = 1L;
 
-        orderService.deleteOrder(orderId, userId);
+        orderService.deleteOrder(orderId, passport);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
