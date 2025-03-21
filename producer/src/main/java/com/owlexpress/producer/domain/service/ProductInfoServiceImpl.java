@@ -1,6 +1,8 @@
 package com.owlexpress.producer.domain.service;
 
+import com.owlexpress.producer.common.dto.response.PassportDto;
 import com.owlexpress.producer.common.exception.ProductInfoException;
+import com.owlexpress.producer.common.helper.PassportHelper;
 import com.owlexpress.producer.common.helper.ProducerHelper;
 import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.entity.ProductInfo;
@@ -22,10 +24,14 @@ public class ProductInfoServiceImpl implements ProductInfoService {
     private final ProductInfoRepository productInfoRepository;
     private final ProducerRepository producerRepository;
     private final ProducerHelper producerHelper;
+    private final PassportHelper passportHelper;
 
     @Override
     @Transactional
-    public void create(CreateProductInfoRequestDto createProductInfoRequestDto) {
+    public void create(CreateProductInfoRequestDto createProductInfoRequestDto, String passport
+    ) {
+
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
 
         //1. 상품명 중복 검사
         productInfoRepository.findByProductNmae(createProductInfoRequestDto.getProductName())
@@ -41,7 +47,7 @@ public class ProductInfoServiceImpl implements ProductInfoService {
                 createProductInfoRequestDto,
                 producer
         );
-        productInfo.updateCreateData(1L); //TODO:: AuditAware후 삭제
+        productInfo.updateCreateData(passportDto.getUserId());
 
         producer.getProductInfos()
                 .add(productInfo);
@@ -56,14 +62,17 @@ public class ProductInfoServiceImpl implements ProductInfoService {
     @Transactional
     public void update(
             UUID productId,
-            UpdateProductInfoRequestDto updateProductInfoRequestDto
+            UpdateProductInfoRequestDto updateProductInfoRequestDto,
+            String passport
     ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
+
         ProductInfo productInfo = getProductInfo(productId);
         productInfo.setProductName(updateProductInfoRequestDto.getProductName());
         productInfo.setProductPrice(updateProductInfoRequestDto.getProductPrice());
         productInfo.setProductType(updateProductInfoRequestDto.getProductType());
 
-        productInfo.updateModifiedData(1L);
+        productInfo.updateModifiedData(passportDto.getUserId());
     }
 
     private ProductInfo getProductInfo(UUID productId) {
@@ -73,10 +82,13 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 
     @Override
     @Transactional
-    public void delete(UUID productId) {
+    public void delete(UUID productId,
+                       String passport
+    ) {
         ProductInfo productInfo = getProductInfo(productId);
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
 
-        productInfo.softDeleteData(1L);
+        productInfo.softDeleteData(passportDto.getUserId());
 
 
     }

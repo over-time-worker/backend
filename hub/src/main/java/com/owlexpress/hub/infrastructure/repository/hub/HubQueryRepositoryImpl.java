@@ -1,4 +1,4 @@
-package com.owlexpress.hub.infrastructure.repository;
+package com.owlexpress.hub.infrastructure.repository.hub;
 
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;

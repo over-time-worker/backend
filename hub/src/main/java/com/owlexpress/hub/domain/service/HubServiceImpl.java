@@ -3,9 +3,11 @@ package com.owlexpress.hub.domain.service;
 import com.owlexpress.hub.application.HubDistanceService;
 import com.owlexpress.hub.application.dto.response.HubProductIsEnoughResponseDto;
 import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
-import com.owlexpress.hub.common.HubHelper;
+import com.owlexpress.hub.common.dto.response.PassportDto;
+import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
+import com.owlexpress.hub.common.helper.PassportHelper;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubIntervalInfoRepository;
@@ -43,10 +45,14 @@ public class HubServiceImpl implements HubService {
     private static final List<Integer> ALLOWED_SIZES = List.of(10, 30, 50);
     private static final Integer DEFAULT_SIZE = 10;
     private final HubDistanceService hubDistanceService;
+    private final PassportHelper passportHelper;
 
     @Override
     @Transactional
-    public void create(HubCreateRequestDto requestDto) {
+    public void create(HubCreateRequestDto requestDto,
+                       String passport
+    ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         Hub hub = null;
         //중앙 허브라면 바로 저장
         if (requestDto.getParentId() == null) {
@@ -57,26 +63,30 @@ public class HubServiceImpl implements HubService {
                     .ifPresent(findparentHub -> {
                         //스포크허브와 중앙 허브 연결
                         Hub spokeHub = requestDto.toEntity(findparentHub);
-                        //TODO :: passport - UserId
-                        spokeHub.createdEntity(1L);
+                        spokeHub.createdEntity(passportDto.getUserId());
                         hubRepository.save(spokeHub);
                     });
         }
-        //TODO :: passport - UserId
         Objects.requireNonNull(hub)
-                .createdEntity(1L);
+                .createdEntity(passportDto.getUserId());
+        hub.createdEntity(passportDto.getUserId());
         hubRepository.save(hub);
         hubIntervalInfoRepository.deleteContainsHub(hub);
     }
 
-    @Override
+
+
     @Transactional
-    public void update(HubUpdateRequestDto requestDto) {
+    @Override
+    public void update(
+            HubUpdateRequestDto requestDto,
+            String passport
+    ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         Hub hub = hubRepository.findByHubId(requestDto.getHubId())
                 .orElseThrow(HubNotFoundException::new);
 
-        // TODO: 패스포트 토큰에서 값 뺴서 집어넣기
-        hub.modifiedEntity(1L);
+        hub.modifiedEntity(passportDto.getUserId());
         hub.update(requestDto);
         //위도 경도에 변화가 있는 경우 기존 기록 지우고 최신화
         if (hub.getLocation()
@@ -85,9 +95,11 @@ public class HubServiceImpl implements HubService {
             hubIntervalInfoRepository.deleteContainsHub(hub);
             hubDistanceService.calculateHubDistances(hub);
         }
+        hub.modifiedEntity(passportDto.getUserId());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PagedModel<HubSearchResponseDto> searchHub(
             int page,
             int size,
@@ -95,7 +107,6 @@ public class HubServiceImpl implements HubService {
             String q,
             String orderBy
     ) {
-        //TODO :: 사용하지 않는 코드 DIRECTION?
         Sort.Direction direction = sort.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC;
         if (!ALLOWED_SIZES.contains(size)) {
             size = DEFAULT_SIZE;
@@ -107,57 +118,22 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public HubFindResponseDto find(UUID hubId) {
         return HubFindResponseDto.fromEntity(HubHelper.findByHubId(hubId, hubRepository));
 
     }
 
-    /*
-    허브 상품
-     */
+
     @Override
-    public PagedModel<HubProductSearchResponseDto> searchHubProduct(
-            int page,
-            int size,
-            String sort,
-            String q,
-            String orderBy
+    @Transactional
+    public void delete(UUID hubId,
+                       String passport
     ) {
-        Sort.Direction direction = sort.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC;
-        if (!ALLOWED_SIZES.contains(size)) {
-            size = DEFAULT_SIZE;
-        }
-        Sort sortAndOrderBy = Sort.by(direction, orderBy); // direction 활용 추가
-        PageRequest pageRequest = PageRequest.of(page, size, sortAndOrderBy);
-        return hubRepository.searchHubProduct(pageRequest, q, orderBy, sort);
-    }
-
-    @Override
-    @Transactional
-    public void update(HubProductUpdateRequestDto requestDto) {
-        HubProduct hubProduct = hubRepository.findByHubProductId(requestDto.getHubProductId())
-                .orElseThrow(HubProductNotFoundException::new);
-        hubProduct.updateEntity(requestDto);
-
-        // TODO: PASSPORT 에서 값 뺴오기
-        hubProduct.modifiedEntity(1L);
-    }
-
-    @Override
-    public HubProductFindResponseDto findHubProduct(UUID hubProductId) {
-        HubProduct hubProduct = hubRepository.findByHubProductId(hubProductId)
-                .orElseThrow(HubProductNotFoundException::new);
-
-        return HubProductFindResponseDto.fromEntity(hubProduct);
-    }
-
-    @Override
-    @Transactional
-    public void delete(UUID hubId) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         Hub hub = HubHelper.findByHubId(hubId, hubRepository);
 
-        // TODO : 패스포트 토큰에서 값 빼서 집어넣기
-        hub.deleteEntity(1L);
+        hub.deleteEntity(passportDto.getUserId());
 
         // 1. 중앙 허브인 경우
         if (hub.getParentHub() == null) {
@@ -184,7 +160,7 @@ public class HubServiceImpl implements HubService {
         // 2. 스포크 허브인 경우 (삭제 시 중앙 허브에 물품 추가)
         Hub centralHub = hub.getParentHub();
         hub.getHubProduct()
-                .forEach(product -> product.setHub(centralHub));
+           .forEach(product -> product.setHub(centralHub));
 
         // 스포크 허브 삭제
         hub.deleteEntity(1L);
@@ -193,35 +169,4 @@ public class HubServiceImpl implements HubService {
         hubIntervalInfoRepository.deleteContainsHub(hub);
     }
 
-    @Override
-    public List<HubProductIsEnoughResponseDto> checkHubProductStocks(
-            List<HubProductCheckRequestDto> requestDto
-    ) {
-        List<UUID> products = requestDto.stream()
-                .map(HubProductCheckRequestDto::getHubProductId)
-                .toList();
-
-        // 각 아이디별 재고 파악
-        Map<UUID, HubProductStockResponseDto> results = hubRepository.findHubProductStocks(
-                        products)
-                .stream()
-                .collect(Collectors.toMap(HubProductStockResponseDto::getHubProductId, dto -> dto));
-
-        return requestDto.stream()
-                .map(dto -> {
-                    UUID hubProductId = dto.getHubProductId();
-                    // 못찾았으면 품절처리를 위해 0 반환
-                    HubProductStockResponseDto orDefault = results.getOrDefault(hubProductId, null);
-
-                    boolean isEnough = true;
-                    if (orDefault == null || orDefault.getStock() < dto.getQuantity()) {
-                        isEnough = false;
-                    }
-
-                    return HubProductIsEnoughResponseDto.builder()
-                            .hubProductId(hubProductId)
-                            .isEnough(isEnough)
-                            .build();
-                }).toList();
-    }
 }

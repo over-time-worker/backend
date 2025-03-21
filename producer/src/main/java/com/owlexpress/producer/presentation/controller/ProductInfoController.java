@@ -4,7 +4,6 @@ import com.owlexpress.producer.common.CommonDto;
 import com.owlexpress.producer.domain.service.ProductInfoService;
 import com.owlexpress.producer.presentation.dto.request.CreateProductInfoRequestDto;
 import com.owlexpress.producer.presentation.dto.request.UpdateProductInfoRequestDto;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +19,11 @@ public class ProductInfoController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
-            @Valid @RequestBody CreateProductInfoRequestDto createProductInfoRequestDto
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody CreateProductInfoRequestDto createProductInfoRequestDto
     ) {
 
-        productInfoService.create(createProductInfoRequestDto);
+        productInfoService.create(createProductInfoRequestDto,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.CREATED)
@@ -37,11 +36,11 @@ public class ProductInfoController {
 
     @PutMapping("/{productId}")
     public ResponseEntity<CommonDto<Void>> update(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID productId,
-            @Valid @RequestBody UpdateProductInfoRequestDto updateProductInfoRequestDto
+            @RequestBody UpdateProductInfoRequestDto updateProductInfoRequestDto
     ){
-        productInfoService.update(productId,updateProductInfoRequestDto);
+        productInfoService.update(productId,updateProductInfoRequestDto,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
@@ -55,10 +54,10 @@ public class ProductInfoController {
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<CommonDto<Void>> delete(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID productId
     ){
-        productInfoService.delete(productId);
+        productInfoService.delete(productId,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
