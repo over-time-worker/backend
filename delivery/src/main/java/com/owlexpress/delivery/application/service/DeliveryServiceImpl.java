@@ -13,6 +13,7 @@ import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryNotFoundException;
+import com.owlexpress.delivery.common.helper.PassportHelper;
 import com.owlexpress.delivery.common.util.PageUtil;
 import com.owlexpress.delivery.domain.entity.Delivery;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
@@ -34,31 +35,45 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+    private final PassportHelper passportHelper;
 
     @Override
     @Transactional
-    public void create(DeliveryCreateRequestDto deliveryCreateRequestDto) {
-        // TODO : create By 적용
-        Delivery delivery = Delivery.create(deliveryCreateRequestDto, DeliveryStatus.PENDING_AT_HUB, 1L);
-        createDeliveryHistory(delivery, deliveryCreateRequestDto, 1L);
+    public void create(
+            DeliveryCreateRequestDto deliveryCreateRequestDto,
+            String passport
+    ) {
+        Long userId = passportHelper.getPassportDto(passport).getUserId();
+
+        Delivery delivery = Delivery.create(deliveryCreateRequestDto, DeliveryStatus.PENDING_AT_HUB, userId);
+        createDeliveryHistory(delivery, deliveryCreateRequestDto, userId);
     }
 
     @Override
     @Transactional
-    public void update(UUID deliveryId, DeliveryUpdateRequestDto deliveryUpdateRequestDto) {
+    public void update(
+            UUID deliveryId,
+            DeliveryUpdateRequestDto deliveryUpdateRequestDto,
+            String passport
+    ) {
+        Long userId = passportHelper.getPassportDto(passport).getUserId();
+
         Delivery delivery = getDeliveryById(deliveryId);
-        // TODO : update By 적용
-        delivery.updateDeliveryStatus(DeliveryStatus.getStatus(deliveryUpdateRequestDto.getDeliveryStatus()), 1L);
+        delivery.updateDeliveryStatus(DeliveryStatus.getStatus(deliveryUpdateRequestDto.getDeliveryStatus()), userId);
     }
 
     @Override
     @Transactional
-    public void delete(UUID deliveryId) {
+    public void delete(
+            UUID deliveryId,
+            String passport
+    ) {
+        Long userId = passportHelper.getPassportDto(passport).getUserId();
 
         Delivery delivery = getDeliveryById(deliveryId);
 
         if(delivery.getDeliveryStatus().equals(DeliveryStatus.PENDING_AT_HUB)) {
-            delivery.deleteDelivery(1L);
+            delivery.deleteDelivery(userId);
             // TODO : 주문 서비스에 주문 삭제 요청
             //요청 실패시 예외처리
 
@@ -92,41 +107,53 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public void startHubDelivery(UUID deliveryId, UUID deliveryHistoryId) {
+    public void startHubDelivery(
+            UUID deliveryId,
+            UUID deliveryHistoryId,
+            String passport
+    ) {
+        Long userId = passportHelper.getPassportDto(passport).getUserId();
 
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
-        // TODO : update By 적용
-        delivery.updateDeliveryStatus(DeliveryStatus.SHIPPING_TO_HUB, 1L);
+        delivery.updateDeliveryStatus(DeliveryStatus.SHIPPING_TO_HUB, userId);
 
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
-        delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.SHIPPING_TO_HUB ,1L);
+        delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.SHIPPING_TO_HUB ,userId);
     }
 
     @Override
     @Transactional
-    public void startCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId) {
+    public void startCompanyDelivery(
+            UUID deliveryId,
+            UUID deliveryHistoryId,
+            String passport
+    ) {
+        Long userId = passportHelper.getPassportDto(passport).getUserId();
 
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
-        // TODO : update By 적용
-        delivery.updateDeliveryStatus(DeliveryStatus.SHIPPING_TO_COMPANY, 1L);
+        delivery.updateDeliveryStatus(DeliveryStatus.SHIPPING_TO_COMPANY, userId);
 
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
-        // TODO : update By 적용
-        delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.SHIPPING_TO_COMPANY ,1L);
+        delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.SHIPPING_TO_COMPANY ,userId);
     }
 
     @Override
     @Transactional
-    public void completeHubDelivery(UUID deliveryId, UUID deliveryHistoryId, DeliveryCompleteRequestDto requestDto) {
+    public void completeHubDelivery(
+            UUID deliveryId,
+            UUID deliveryHistoryId,
+            DeliveryCompleteRequestDto requestDto,
+            String passport
+    ) {
+        Long userId = passportHelper.getPassportDto(passport).getUserId();
 
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
-        // TODO : update By 적용
-        delivery.updateDeliveryStatus(DeliveryStatus.ARRIVED_AT_HUB, 1L);
+        delivery.updateDeliveryStatus(DeliveryStatus.ARRIVED_AT_HUB, userId);
 
         List<DeliveryHistory> deliveryHistoryList = delivery.getDeliveryHistories();
+
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, deliveryHistoryList);
-        // TODO : update By 적용
-        delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,1L);
+        delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,userId);
 
         // TODO : 배송 담당자 서비스에 FeignClient로 배송 담당자 반환 처리
         //반환 실패시 예외 처리
@@ -142,8 +169,7 @@ public class DeliveryServiceImpl implements DeliveryService {
             // TODO : 배송 담당자 서비스에 FeignClient로 업체 배송 담당자 요청
             // 응답 예외 처리
 
-            // TODO : update By 적용 / 받아온 companyDeliverId 적용
-            delivery.updateCompanyDeliver(UUID.randomUUID(), 1L);
+            delivery.updateCompanyDeliver(UUID.randomUUID(), userId);
         } else {
             // TODO : 배송 담당자 서비스에 FeignClient로 허브 배송 담당자 요청
             // 요청 실패시 예외 처리
@@ -152,16 +178,22 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public void completeCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId, DeliveryCompleteRequestDto requestDto) {
+    public void completeCompanyDelivery(
+            UUID deliveryId,
+            UUID deliveryHistoryId,
+            DeliveryCompleteRequestDto requestDto,
+            String passport
+    ) {
         // TODO : 배송 담당자 서비스에 FeignClient로 배송 담당자 반환 처리
         //반환 실패시 예외 처리
 
+        Long userId = passportHelper.getPassportDto(passport).getUserId();
+
         Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
-        // TODO : update By 적용
-        delivery.updateDeliveryStatus(DeliveryStatus.COMPLETE, 1L);
+        delivery.updateDeliveryStatus(DeliveryStatus.COMPLETE, userId);
+
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
-        // TODO : update By 적용
-        delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE , requestDto, 1L);
+        delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE , requestDto, userId);
     }
 
     @Transactional
