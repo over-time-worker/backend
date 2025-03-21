@@ -24,10 +24,10 @@ public class HubInfoController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Object>> create(
-        //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+        @RequestHeader("X-User-Passport") String passport,
          @Valid @RequestBody CreateHubInfoRequestDto createHubInfoRequestDto
     ) {
-        HubInfo hubInfo = hubInfoService.create(createHubInfoRequestDto);
+        HubInfo hubInfo = hubInfoService.create(createHubInfoRequestDto,passport);
         productUsecase.connect(createHubInfoRequestDto, hubInfo);
 
         CommonDto<Object> commonDto = CommonDto.builder()
@@ -41,11 +41,11 @@ public class HubInfoController {
 
     @PutMapping("/{hubInfoId}")
     public ResponseEntity<CommonDto<Object>> update(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody UpdateHubInfoRequestDto updateHubInfoRequestDto,
             @PathVariable UUID hubInfoId
     ){
-        hubInfoService.update(hubInfoId, updateHubInfoRequestDto);
+        hubInfoService.update(hubInfoId, updateHubInfoRequestDto,passport);
 
         CommonDto<Object> commonDto = CommonDto.builder()
                 .status(HttpStatus.ACCEPTED)
@@ -58,11 +58,11 @@ public class HubInfoController {
 
     @DeleteMapping("/{hubInfoId}")
     public ResponseEntity<CommonDto<Object>> delete(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID hubInfoId
     ) {
 
-        hubInfoService.delete(hubInfoId);
+        hubInfoService.delete(hubInfoId,passport);
 
         CommonDto<Object> commonDto = CommonDto.builder()
                 .status(HttpStatus.ACCEPTED)

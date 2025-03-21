@@ -1,9 +1,9 @@
 package com.owlexpress.product.infrastructure.feignClient;
 
 import com.owlexpress.product.common.CommonDto;
-import com.owlexpress.product.common.dto.CreateProductInfoRequestDto;
-import com.owlexpress.product.common.dto.ProducerResponseDto;
-import com.owlexpress.product.common.dto.UpdateProductInfoRequestDto;
+import com.owlexpress.product.common.dto.request.CreateProductInfoRequestDto;
+import com.owlexpress.product.common.dto.response.ProducerResponseDto;
+import com.owlexpress.product.common.dto.request.UpdateProductInfoRequestDto;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public interface ProducerClient {
 
     @PostMapping(REQUEST_PREFIX+"/product-info")
      CommonDto<Void> create(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @RequestHeader("X-User-Passport") String passport,
             @Valid @RequestBody CreateProductInfoRequestDto createProductInfoRequestDto
     );
 
@@ -28,14 +28,14 @@ public interface ProducerClient {
 
     @PutMapping(REQUEST_PREFIX+"/product-info/{productId}")
      ResponseEntity<CommonDto<Void>> update(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID productId,
             @Valid @RequestBody UpdateProductInfoRequestDto updateProductInfoRequestDto
     );
 
     @DeleteMapping(REQUEST_PREFIX+"/product-info/{productId}")
-    public ResponseEntity<CommonDto<Void>> delete(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+    ResponseEntity<CommonDto<Void>> delete(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID productId
     );
 }
