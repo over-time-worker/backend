@@ -4,12 +4,13 @@ import com.owlexpress.producer.application.dto.request.UpdateProductDto;
 import com.owlexpress.producer.common.dto.request.CreateProducerRequestDto;
 import com.owlexpress.producer.common.dto.request.UpdateProducerRequestDto;
 import com.owlexpress.producer.common.dto.response.GetUserInfoResponseDto;
+import com.owlexpress.producer.common.dto.response.PassportDto;
 import com.owlexpress.producer.common.exception.ProducerException;
+import com.owlexpress.producer.common.helper.PassportHelper;
 import com.owlexpress.producer.common.helper.ProducerHelper;
 import com.owlexpress.producer.common.util.GeoUtil;
 import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.repository.ProducerRepository;
-import com.owlexpress.producer.infrastructure.feignClient.HubProductClient;
 import com.owlexpress.producer.infrastructure.feignClient.ProductClient;
 import com.owlexpress.producer.infrastructure.feignClient.UserFeignClient;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +34,15 @@ public class ProducerUsecase {
     private final ProducerRepository producerRepository;
     private final ProducerHelper producerHelper;
     private final ProductClient productClient;
+    private final PassportHelper passportHelper;
 
     @Transactional
-    public void create(CreateProducerRequestDto createProducerRequestDto) {
+    public void create(CreateProducerRequestDto createProducerRequestDto,
+                       String passport
+    ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
 
-        GetUserInfoResponseDto getUserInfoResponseDto = userFeignClient.get(createProducerRequestDto.getUserId())
+        GetUserInfoResponseDto getUserInfoResponseDto = userFeignClient.get(passportDto.getUserId())
                                                                        .getData();
 
         producerRepository.findByCompanyName(createProducerRequestDto.getCompanyName())
@@ -46,7 +51,7 @@ public class ProducerUsecase {
                           });
 
         Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto, getUserInfoResponseDto);
-        producer.updateCreateData(1L);
+        producer.updateCreateData(passportDto.getUserId());
 
         producerRepository.save(producer);
 
@@ -55,21 +60,18 @@ public class ProducerUsecase {
     @Transactional
     public void update(
             UpdateProducerRequestDto updateProducerRequestDto,
-            UUID producerId
+            UUID producerId,
+            String passport
     ) {
-        //TODO:: 본인의 생성업체가 맞는지 확인 필요
-        // passport로 가져온 ID와 대조하기
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         Producer producer = producerHelper.getProducer(producerId);
         if (!producer.getUserId()
-                     .equals(1L)) {
+                     .equals(passportDto.getUserId())) {
             throw new ProducerException.NotAuthorizedException(PRODUCER_NOT_AUTHORIZED_UPDATE_MESSAGE);
         }
 
-        //TODO:: 가져온 데이터의 정보를 통해 기존 producer의 데이터 수정
-        //        GetUserResponseDto findUserResponseDto = userFeignClient.get(passport.getUserId());
-
         updateProducer(producer, updateProducerRequestDto);
-        producer.updateModifiedData(1L);
+        producer.updateModifiedData(passportDto.getUserId());
 
         // 상품 전파 (업체 관련 정보 변동시에만)
         if (updateProducerRequestDto.getCompanyName() != null || updateProducerRequestDto.getCompanyType() != null || updateProducerRequestDto.getCompanyAddress() != null) {
@@ -114,12 +116,12 @@ public class ProducerUsecase {
     public void delete(UUID producerId) {
         Producer producer = producerHelper.getProducer(producerId);
 
-        //TODO :: 방법2. 생산업체는 null 처리하고 남은 모든 재고까지만 판매
-
             //1. 상품 삭제 처리 ->허브 상품쪽 알아서 이벤트 날아가므로 추가 작업 필요없음
             productClient.delete(producerId);
             // 모두 성공시 회사 softDelete
             producer.softDeleteData(1L);
 
     }
+
+
 }
