@@ -1,11 +1,14 @@
 package com.owlexpress.hub.infrastructure.repository.hub;
 
+import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -96,5 +99,24 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
                 .fetchOne().longValue();
 
         return new PageImpl<>(hubProducts, pageable, count);
+    }
+
+    public List<HubProductInfoResponseDto> test(List<UUID> hubProductIds) {
+
+        return queryFactory.select(
+                        Projections.constructor(
+                                HubProductInfoResponseDto.class,
+                                hubProduct.hub.hubId,
+                                hubProduct.hubProductId,
+                                hubProduct.productStock,
+                                hubProduct.hub.location
+                        )
+                )
+                .from(hubProduct)
+                .innerJoin(hubProduct.hub, hub)
+                .where(hubProduct.hubProductId.in(hubProductIds))
+                .groupBy(hub.hubId)
+                .fetch();
+
     }
 }
