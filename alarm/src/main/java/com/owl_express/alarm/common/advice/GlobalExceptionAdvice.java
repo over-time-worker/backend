@@ -27,12 +27,11 @@ public class GlobalExceptionAdvice {
     public static final String METHOD_ARGUMENT_NOT_VALID_EXCEPTION = "handleMethodArgumentNotValidException : {}";
     public static final String CONSTRAIN_VIOLATION_EXCEPTION = "handleConstraintViolationException : {}";
     public static final String AI_FEIGN_CLIENT_EXCEPTION = "handleAiFeignClientException : {}";
-    public static final String ORDER_NOT_FOUND_EXCEPTION = "handleOrderNotFoundException : {}";
     public static final String ALARM_NOT_FOUND_EXCEPTION = "handleAlarmNotFoundException : {}";
     public static final String PLATFORM_TYPE_NOT_SUPPORTED_EXCEPTION = "handlePlatformTypeNotSupportedException : {}";
     public static final String MESSAGE_TYPE_NOT_SUPPORTED_EXCEPTION = "handleMessageTypeNotSupportedException : {}";
     public static final String SLACK_EXCEPTION = "handleSlackException : {}";
-    public static final String FEIGN_EXCEPTION = "handleValidationException : {} {}";
+    public static final String FEIGN_EXCEPTION = "handleFeignException : {}";
 
     public final List<FeignExceptionHandlerStrategy> strategies;
 
@@ -136,7 +135,7 @@ public class GlobalExceptionAdvice {
     }
 
     @ExceptionHandler(FeignException.class)
-    public ResponseEntity<CommonDto<Void>> handleValidationException(FeignException e) {
+    public ResponseEntity<CommonDto<Void>> handleFeignException(FeignException e) {
         log.error(FEIGN_EXCEPTION, e.getMessage(), e);
 
         return strategies.stream()

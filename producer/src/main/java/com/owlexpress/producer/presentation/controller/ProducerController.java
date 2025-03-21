@@ -113,10 +113,10 @@ public class ProducerController {
 
     @DeleteMapping("/{producerId}")
     public ResponseEntity<CommonDto<Void>> delete(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+           @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID producerId
     ) {
-        producerUsecase.delete(producerId);
+        producerUsecase.delete(producerId,passport);
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
                                              .code(HttpStatus.ACCEPTED.value())

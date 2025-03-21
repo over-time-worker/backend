@@ -12,7 +12,6 @@ public interface UserFeignClient {
     //User정보 조회
     @GetMapping("/api/users/{userId}")
     CommonDto<GetUserInfoResponseDto> get(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable("userId") Long userId
     );
 }

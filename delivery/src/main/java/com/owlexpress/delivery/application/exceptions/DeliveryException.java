@@ -2,8 +2,8 @@ package com.owlexpress.delivery.application.exceptions;
 
 public class DeliveryException extends RuntimeException {
 
-    public static class AlarmFeignClientException extends RuntimeException {
-        public AlarmFeignClientException(String message) {
+    public static class DeliveryManagerFeignClientException extends RuntimeException {
+        public DeliveryManagerFeignClientException(String message) {
             super(message);
         }
     }

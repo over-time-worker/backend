@@ -3,6 +3,7 @@ package com.owlexpress.delivery.domain.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
+import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedOrderTypeException;
 import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
@@ -192,12 +193,39 @@ public class Delivery extends BaseEntity {
         this.modifiedEntity(userId);
     }
 
-    public void updateDeliveryHistoryStatus(DeliveryHistory deliveryHistory, DeliveryStatus deliveryStatus, Long userId) {
+    public void updateDeliveryHistoryStatus(
+            DeliveryHistory deliveryHistory,
+            DeliveryStatus deliveryStatus,
+            Long userId
+    ) {
         deliveryHistory.updateDeliveryStatus(deliveryStatus, userId);
     }
 
-    public void updateDeliveryHistoryActualInfo(DeliveryHistory deliveryHistory, DeliveryStatus deliveryStatus, DeliveryCompleteRequestDto requestDto, Long userId) {
+    public void updateDeliveryHistoryActualInfo(
+            DeliveryHistory deliveryHistory,
+            DeliveryStatus deliveryStatus,
+            DeliveryCompleteRequestDto requestDto,
+            Long userId
+    ) {
         deliveryHistory.updateDeliveryHistoryActualInfo(deliveryStatus, requestDto, userId);
+    }
+
+    public void updateHubDeliverInfo(
+            DeliveryHistory deliveryHistory,
+            AlarmCreateResponseDto alarmCreateResponseDto,
+            Long userId
+    ) {
+        deliveryHistory.updateDeliverInfo(alarmCreateResponseDto, userId);
+    }
+
+    public void updateCompanyDeliverInfo(
+            DeliveryHistory deliveryHistory,
+            AlarmCreateResponseDto alarmCreateResponseDto,
+            Long userId
+    ) {
+        this.consumerDeliverId = alarmCreateResponseDto.getDeliverId();
+        deliveryHistory.updateDeliverInfo(alarmCreateResponseDto, userId);
+        modifiedEntity(userId);
     }
 
     @RequiredArgsConstructor

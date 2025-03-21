@@ -2,6 +2,7 @@ package com.owlexpress.delivery.domain.entity;
 
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
+import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
@@ -193,6 +194,14 @@ public class DeliveryHistory extends BaseEntity {
         this.deliveryStatus = deliveryStatus;
         this.actualDistance = requestDto.getActualDistance();
         this.actualTime = requestDto.getActualTime();
+        this.modifiedEntity(userId);
+    }
+
+    public void updateDeliverInfo(AlarmCreateResponseDto alarmCreateResponseDto, Long userId) {
+        this.deliverId = alarmCreateResponseDto.getDeliverId();
+        this.deliverName = alarmCreateResponseDto.getDeliverName();
+        this.deliverChannelId = alarmCreateResponseDto.getDeliverChannelId();
+        this.deliverPhoneNumber = alarmCreateResponseDto.getDeliverPhoneNumber();
         this.modifiedEntity(userId);
     }
 

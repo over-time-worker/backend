@@ -65,7 +65,7 @@ public class AlarmServiceImpl implements AlarmService {
             String passport
     ) {
         // TODO : ai 메세지 요청 feign client 통신 test
-        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto);
+        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto, passport);
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
@@ -101,7 +101,7 @@ public class AlarmServiceImpl implements AlarmService {
             String passport
     ) {
         // TODO : ai 메세지 요청 feign client 통신 test
-        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto);
+        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto, passport);
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
@@ -135,6 +135,7 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
+    @Transactional
     public void delete(
             String channelId,
             String messageId,
@@ -145,8 +146,9 @@ public class AlarmServiceImpl implements AlarmService {
         Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
                 () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
+        alarmUsecase.deleteMessageToAi(alarm.getAiId(), passport);
+
         alarm.deleteEntity(passportHelper.getPassportDto(passport).getUserId());
-        alarmRepository.save(alarm);
     }
 
     @Override

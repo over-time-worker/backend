@@ -1,6 +1,7 @@
 package com.owl_express.ai.presentation;
 
 import static com.owl_express.ai.presentation.ApiResponseMessageConstant.CREATE_MESSAGE_SUCCESS;
+import static com.owl_express.ai.presentation.ApiResponseMessageConstant.DELETE_MESSAGE_SUCCESS;
 import static com.owl_express.ai.presentation.ApiResponseMessageConstant.FIND_MESSAGE_SUCCESS;
 import static com.owl_express.ai.presentation.ApiResponseMessageConstant.SEARCH_MESSAGE_SUCCESS;
 
@@ -17,6 +18,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,6 +100,22 @@ public class AiController {
                         .message(SEARCH_MESSAGE_SUCCESS)
                         .code(HttpStatus.OK.value())
                         .data(pagedModel)
+                        .build());
+    }
+
+    @DeleteMapping("/messages/{ai_id}")
+    public ResponseEntity<CommonDto<Void>> delete(
+            @NotNull(message = "[notNull:ai_id]") @PathVariable("ai_id") UUID aiId,
+            @RequestHeader("X-User-Passport") String passport
+    ) {
+        aiService.delete(aiId, passport);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(
+                CommonDto.<Void>builder()
+                        .status(HttpStatus.ACCEPTED)
+                        .message(DELETE_MESSAGE_SUCCESS)
+                        .code(HttpStatus.ACCEPTED.value())
+                        .data(null)
                         .build());
     }
 }
