@@ -114,19 +114,15 @@ public class AlarmServiceImpl implements AlarmService {
             String gmtDate = chatScheduleMessageResponse.getHttpResponseHeaders().get("date").get(0);
 
             //alarm 생성
-            Alarm alarm = Alarm.builder()
-                    .aiId(messageCreateResponseDto.getAiId())
-                    .userId(requestDto.getDeliverUserId())
-                    .userChannelId(requestDto.getDeliverChannelId())
-                    .platformType(platformType)
-                    .message(messageCreateResponseDto.getMessage())
-                    .aiId(messageCreateResponseDto.getAiId())
-                    .sendAt(CommonUtil.gmtStringToDefaultLocalDateTime(gmtDate))
-                    .messageType(MessageType.RESERVATION)
-                    .messageId(platformMessageId)
-                    .build();
+            Alarm alarm = Alarm.create(
+                    messageCreateResponseDto,
+                    requestDto,
+                    platformType,
+                    gmtDate,
+                    platformMessageId,
+                    passportHelper.getPassportDto(passport).getUserId()
+            );
 
-            alarm.createdEntity(passportHelper.getPassportDto(passport).getUserId());
             alarmRepository.save(alarm);
 
             return AlarmCreateResponseDto.toDto(alarm, platformMessageId);

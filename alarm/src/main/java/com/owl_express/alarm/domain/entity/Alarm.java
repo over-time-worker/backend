@@ -1,6 +1,10 @@
 package com.owl_express.alarm.domain.entity;
 
+import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
+import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
+import com.owl_express.alarm.common.util.CommonUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -75,6 +79,32 @@ public class Alarm extends BaseEntity {
         this.messageId = messageId;
         this.messageType = messageType;
     }
+
+    public static Alarm create(
+            MessageCreateResponseDto messageCreateResponseDto,
+            AlarmCreateRequestDto requestDto,
+            PlatformType platformType,
+            String gmtDate,
+            String platformMessageId,
+            Long userId
+    ) {
+        Alarm alarm = Alarm.builder()
+                .aiId(messageCreateResponseDto.getAiId())
+                .userId(requestDto.getDeliverUserId())
+                .userChannelId(requestDto.getDeliverChannelId())
+                .platformType(platformType)
+                .message(messageCreateResponseDto.getMessage())
+                .aiId(messageCreateResponseDto.getAiId())
+                .sendAt(CommonUtil.gmtStringToDefaultLocalDateTime(gmtDate))
+                .messageType(MessageType.RESERVATION)
+                .messageId(platformMessageId)
+                .build();
+
+        alarm.createdEntity(userId);
+
+        return alarm;
+    }
+
 
     @RequiredArgsConstructor
     public enum PlatformType{
