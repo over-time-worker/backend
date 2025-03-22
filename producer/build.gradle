@@ -33,8 +33,6 @@ dependencyManagement {
     }
 }
 dependencies {
-    //monitoring
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     //ORM
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -69,6 +67,15 @@ dependencies {
 
     //GeoMetry
     implementation "org.hibernate:hibernate-spatial:6.6.8.Final"  // 최신 버전과 맞춤
+
+    //zipkin
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'io.github.openfeign:feign-micrometer'
+    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+
+    //redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 
 }
