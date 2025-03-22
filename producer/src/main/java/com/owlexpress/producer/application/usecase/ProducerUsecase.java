@@ -44,7 +44,7 @@ public class ProducerUsecase {
     ) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
-        GetUserInfoResponseDto getUserInfoResponseDto = userFeignClient.get(passportDto.getUserId())
+        GetUserInfoResponseDto getUserInfoResponseDto = userFeignClient.get(passport)
                                                                        .getData();
 
         producerRepository.findByCompanyName(createProducerRequestDto.getCompanyName())
