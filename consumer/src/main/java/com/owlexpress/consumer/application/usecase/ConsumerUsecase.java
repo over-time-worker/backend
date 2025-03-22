@@ -162,7 +162,7 @@ public class ConsumerUsecase {
                        .userId(getUserInfoResponseDto.getUserId())
                        .userName(getUserInfoResponseDto.getUsername())
                        .userPhoneNumber(getUserInfoResponseDto.getPhoneNumber())
-                       .location(GeoUtil.createPoint(consumerRequestDto.getLatitude(), consumerRequestDto.getLongitude()))
+                       .location(GeoUtil.createPoint(consumerRequestDto.getLongitude(), consumerRequestDto.getLatitude()))
                        .businessNumber(consumerRequestDto.getBusinessNumber())
                        .build();
     }
