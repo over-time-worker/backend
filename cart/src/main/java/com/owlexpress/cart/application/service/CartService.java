@@ -14,7 +14,7 @@ public interface CartService {
 
     void deleteCartProduct(UUID cartId, UUID cartProductId, String passport);
 
-    void deleteCart(UUID cartId, String passport);
+    void deleteCart(UUID consumerId, String passport);
 
     CartResponseDto find(String passport, UUID consumerId);
 

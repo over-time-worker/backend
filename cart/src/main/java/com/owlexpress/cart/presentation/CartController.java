@@ -127,13 +127,13 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
     }
 
-    @DeleteMapping("/{cartId}")
+    @DeleteMapping("/{consumerId}")
     public ResponseEntity<CommonDto<Void>> deleteCart(
             @RequestHeader("X-User-Passport") String passport,
-            @PathVariable("cartId") UUID cartId
+            @PathVariable("consumerId") UUID consumerId
     ) {
         // TODO : 장바구니 삭제는 MASTER의 consumer 계정 삭제시 수행
-        cartService.deleteCart(cartId, passport);
+        cartService.deleteCart(consumerId, passport);
 
         CommonDto<Void> commonDto = CommonDto
                 .<Void>builder()
