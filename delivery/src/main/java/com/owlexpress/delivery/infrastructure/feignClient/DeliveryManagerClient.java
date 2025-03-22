@@ -8,18 +8,25 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name="deliveryManager-service")
 public interface DeliveryManagerClient {
 
     @PostMapping("/api/hub/delivery/assign")
-    CommonDto<AlarmCreateResponseDto> assignHub(DeliveryManagerRequestDto deliveryManagerRequestDto);
+    CommonDto<AlarmCreateResponseDto> assignHub(
+            @RequestHeader("X-User-Passport") String passport,
+            DeliveryManagerRequestDto deliveryManagerRequestDto
+    );
 
     @PatchMapping("/api/hub/delivery/return-hub/{deliveryManagerId}")
     void returnHub(@PathVariable("deliveryManagerId") UUID deliveryManagerId);
 
     @PostMapping("/api/consumer/delivery/assign")
-    CommonDto<AlarmCreateResponseDto> assignCompany(DeliveryManagerRequestDto deliveryManagerRequestDto);
+    CommonDto<AlarmCreateResponseDto> assignCompany(
+            @RequestHeader("X-User-Passport") String passport,
+            DeliveryManagerRequestDto deliveryManagerRequestDto
+    );
 
     @PatchMapping("/api/consumer/delivery/return-hub/{deliveryManagerId}")
     void returnCompany(@PathVariable("deliveryManagerId") UUID deliveryManagerId);
