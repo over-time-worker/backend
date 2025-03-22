@@ -50,7 +50,7 @@ public class ProductUsecase {
     public void createProduct(
             CreateProductRequestDto createProductRequestDto,
             String passport
-    ) {
+    ) throws ProductException.ProductCreateFailException {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
         //1. 상품 중복검사
@@ -74,22 +74,23 @@ public class ProductUsecase {
 
         //5. client 통신용 dto 생성
         CreateProductInfoRequestDto createProductInfoRequestDto = CreateProductInfoRequestDto.fromEntity(product);
-
-        //5.상품 정보 productInfo Controller에 전달
-        producerClient.create(passport,createProductInfoRequestDto);
-
-        //6. 상품 관리 허브에 전달
-        //producer조회해서 hubID가져오기
         try {
-            CommonDto<ProducerResponseDto> producerResponseDtoCommonDto = producerClient.find(
-                    createProductInfoRequestDto.getProducerId());
+            // 1차 외부 시스템 호출: producer 시스템
+            producerClient.create(passport, createProductInfoRequestDto);
 
-            log.info("!!!!!!!!!!!!!!!!!!={}",String.valueOf(product.getProducerId()));
-            hubClient.create(passport, HubProductCreateRequestDto.toDto(
-                    product, producerResponseDtoCommonDto.getData().getHubId()));
+            // 2차 외부 시스템 호출: hub 시스템
+            CommonDto<ProducerResponseDto> producerResponseDtoCommonDto = producerClient.find(product.getProducerId());
+            hubClient.create(passport, HubProductCreateRequestDto.toDto(product, producerResponseDtoCommonDto.getData().getHubId()));
 
         } catch (Exception e) {
-            producerClient.delete(passport, createProductInfoRequestDto.getProductId());
+            // 보상 트랜잭션 처리
+            try {
+                producerClient.delete(passport, createProductInfoRequestDto.getProductId());
+            } catch (Exception rollbackEx) {
+                log.error("보상 트랜잭션 실패: producerClient.delete 실패", rollbackEx);
+            }
+
+            throw new ProductException.ProductCreateFailException("상품 생성 중 예외 발생: " + e.getMessage());
         }
 
     }
@@ -99,7 +100,7 @@ public class ProductUsecase {
             UpdateProductDto updateProductDto,
             UUID productsId,
             String passport
-    ) {
+    ) throws ProductException.ProductUpdateFailException {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         //1.제품 정보 수정
         Product product = getProduct(productsId);
@@ -112,18 +113,29 @@ public class ProductUsecase {
 
         //4. 통신용 dto 생성
         UpdateProductInfoRequestDto updateProductInfoRequestDto = UpdateProductInfoRequestDto.fromEntity(product);
+        try {
+            //5. 생산업체 이벤트 전달
+            producerClient.update(passport, productsId, updateProductInfoRequestDto);
 
-        //5. 생산업체 이벤트 전달
-        producerClient.update(passport,productsId, updateProductInfoRequestDto);
+            //6. 허브 상품 정보 이벤트 전달
+            HubProductFindResponseDto hubProductFindResponseDto = hubClient.findHubProduct(productsId).getData();
+            hubClient.update(passport, HubProductUpdateRequestDto.toDto(hubProductFindResponseDto, updateProductDto));
 
-        //6. 허브 상품 정보 이벤트 전달
-        //허브의 상품 정보 조회
-        HubProductFindResponseDto hubProductFindResponseDto = hubClient.findHubProduct(productsId)
-                                                                       .getData();
+        } catch (Exception e) {
+            log.error("updateProduct 외부 시스템 호출 중 예외 발생", e);
 
-        //허브 상품 업데이트 이벤트 전달
-        hubClient.update(passport, HubProductUpdateRequestDto.toDto(hubProductFindResponseDto, updateProductDto));
+            // 보상 트랜잭션 시도
+            try {
+                // producerClient는 기존 상태로 되돌릴 수 있어야 함 (e.g. 재조회 후 rollback용 DTO 구성)
+                Product rollbackProduct = getProduct(productsId); // 최신 상태
+                UpdateProductInfoRequestDto rollbackDto = UpdateProductInfoRequestDto.fromEntity(rollbackProduct);
+                producerClient.update(passport, productsId, rollbackDto);
+            } catch (Exception rollbackEx) {
+                log.error("보상 트랜잭션 실패: producerClient rollback 실패", rollbackEx);
+            }
 
+            throw new ProductException.ProductUpdateFailException("상품 수정 실패: " + e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)
@@ -132,13 +144,13 @@ public class ProductUsecase {
 
         AtomicInteger totalQuantity = new AtomicInteger(1000);
 
-        product.getHubInfo()
-               .forEach(hubInfo ->
-                                //TODO :: Hub에 재고조회 API 날려서 각 재고 모아오기?
-                                totalQuantity.addAndGet(hubInfo.getHubProductQuantity()));
         return FindProductResponseDto.toDTO(product, totalQuantity);
     }
 
+    /**
+     * 허브상품재고는 그대로 나가지만 이후 상품에 대한 정보 조회가 실패하기때문에 삭제만 해도 된다는 판단
+     *
+     * */
     @Transactional
     public void delete(UUID productsId,
                        String passport
