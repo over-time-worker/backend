@@ -1,6 +1,7 @@
 package com.owl_express.alarm.application.service;
 
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
@@ -28,6 +29,19 @@ public interface AlarmService {
 
     AlarmFindResponseDto find(UUID alarmId);
 
-    PagedModel<AlarmSearchResponseDto> search(int page, int size, String sort, String orderBy,
-            String startDate, String endDate, String deliveryUserId, String platformType);
+    PagedModel<AlarmSearchResponseDto> search(
+            int page,
+            int size,
+            String sort,
+            String orderBy,
+            String startDate,
+            String endDate,
+            String deliveryUserId,
+            String platformType
+    );
+
+    void hubFallback(
+            HubDeliverFallbackMessageCreateRequestDto requestDto,
+            String passport
+    );
 }

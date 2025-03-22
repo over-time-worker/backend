@@ -8,6 +8,7 @@ import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_RE
 import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_SEND_FAIL_MESSAGE;
 
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
@@ -15,7 +16,6 @@ import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
 import com.owl_express.alarm.common.helper.PassportHelper;
-import com.owl_express.alarm.common.util.CommonUtil;
 import com.owl_express.alarm.common.util.PageUtil;
 import com.owl_express.alarm.domain.entity.Alarm;
 import com.owl_express.alarm.domain.entity.Alarm.MessageType;
@@ -58,13 +58,15 @@ public class AlarmServiceImpl implements AlarmService {
     @Value("${slack.token}")
     private String slackBotToken;
 
+    @Value("${massage.fallback}")
+    private String fallbackBase;
+
     @Override
     @Transactional
     public void createAlarmForHubDeliver(
             AlarmCreateRequestDto requestDto,
             String passport
     ) {
-        // TODO : ai 메세지 요청 feign client 통신 test
         MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto, passport);
 
         //slack 전송
@@ -78,18 +80,16 @@ public class AlarmServiceImpl implements AlarmService {
             String gmtDate = chatPostMessageResponse.getHttpResponseHeaders().get("date").get(0);
 
             //alarm 생성
-            Alarm alarm = Alarm.builder()
-                    .aiId(messageCreateResponseDto.getAiId())
-                    .userId(requestDto.getDeliverUserId())
-                    .userChannelId(requestDto.getDeliverChannelId())
-                    .platformType(platformType)
-                    .message(messageCreateResponseDto.getMessage())
-                    .aiId(messageCreateResponseDto.getAiId())
-                    .sendAt(CommonUtil.gmtStringToDefaultLocalDateTime(gmtDate))
-                    .messageType(MessageType.NORMAL)
-                    .build();
+            Alarm alarm = Alarm.create(
+                    messageCreateResponseDto,
+                    requestDto,
+                    platformType,
+                    gmtDate,
+                    null,
+                    MessageType.NORMAL,
+                    passportHelper.getPassportDto(passport).getUserId()
+            );
 
-            alarm.createdEntity(passportHelper.getPassportDto(passport).getUserId());
             alarmRepository.save(alarm);
         }
     }
@@ -100,7 +100,6 @@ public class AlarmServiceImpl implements AlarmService {
             AlarmCreateRequestDto requestDto,
             String passport
     ) {
-        // TODO : ai 메세지 요청 feign client 통신 test
         MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto, passport);
 
         //slack 전송
@@ -120,6 +119,7 @@ public class AlarmServiceImpl implements AlarmService {
                     platformType,
                     gmtDate,
                     platformMessageId,
+                    MessageType.RESERVATION,
                     passportHelper.getPassportDto(passport).getUserId()
             );
 
@@ -170,6 +170,48 @@ public class AlarmServiceImpl implements AlarmService {
         Page<AlarmSearchResponseDto> paged = alarmRepository.search(pageable, startDate, endDate, deliveryUserId, platformType);
         return new PagedModel<>(paged);
 
+    }
+
+    @Override
+    @Transactional
+    public void hubFallback(
+            HubDeliverFallbackMessageCreateRequestDto requestDto,
+            String passport
+    ) {
+        String messageId = requestDto.getMessageId();
+        PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
+
+        Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
+                () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
+
+        alarmUsecase.deleteMessageToAi(alarm.getAiId(), passport);
+
+        alarm.deleteEntity(passportHelper.getPassportDto(passport).getUserId());
+
+        ChatPostMessageResponse chatPostMessageResponse;
+        String fallbackMessage = createFallbackMessage(requestDto);
+
+        if(platformType.equals(PlatformType.SLACK)) {
+            chatPostMessageResponse = sendMessage(
+                    fallbackMessage,
+                    requestDto.getDeliverChannelId()
+            );
+
+            String gmtDate = chatPostMessageResponse.getHttpResponseHeaders().get("date").get(0);
+
+            //alarm 생성
+            Alarm newAlarm = Alarm.createFallback(
+                    requestDto,
+                    platformType,
+                    gmtDate,
+                    null,
+                    MessageType.NORMAL,
+                    fallbackMessage,
+                    passportHelper.getPassportDto(passport).getUserId()
+            );
+
+            alarmRepository.save(newAlarm);
+        }
     }
 
     private ChatPostMessageResponse sendMessage(String message, String channelId) {
@@ -240,6 +282,13 @@ public class AlarmServiceImpl implements AlarmService {
             throw new SlackException(MESSAGE_NOT_FOUND_MESSAGE);
         }
 
+    }
+
+    private String createFallbackMessage(HubDeliverFallbackMessageCreateRequestDto requestDto) {
+        return fallbackBase
+                .replace("{deliverName}", requestDto.getDeliverName())
+                .replace("{orderId}", requestDto.getOrderId().toString())
+                .replace("{productInfo}", requestDto.getProductInfo());
     }
 
 }

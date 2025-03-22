@@ -1,6 +1,7 @@
 package com.owl_express.alarm.domain.entity;
 
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
@@ -86,6 +87,7 @@ public class Alarm extends BaseEntity {
             PlatformType platformType,
             String gmtDate,
             String platformMessageId,
+            MessageType messageType,
             Long userId
     ) {
         Alarm alarm = Alarm.builder()
@@ -94,9 +96,33 @@ public class Alarm extends BaseEntity {
                 .userChannelId(requestDto.getDeliverChannelId())
                 .platformType(platformType)
                 .message(messageCreateResponseDto.getMessage())
-                .aiId(messageCreateResponseDto.getAiId())
                 .sendAt(CommonUtil.gmtStringToDefaultLocalDateTime(gmtDate))
-                .messageType(MessageType.RESERVATION)
+                .messageType(messageType)
+                .messageId(platformMessageId)
+                .build();
+
+        alarm.createdEntity(userId);
+
+        return alarm;
+    }
+
+    public static Alarm createFallback(
+            HubDeliverFallbackMessageCreateRequestDto requestDto,
+            PlatformType platformType,
+            String gmtDate,
+            String platformMessageId,
+            MessageType messageType,
+            String message,
+            Long userId
+    ) {
+        Alarm alarm = Alarm.builder()
+                .aiId(requestDto.getAiId())
+                .userId(requestDto.getDeliverUserId())
+                .userChannelId(requestDto.getDeliverChannelId())
+                .platformType(platformType)
+                .message(message)
+                .sendAt(CommonUtil.gmtStringToDefaultLocalDateTime(gmtDate))
+                .messageType(messageType)
                 .messageId(platformMessageId)
                 .build();
 
