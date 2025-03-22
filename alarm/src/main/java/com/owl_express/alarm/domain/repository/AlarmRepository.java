@@ -18,4 +18,6 @@ public interface AlarmRepository {
 
     Page<AlarmSearchResponseDto> search(Pageable pageable, String startDate, String endDate,
             String deliveryUserId, String platformType);
+
+    Optional<Alarm> findByAiId(UUID aiId);
 }

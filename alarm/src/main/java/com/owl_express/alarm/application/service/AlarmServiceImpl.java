@@ -178,10 +178,9 @@ public class AlarmServiceImpl implements AlarmService {
             HubDeliverFallbackMessageCreateRequestDto requestDto,
             String passport
     ) {
-        String messageId = requestDto.getMessageId();
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
 
-        Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
+        Alarm alarm = alarmRepository.findByAiId(requestDto.getAiId()).orElseThrow(
                 () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
         alarmUsecase.deleteMessageToAi(alarm.getAiId(), passport);
