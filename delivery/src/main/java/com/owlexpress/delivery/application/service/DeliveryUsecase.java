@@ -54,7 +54,7 @@ public class DeliveryUsecase {
         AlarmCreateResponseDto messageCreateResponseDto;
 
         CommonDto<AlarmCreateResponseDto> responseEntity
-                = deliveryManagerClient.assignHub(passport, deliveryManagerRequestDto);
+                = deliveryManagerClient.assignCompany(passport, deliveryManagerRequestDto);
 
         messageCreateResponseDto = responseEntity.getData();
 
