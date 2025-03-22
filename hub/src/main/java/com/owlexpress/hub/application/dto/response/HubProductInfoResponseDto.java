@@ -14,6 +14,7 @@ import org.locationtech.jts.geom.Point;
 public class HubProductInfoResponseDto {
 
     private UUID hubId;
+    private String hubName;
     private Point location;
     private UUID hubProductId;
     private UUID productId;
@@ -24,6 +25,7 @@ public class HubProductInfoResponseDto {
     @Builder
     public HubProductInfoResponseDto(
             UUID hubId,
+            String hubName,
             Point location,
             UUID hubProductId,
             UUID productId,
@@ -33,6 +35,7 @@ public class HubProductInfoResponseDto {
     ) {
         this.hubId = hubId;
         this.location = location;
+        this.hubName = hubName;
         this.hubProductId = hubProductId;
         this.productId = productId;
         this.productName = productName;

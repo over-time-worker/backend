@@ -9,11 +9,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HubProductOrderConfirmResponseDto {
 
-    @Getter
     private UUID hubId;
+    private String hubName;
     private List<ConfirmedHubProductResponseDto> products;
 
     @Getter
@@ -36,9 +37,13 @@ public class HubProductOrderConfirmResponseDto {
     }
 
     @Builder
-    public HubProductOrderConfirmResponseDto(UUID hubId,
-            List<ConfirmedHubProductResponseDto> products) {
+    public HubProductOrderConfirmResponseDto(
+            UUID hubId,
+            String hubName,
+            List<ConfirmedHubProductResponseDto> products
+    ) {
         this.hubId = hubId;
+        this.hubName = hubName;
         this.products = products;
     }
 
