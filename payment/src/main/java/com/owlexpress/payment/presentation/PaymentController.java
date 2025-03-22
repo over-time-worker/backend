@@ -7,6 +7,7 @@ import com.owlexpress.payment.presentation.dto.CommonDto;
 import com.owlexpress.payment.presentation.dto.CommonDto.CommonDtoBuilder;
 import com.owlexpress.payment.presentation.dto.request.PaymentCreateRequestDto;
 import com.owlexpress.payment.presentation.dto.request.PaymentDeleteRequestDto;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,18 +29,18 @@ public class PaymentController {
     private final PaymentUseCase paymentUseCase;
 
     @PostMapping
-    public ResponseEntity<CommonDto<Void>> create(
+    public ResponseEntity<CommonDto<Map<String, UUID>>> create(
             @RequestBody PaymentCreateRequestDto requestDto,
             @RequestHeader("X-User-Passport") String passport
     ) {
         // TODO : 주문에서 요청 넘어오면 정보 담아서 -> 허브 간 이동거리로 정보 전달
-        paymentUseCase.createPayment(requestDto, passport);
+        UUID payment = paymentUseCase.createPayment(requestDto, passport);
 
-        CommonDto<Void> created = CommonDto.<Void>builder()
+        CommonDto<Map<String, UUID>> created = CommonDto.<Map<String, UUID>>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
                 .message(ResponseMessage.PAYMENT_CREATE_SUCESS)
-                .data(null)
+                .data(Map.of("deliveryId", payment))
                 .build();
 
         return ResponseEntity.ok(created);
