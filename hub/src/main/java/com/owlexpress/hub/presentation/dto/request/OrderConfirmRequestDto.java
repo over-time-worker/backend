@@ -5,19 +5,22 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderConfirmRequestDto {
+public class
+OrderConfirmRequestDto {
 
     private UUID consumerId;
-    private Point location;
+    private Double latitude;
+    private Double longitude;
     private List<Product> orderProducts;
 
-    public OrderConfirmRequestDto(UUID consumerId, Point location, List<Product> orderProducts) {
+    public OrderConfirmRequestDto(
+            UUID consumerId, Double latitude, Double longitude, List<Product> orderProducts) {
         this.consumerId = consumerId;
-        this.location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.orderProducts = orderProducts;
     }
 

@@ -4,6 +4,7 @@ import com.owlexpress.hub.application.dto.request.DirectionsRequestDto;
 import com.owlexpress.hub.application.dto.response.DirectionsResponseDto;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class NaverDirectionsClient {
 
     @Value("${naver.client-id}")
@@ -34,18 +36,24 @@ public class NaverDirectionsClient {
                                   .build();
     }
 
-    /** 🔹 비동기 방식으로 네이버 API 호출 */
+    /** 🔹 비동기 방식으로 네이버 API 호출 (로깅 포함) */
     public Mono<DirectionsResponseDto> getDrivingRoute(DirectionsRequestDto requestDto) {
+        log.info("[Naver Directions API] 요청 준비 - start: {}, goal: {}, option: {}",
+                 requestDto.getStart(), requestDto.getGoal(), requestDto.getOption());
+
         return webClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .queryParam("start", requestDto.getStart())
-                                .queryParam("goal", requestDto.getGoal())
-                                .queryParam("option", requestDto.getOption())
-                                .build())
-                        .retrieve()
-                        .bodyToMono(DirectionsResponseDto.class)
-                        .onErrorResume(e ->
-                             Mono.empty() // 오류 발생 시 빈 결과 반환
-                        );
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("start", requestDto.getStart())
+                        .queryParam("goal", requestDto.getGoal())
+                        .queryParam("option", requestDto.getOption())
+                        .build())
+                .retrieve()
+                .bodyToMono(DirectionsResponseDto.class)
+                .doOnNext(response -> log.info("[Naver Directions API] 응답 수신 완료"))
+                .doOnError(error -> log.error("[Naver Directions API] 오류 발생: {}", error.getMessage(), error))
+                .onErrorResume(e -> {
+                    log.warn("[Naver Directions API] 오류로 인해 빈 응답 반환");
+                    return Mono.empty();
+                });
     }
 }

@@ -79,6 +79,8 @@ dependencies {
     // ✅ for PostGIS
     implementation 'org.hibernate.orm:hibernate-spatial:6.6.11.Final'
 
+    implementation 'com.bedatadriven:jackson-datatype-jts:2.4'
+
     // ✅ Zipkin
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'

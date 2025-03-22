@@ -201,6 +201,8 @@ public class HubDistanceService {
         DirectionsResponseDto responseDto = naverDirectionsClient.getDrivingRoute(requestDto).block();
 
         if (responseDto == null || responseDto.getRoute() == null || responseDto.getRoute().isEmpty()) {
+            log.info("responseDto : {}",responseDto);
+            log.info("responseDto route : {}", responseDto.getRoute());
             log.error(" API 응답이 올바르지 않습니다. startHub={}, Consumer({}, {})", startHub.getName(), consumerLongitude, consumerLatitude);
             throw new LocationNotExistException();
         }

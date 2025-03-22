@@ -62,17 +62,36 @@ public class HubPathFinder {
         DirectionsResponseDto responseDto = naverDirectionsClient.getDrivingRoute(requestDto).block();
 
         try {
-            if (responseDto == null || responseDto.getRoute() == null || responseDto.getRoute()
-                                                                                    .isEmpty()) {
+            if (responseDto == null) {
+                log.error("[Naver API] 응답이 null입니다. 요청 정보: start={}, goal={}, option={}",
+                          requestDto.getStart(), requestDto.getGoal(), requestDto.getOption());
                 throw new HubException.RouteNotFoundException();
             }
+
+            if (responseDto.getRoute() == null || responseDto.getRoute().isEmpty()) {
+                log.error("[Naver API] 'route' 필드가 비어 있습니다. 응답 내용: {}", responseDto);
+                throw new HubException.RouteNotFoundException();
+            }
+
             List<RouteOption> routeOptions = responseDto.getRoute().get("trafast");
-            if (routeOptions == null || routeOptions.isEmpty()) {
-                log.warn("Naver Maps API 경로 없음: startHub={}, consumerLocation=({}, {})",
+            if (routeOptions == null) {
+                log.warn("[Naver API] 'trafast' 경로가 존재하지 않습니다. 전체 route 키: {}", responseDto.getRoute().keySet());
+                throw new HubException.RouteNotFoundException();
+            }
+
+            if (routeOptions.isEmpty()) {
+                log.warn("[Naver API] 'trafast' 경로는 있지만 옵션이 없습니다. startHub={}, consumer=({}, {})",
                          startHub.getHubId(), consumerLongitude, consumerLatitude);
                 throw new HubException.RouteNotFoundException();
             }
-            // Naver API에서 반환된 최적 경로를 RouteResponseDto로 변환
+
+            // 성공 로그
+            log.info("[Naver API] 경로 조회 성공. startHub={}, consumer=({}, {}), 거리: {}m, 예상 시간: {}초",
+                     startHub.getHubId(), consumerLongitude, consumerLatitude,
+                     routeOptions.get(0).getSummary().getDistance(),
+                     routeOptions.get(0).getSummary().getDuration());
+
+            // 최적 경로를 사용
             RouteOption routeOption = routeOptions.get(0);
             List<RouteResponseDto> route = new ArrayList<>();
 
