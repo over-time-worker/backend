@@ -12,7 +12,7 @@ public class CreateHubDeliveryManagerRequestDto {
     private String user_name;
     private String user_phone_number;
     private PlatformType platform_type;
-    private Long channelId;
+    private String channelId;
 
     @Builder
     public CreateHubDeliveryManagerRequestDto(
@@ -21,7 +21,7 @@ public class CreateHubDeliveryManagerRequestDto {
             String user_name,
             String user_phone_number,
             PlatformType platform_type,
-            Long channelId
+            String channelId
     ) {
         this.userId = userId;
         this.assign_number = assign_number;

@@ -26,9 +26,10 @@ public class ConsumerDeliveryManagerController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
     ) throws HubNotFoundException {
-        consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto);
+        consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.CREATED)
@@ -42,10 +43,11 @@ public class ConsumerDeliveryManagerController {
 
     @PutMapping("/{consumerDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> update(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId,
             @RequestBody UpdateConsumerDeliveryManagerRequestDto updateConsumerDeliveryManagerRequestDto
     ) throws ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException {
-        consumerDeliveryManagerUsecase.update(updateConsumerDeliveryManagerRequestDto, consumerDeliveryManagerId);
+        consumerDeliveryManagerUsecase.update(updateConsumerDeliveryManagerRequestDto, consumerDeliveryManagerId,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
@@ -59,7 +61,6 @@ public class ConsumerDeliveryManagerController {
 
     @GetMapping("/{consumerDeliveryManagerId}")
     public ResponseEntity<CommonDto<FindConsumerResponseDto>> find(
-            //TODO:: passport 연결 후에는 UUID받을 필요 없음
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId
     ) {
         FindConsumerResponseDto findConsumerResponseDto = consumerDeliveryManagerUsecase.find(
@@ -100,10 +101,11 @@ public class ConsumerDeliveryManagerController {
 
     @DeleteMapping("/{consumerDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> delete(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId
     ) throws ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException {
 
-        consumerDeliveryManagerUsecase.delete(consumerDeliveryManagerId);
+        consumerDeliveryManagerUsecase.delete(consumerDeliveryManagerId,passport);
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
                                              .code(HttpStatus.ACCEPTED.value())
@@ -114,11 +116,12 @@ public class ConsumerDeliveryManagerController {
                              .body(commonDto);
     }
 
-    @GetMapping("/assign")
+    @PostMapping("/assign")
     public ResponseEntity<CommonDto<AlarmCreateResponseDto>> assign(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody DeliveryManagerRequestDto deliveryManagerRequestDto
     ) throws HubNotFoundException, ConsumerDeliveryManagerException.ConsumerEmptyException {
-        AlarmCreateResponseDto assign = consumerDeliveryManagerUsecase.assign(deliveryManagerRequestDto);
+        AlarmCreateResponseDto assign = consumerDeliveryManagerUsecase.assign(deliveryManagerRequestDto,passport);
 
         CommonDto<AlarmCreateResponseDto> commonDto = CommonDto.<AlarmCreateResponseDto>builder()
                                                                .status(HttpStatus.ACCEPTED)
@@ -133,6 +136,7 @@ public class ConsumerDeliveryManagerController {
 
     @PatchMapping("/return-hub/{deliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> returnHub(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @PathVariable UUID deliveryManagerId
     ) {
         consumerDeliveryManagerUsecase.returnHub(deliveryManagerId);

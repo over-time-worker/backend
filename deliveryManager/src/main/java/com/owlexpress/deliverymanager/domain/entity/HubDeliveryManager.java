@@ -41,7 +41,7 @@ public class HubDeliveryManager extends BaseEntity {
     private PlatformType platformType;
 
     @Column(name = "channel_id")
-    private Long channelId;
+    private String channelId;
 
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;
@@ -54,7 +54,7 @@ public class HubDeliveryManager extends BaseEntity {
             String userName,
             String userPhoneNumber,
             PlatformType platformType,
-            Long channelId,
+            String channelId,
             boolean isAvaliable
     ) {
         this.hubDeliveryManagerId = hubDeliveryManagerId;
