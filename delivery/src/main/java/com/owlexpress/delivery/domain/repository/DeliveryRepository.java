@@ -15,4 +15,8 @@ public interface DeliveryRepository {
     Page<DeliveryFindResponseDto> search(Pageable pageable, String startDate, String endDate, UUID deliveryId, String deliveryStatus);
 
     Delivery save(Delivery delivery);
+
+    Optional<Delivery> findByConsumerCompanyId(UUID consumerId);
+
+    Boolean isExistByConsumerCompanyId(UUID consumerId);
 }
