@@ -101,7 +101,7 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
         return new PageImpl<>(hubProducts, pageable, count);
     }
 
-    public List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> hubProductIds) {
+    public List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds) {
 
         return queryFactory.select(
                         Projections.constructor(
@@ -109,15 +109,17 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
                                 hubProduct.hub.hubId,
                                 hubProduct.hub.location,
                                 hubProduct.hubProductId,
+                                hubProduct.productId,
                                 hubProduct.productName,
                                 hubProduct.productStock,
                                 hubProduct.productType
+
                         )
                 )
                 .from(hubProduct)
                 .innerJoin(hubProduct.hub, hub)
-                .where(hubProduct.hubProductId.in(hubProductIds))
-                .groupBy(hub.hubId)
+                .where(hubProduct.productId.in(productIds))
+//                .groupBy(hub.hubId)
                 .fetch();
 
     }

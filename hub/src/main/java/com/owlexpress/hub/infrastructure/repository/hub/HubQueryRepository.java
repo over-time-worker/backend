@@ -12,7 +12,8 @@ public interface HubQueryRepository {
 
     Page<Hub> searchHub(Pageable pageable, String keyword, String orderBy, String sort);
 
-    Page<HubProduct> searchHubProduct(Pageable pageable, String keyword, String orderBy, String sort);
+    Page<HubProduct> searchHubProduct(Pageable pageable, String keyword, String orderBy,
+            String sort);
 
-    List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> hubProductIds);
+    List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds);
 }

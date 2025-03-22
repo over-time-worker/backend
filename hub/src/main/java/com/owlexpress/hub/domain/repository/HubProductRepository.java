@@ -2,6 +2,7 @@ package com.owlexpress.hub.domain.repository;
 
 import com.owlexpress.hub.domain.entity.HubProduct;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,4 +12,6 @@ public interface HubProductRepository {
     HubProduct save(HubProduct hubProduct);
 
     Optional<HubProduct> findByHubProductId(UUID hubProductId);
+
+    List<HubProduct> findAllHubProductsIn(List<UUID> productIds);
 }

@@ -73,4 +73,8 @@ public class HubProduct extends BaseEntity {
         this.productStock = requestDto.getHubProductStock();
         this.productType = requestDto.getHubProductType();
     }
+
+    public void reduceStock(long quantity) {
+        this.productStock -= quantity;
+    }
 }
