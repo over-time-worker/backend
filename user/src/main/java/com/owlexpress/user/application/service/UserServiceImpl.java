@@ -4,10 +4,10 @@ import static com.owlexpress.user.common.exception.ExceptionMessage.NEW_PASSWORD
 import static com.owlexpress.user.common.exception.ExceptionMessage.PASSWORD_INCORRECT_MESSAGE;
 import static com.owlexpress.user.common.exception.ExceptionMessage.USER_NOT_FOUND_MESSAGE;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlexpress.user.application.exception.NewPasswordNotMatchesException;
 import com.owlexpress.user.application.exception.PasswordIncorrectException;
-import com.owlexpress.user.common.PassportHelper;
+import com.owlexpress.user.common.dto.PassportDto;
+import com.owlexpress.user.common.helper.PassportHelper;
 import com.owlexpress.user.domain.entity.User;
 import com.owlexpress.user.domain.repository.UserRepository;
 import com.owlexpress.user.infrastructure.exception.UserNotFoundException;
@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PassportHelper passportHelper;
 
     @Override
     public void signup(UserSignupRequestDto userSignupRequestDto) {
@@ -61,9 +62,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public GetUserInfoResponseDto find(String passport) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        PassportHelper helper = objectMapper.convertValue(passport, PassportHelper.class);
-        User user = userRepository.findByUserId(helper.getUserId())
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
+
+        User user = userRepository.findByUserId(passportDto.getUserId())
                 .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
 
         return GetUserInfoResponseDto.builder()
@@ -83,10 +84,9 @@ public class UserServiceImpl implements UserService {
             throw new NewPasswordNotMatchesException(NEW_PASSWORD_NOT_MATCHES_MESSAGE);
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        PassportHelper helper = objectMapper.convertValue(passport, PassportHelper.class);
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
 
-        User user = userRepository.findByUserId(helper.getUserId())
+        User user = userRepository.findByUserId(passportDto.getUserId())
                 .orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
 
         boolean matches = passwordEncoder.matches(
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
 
         user.setNewPassword(
                 passwordEncoder.encode(updatePasswordRequestDto.getNewPassword()),
-                helper.getUserId()
+                passportDto.getUserId()
         );
     }
 

@@ -63,7 +63,7 @@ public class UserController {
         return ResponseEntity.ok().body(commonDto);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping
     public ResponseEntity<CommonDto<GetUserInfoResponseDto>> get(
             @RequestHeader("X-User-Passport") String passport
     ) {
