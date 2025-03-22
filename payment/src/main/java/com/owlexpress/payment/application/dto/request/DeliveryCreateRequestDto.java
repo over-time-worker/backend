@@ -1,11 +1,11 @@
-package com.owlexpress.payment.presentation.dto.request;
+package com.owlexpress.payment.application.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.owlexpress.payment.application.dto.response.RouteInfoResponseDto;
 import com.owlexpress.payment.common.OrderType;
-import com.owlexpress.payment.domain.constant.PaymentStatus;
-import com.owlexpress.payment.domain.entity.Payment;
-import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,66 +14,61 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentCreateRequestDto {
+public class DeliveryCreateRequestDto {
 
     private UUID orderId;
-    private BigDecimal price;
-    private String transactionId;
     private String productInfo;
     private UUID startHubId;
     private String startHubName;
+    private UUID destinationHubId;
+    private String destinationHubName;
     private OrderType orderType;
     private String shippingAddress;
     private String description;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     private UUID consumerCompanyId;
-    private Double consumerLatitude;
-    private Double consumerLongitude;
     private String consumerPhoneNumber;
     private String consumerName;
+    private Double totalEstimateDistance;
+    private Duration totalEstimateDurationTime;
+    private List<RouteInfoResponseDto> hubList;
 
 
-    public PaymentCreateRequestDto(
+    @Builder
+    public DeliveryCreateRequestDto(
             UUID orderId,
-            BigDecimal price,
-            String transactionId,
             String productInfo,
             UUID startHubId,
             String startHubName,
+            UUID destinationHubId,
+            String destinationHubName,
             OrderType orderType,
             String shippingAddress,
             String description,
             LocalDateTime requestArrivalTime,
             UUID consumerCompanyId,
-            Double consumerLatitude,
-            Double consumerLongitude,
             String consumerPhoneNumber,
-            String consumerName
+            String consumerName,
+            Double totalEstimateDistance,
+            Duration totalEstimateDurationTime,
+            List<RouteInfoResponseDto> hubList
     ) {
         this.orderId = orderId;
-        this.price = price;
-        this.transactionId = transactionId;
         this.productInfo = productInfo;
         this.startHubId = startHubId;
         this.startHubName = startHubName;
+        this.destinationHubId = destinationHubId;
+        this.destinationHubName = destinationHubName;
         this.orderType = orderType;
         this.shippingAddress = shippingAddress;
         this.description = description;
         this.requestArrivalTime = requestArrivalTime;
         this.consumerCompanyId = consumerCompanyId;
-        this.consumerLatitude = consumerLatitude;
-        this.consumerLongitude = consumerLongitude;
         this.consumerPhoneNumber = consumerPhoneNumber;
         this.consumerName = consumerName;
-    }
-
-    public Payment toEntity() {
-        return Payment.builder()
-                .orderId(this.orderId)
-                .price(this.price)
-                .transactionId(this.transactionId)
-                .paymentStatus(PaymentStatus.SUCCESS)
-                .build();
+        this.totalEstimateDistance = totalEstimateDistance;
+        this.totalEstimateDurationTime = totalEstimateDurationTime;
+        this.hubList = hubList;
     }
 }
