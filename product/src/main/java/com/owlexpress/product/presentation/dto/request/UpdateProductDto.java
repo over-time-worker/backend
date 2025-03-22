@@ -1,6 +1,7 @@
 package com.owlexpress.product.presentation.dto.request;
 
 import com.owlexpress.product.domain.constant.ProductType;
+import com.owlexpress.product.domain.entity.Product;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -44,5 +45,26 @@ public class UpdateProductDto {
         this.producerId = producerId;
         this.producerName = producerName;
         this.producerAddress = producerAddress;
+    }
+
+    public static void updateProduct(Product product, UpdateProductDto updateProductDto) {
+        if (updateProductDto.getProductName() != null) {
+            product.setProductName(updateProductDto.getProductName());
+        }
+        if (updateProductDto.getProductPrice() != null) {
+            product.setProductPrice(updateProductDto.getProductPrice());
+        }
+        if (updateProductDto.getProductType() != null) {
+            product.setProductType(updateProductDto.getProductType());
+        }
+        if (updateProductDto.getProducerId() != null) {
+            product.setProducerId(updateProductDto.getProducerId());
+        }
+        if (updateProductDto.getProducerName() != null) {
+            product.setProducerName(updateProductDto.getProducerName());
+        }
+        if (updateProductDto.getProducerAddress() != null) {
+            product.setProducerAddress(updateProductDto.getProducerAddress());
+        }
     }
 }

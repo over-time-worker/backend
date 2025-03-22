@@ -1,4 +1,4 @@
-package com.owlexpress.order.common;
+package com.owlexpress.order.common.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;

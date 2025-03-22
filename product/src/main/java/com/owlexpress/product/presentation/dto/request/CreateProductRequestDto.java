@@ -1,6 +1,6 @@
 package com.owlexpress.product.presentation.dto.request;
 
-import com.owlexpress.product.common.dto.ProducerResponseDto;
+import com.owlexpress.product.common.dto.response.ProducerResponseDto;
 import com.owlexpress.product.domain.constant.ProductType;
 import com.owlexpress.product.domain.entity.Product;
 import jakarta.validation.constraints.Size;
@@ -52,8 +52,8 @@ public class CreateProductRequestDto {
                 .productName(createProductRequestDto.getProductName())
                 .productPrice(createProductRequestDto.getProductPrice())
                 .productType(createProductRequestDto.getProductType())
-                .producerId(createProductRequestDto.getProducerId())
-                .producerName(producerResponseDto.getUserName()) //TODO:: Producer find에 companyName 추가할것
+                .producerId(producerResponseDto.getProducerId())
+                .producerName(producerResponseDto.getCompanyName())
                 .producerAddress(producerResponseDto.getCompanyAddress())
                 .build();
     }
