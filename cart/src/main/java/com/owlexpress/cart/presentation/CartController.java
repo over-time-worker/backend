@@ -127,7 +127,7 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
     }
 
-    @DeleteMapping("/{consumerId}")
+    @DeleteMapping("/remove/{consumerId}")
     public ResponseEntity<CommonDto<Void>> deleteCart(
             @RequestHeader("X-User-Passport") String passport,
             @PathVariable("consumerId") UUID consumerId
