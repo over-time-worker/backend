@@ -23,6 +23,7 @@ public class ConfirmHubStockRequestDto {
         this.orderProducts = orderProducts;
     }
 
+    @Builder
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class HubProduct {

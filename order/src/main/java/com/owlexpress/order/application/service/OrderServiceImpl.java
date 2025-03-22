@@ -66,10 +66,11 @@ public class OrderServiceImpl implements OrderService{
                 .orderProducts(
                         request.getProducts().stream()
                                 .map(hubProduct ->
-                                        new ConfirmHubStockRequestDto.HubProduct(
-                                                hubProduct.getProductId(),
-                                                hubProduct.getQuantity()
-                                        ))
+                                        ConfirmHubStockRequestDto.HubProduct.builder()
+                                                .productId(hubProduct.getProductId())
+                                                .quantity(hubProduct.getQuantity())
+                                                .build()
+                                )
                                 .collect(Collectors.toList())
                 )
                 .build();
