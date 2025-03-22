@@ -34,4 +34,9 @@ public class AlarmRepositoryImpl implements AlarmRepository {
         return alarmQueryRepository.search(pageable, startDate, endDate,
                 deliveryUserId, platformType);
     }
+
+    @Override
+    public Optional<Alarm> findByAiId(UUID aiId) {
+        return alarmJpaRepository.findByAiId(aiId);
+    }
 }

@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AlarmJpaRepository extends JpaRepository<Alarm, UUID> {
     Optional<Alarm> findByMessageId(String messageId);
+
+    Optional<Alarm> findByAiId(UUID aiId);
 }

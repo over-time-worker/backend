@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface AlarmService {
-    void createAlarmForHubDeliver(
+    AlarmCreateResponseDto createAlarmForHubDeliver(
             AlarmCreateRequestDto alarmCreateRequestDto,
             String passport
             );

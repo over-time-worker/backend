@@ -63,7 +63,7 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Override
     @Transactional
-    public void createAlarmForHubDeliver(
+    public AlarmCreateResponseDto createAlarmForHubDeliver(
             AlarmCreateRequestDto requestDto,
             String passport
     ) {
@@ -91,7 +91,10 @@ public class AlarmServiceImpl implements AlarmService {
             );
 
             alarmRepository.save(alarm);
+
+            return AlarmCreateResponseDto.toDto(alarm, null);
         }
+        return AlarmCreateResponseDto.builder().build();
     }
 
     @Override
@@ -178,10 +181,9 @@ public class AlarmServiceImpl implements AlarmService {
             HubDeliverFallbackMessageCreateRequestDto requestDto,
             String passport
     ) {
-        String messageId = requestDto.getMessageId();
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
 
-        Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
+        Alarm alarm = alarmRepository.findByAiId(requestDto.getAiId()).orElseThrow(
                 () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
         alarmUsecase.deleteMessageToAi(alarm.getAiId(), passport);

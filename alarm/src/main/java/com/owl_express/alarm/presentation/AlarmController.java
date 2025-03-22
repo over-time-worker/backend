@@ -40,14 +40,14 @@ public class AlarmController {
     private final AlarmService alarmService;
 
     @PostMapping("/hub-delivery")
-    public ResponseEntity<CommonDto<Void>> createAlarmForHubDeliver(
+    public ResponseEntity<CommonDto<AlarmCreateResponseDto>> createAlarmForHubDeliver(
             @RequestBody AlarmCreateRequestDto alarmCreateRequestDto,
             @RequestHeader("X-User-Passport") String passport
     ) {
-        alarmService.createAlarmForHubDeliver(alarmCreateRequestDto, passport);
+        AlarmCreateResponseDto responseDto = alarmService.createAlarmForHubDeliver(alarmCreateRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                CommonDto.<Void>builder()
+                CommonDto.<AlarmCreateResponseDto>builder()
                         .status(HttpStatus.CREATED)
                         .message(SEND_MESSAGE_SUCCESS)
                         .code(HttpStatus.CREATED.value())
