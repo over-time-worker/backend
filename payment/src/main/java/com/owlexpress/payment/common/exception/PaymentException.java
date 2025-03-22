@@ -6,6 +6,7 @@ public class PaymentException {
     private static final String ORDER_DOES_NOT_EXIST = "찾으시는 주문 내역이 없습니다.";
     private static final String PAYMENT_DOES_NOT_LINKED_WITH_ORDER = "해당 주문 내역에 대한 결제 내역이 없습니다.";
     private static final String PAYMENT_CANCEL_FAILED = "결제 취소 중 문제가 발생했습니다.";
+    private static final String DELIVERY_CREATION_FAILED = "배송 생성 중 문제가 발생했습니다.";
 
     public static class PaymentNotFoundException extends RuntimeException {
 
@@ -28,10 +29,17 @@ public class PaymentException {
         }
     }
 
-    public static class OrderDoesNotMatchException extends RuntimeException{
+    public static class OrderDoesNotMatchException extends RuntimeException {
 
         public OrderDoesNotMatchException() {
             super(PAYMENT_DOES_NOT_LINKED_WITH_ORDER);
+        }
+    }
+
+    public static class DeliveryCreationFailException extends RuntimeException {
+
+        public DeliveryCreationFailException() {
+            super(DELIVERY_CREATION_FAILED);
         }
     }
 
