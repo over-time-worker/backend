@@ -1,7 +1,9 @@
 package com.owlexpress.product.domain.service;
 
 import com.owlexpress.product.application.ProductUsecase;
+import com.owlexpress.product.common.dto.response.PassportDto;
 import com.owlexpress.product.common.exceptions.ProductException;
+import com.owlexpress.product.common.helper.PassportHelper;
 import com.owlexpress.product.domain.entity.HubInfo;
 import com.owlexpress.product.domain.repository.HubInfoRepository;
 import com.owlexpress.product.presentation.dto.request.CreateHubInfoRequestDto;
@@ -18,12 +20,16 @@ public class HubInfoServiceImpl implements HubInfoService {
 
     private final HubInfoRepository hubInfoRepository;
     private final ProductUsecase productUsecase;
+    private final PassportHelper passportHelper;
 
     @Override
     @Transactional
-    public HubInfo create(CreateHubInfoRequestDto createHubInfoRequestDto) {
+    public HubInfo create(CreateHubInfoRequestDto createHubInfoRequestDto,
+                          String passport
+    ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         HubInfo hubInfo = CreateHubInfoRequestDto.toEntity(createHubInfoRequestDto);
-        hubInfo.updateCreateData(1L); //TODO:: AuditAware 적용 후 삭제
+        hubInfo.updateCreateData(passportDto.getUserId());
 
         return hubInfoRepository.save(hubInfo);
     }
@@ -32,22 +38,27 @@ public class HubInfoServiceImpl implements HubInfoService {
     @Transactional
     public void update(
             UUID hubInfoId,
-            UpdateHubInfoRequestDto updateHubInfoRequestDto
+            UpdateHubInfoRequestDto updateHubInfoRequestDto,
+            String passport
     )
     {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         HubInfo hubInfo = getHubInfo(hubInfoId);
         hubInfo.setHubProductQuantity(updateHubInfoRequestDto.getHubProductQuantity());
 
-        hubInfo.updateModifiedData(1L); //TODO:: AuditAware 적용 후 삭제
+        hubInfo.updateModifiedData(passportDto.getUserId());
     }
 
     @Override
     @Transactional
-    public void delete(UUID hubInfoId) {
+    public void delete(UUID hubInfoId,
+                       String passport
+    ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         HubInfo hubInfo = getHubInfo(hubInfoId);
 
-        hubInfo.updateModifiedData(1L);
-        hubInfo.softDeleteData(1L);
+        hubInfo.updateModifiedData(passportDto.getUserId());
+        hubInfo.softDeleteData(passportDto.getUserId());
         productUsecase.disConnect(hubInfo);
     }
 
