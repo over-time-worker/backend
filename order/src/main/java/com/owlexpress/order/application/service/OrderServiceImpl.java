@@ -2,11 +2,20 @@ package com.owlexpress.order.application.service;
 
 import static com.owlexpress.order.common.exception.ExceptionMessage.ORDER_NOT_FOUND_EXCEPTION_MESSAGE;
 
+import com.owlexpress.order.application.dto.request.HubProductIsEnoughRequestDto;
+import com.owlexpress.order.application.dto.response.GetConsumerInfoResponseDto;
+import com.owlexpress.order.application.dto.response.HubProductIsEnoughResponseDto;
 import com.owlexpress.order.application.exception.OrderNotFoundException;
+import com.owlexpress.order.common.dto.CommonDto;
+import com.owlexpress.order.common.dto.PassportDto;
+import com.owlexpress.order.common.helper.PassportHelper;
 import com.owlexpress.order.common.util.PageUtil;
 import com.owlexpress.order.domain.entity.Order;
 import com.owlexpress.order.domain.entity.OrderProduct;
 import com.owlexpress.order.domain.repository.OrderRepository;
+import com.owlexpress.order.infrastructure.client.ConsumerFeignClient;
+import com.owlexpress.order.infrastructure.client.HubFeignClient;
+import com.owlexpress.order.infrastructure.client.PaymentFeignClient;
 import com.owlexpress.order.presentation.dto.request.CreateOrderProductRequestDto;
 import com.owlexpress.order.presentation.dto.request.CreateOrderRequestDto;
 import com.owlexpress.order.presentation.dto.request.UpdateOrderRequestDto;
@@ -17,6 +26,7 @@ import com.owlexpress.order.presentation.dto.response.OrderSearchResponseDto;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,19 +38,43 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService{
     private final OrderRepository orderRepository;
+    private final PassportHelper passportHelper;
+    private final ConsumerFeignClient consumerFeignClient;
+    private final HubFeignClient hubFeignClient;
+    private final PaymentFeignClient paymentFeignClient;
 
     @Transactional
     @Override
-    public CreateOrderResponseDto createOrder(Long userId, CreateOrderRequestDto request) {
+    public CreateOrderResponseDto createOrder(String passport, CreateOrderRequestDto request) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
 
+        // 1. consumer 업체 정보 조회 feign request
+        CommonDto<GetConsumerInfoResponseDto> consumerInfo = consumerFeignClient.getConsumerInfo(
+                passport, request.getConsumerId());
+
+        // 2. 허브로 재고 확인 요청
+        List<HubProductIsEnoughRequestDto> dtos = request.getProducts().stream()
+                .map(orderProductRequestDto -> HubProductIsEnoughRequestDto.builder()
+                        .hubProductId(orderProductRequestDto.getProductId())
+                        .quantity(orderProductRequestDto.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
+
+        CommonDto<List<HubProductIsEnoughResponseDto>> hubProductStock = hubFeignClient
+                .findHubProductStock(
+                    passport, dtos
+                );
+
+        // 3. payment service에 모든 정보를 담아 전달
         BigDecimal calcTotalPrice = calculateTotalPrice(request.getProducts());
 
-        Order order = buildOrder(userId, request, calcTotalPrice);
+        Order order = buildOrder(passportDto.getUserId(), request, calcTotalPrice);
 
         addOrderProducts(order, request.getProducts());
 
         Order save = orderRepository.save(order);
-        save.updateCreateData(userId);
+        save.updateCreateData(passportDto.getUserId());
+
 
         // TODO:: 1. Payment Service로 FeignClient Request send
         // TODO:: 2. Transaction이 정상적으로 종료되면 Cart Service로 FeignClient Request send하여 항목 삭제
@@ -49,7 +83,7 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public GetOrderResponseDto findOrder(UUID orderId) {
+    public GetOrderResponseDto findOrder(UUID orderId, String passport) {
         Order order = findByOrderId(orderId);
         return GetOrderResponseDto.toDto(order);
     }
@@ -69,25 +103,28 @@ public class OrderServiceImpl implements OrderService{
 
     @Transactional
     @Override
-    public void updateOrder(UUID orderId, UpdateOrderRequestDto request, Long userId) {
+    public void updateOrder(UUID orderId, UpdateOrderRequestDto request, String passport) {
         // 현재 구현 : description 수정
         // 이후 고려할 것 : 배송지 수정이 가능하다면,
         // 1. 배송 Service로 FeignClient Request send를 하여 배송 상태 확인
         // 2. 배송중이 아니면 수정 성공
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         Order order = findByOrderId(orderId);
-        order.setDescription(request.getDescription(), userId);
+        order.setDescription(request.getDescription(), passportDto.getUserId());
     }
 
     @Transactional
     @Override
-    public void deleteOrder(UUID orderId, Long userId) {
+    public void deleteOrder(UUID orderId, String passport) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
         Order order = findByOrderId(orderId);
-        order.deleteOrder(userId);
+        order.deleteOrder(passportDto.getUserId());
     }
 
 
     @Override
     public PagedModel<OrderSearchResponseDto> search(
+            String passport,
             int page,
             int size,
             String sort,
@@ -95,6 +132,8 @@ public class OrderServiceImpl implements OrderService{
             String startDate,
             String endDate
     ) {
+        PassportDto passportDto = passportHelper.getPassportDto(passport);
+
         Pageable pageable = PageUtil.getPageable(page, size, sort, orderBy);
         Page<OrderSearchResponseDto> paged = orderRepository.search(
                 pageable,
