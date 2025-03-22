@@ -15,6 +15,8 @@ import java.util.UUID;
 
 @Data
 public class AlarmCreateResponseDto {
+    private UUID aiId;
+    private String platformMessageId;
     private UUID deliverId;
     private Long deliverUserId;
     private String deliverName;
@@ -48,6 +50,8 @@ public class AlarmCreateResponseDto {
 
     @Builder
     public AlarmCreateResponseDto(
+            UUID aiId,
+            String platformMessageId,
             UUID deliverId,
             Long deliverUserId,
             String deliverName,
@@ -71,6 +75,8 @@ public class AlarmCreateResponseDto {
             List<DeliveryManagerRequestDto.HubListDto> totalHubList,
             Duration totalEstimateDurationTime
     ) {
+        this.aiId = aiId;
+        this.platformMessageId = platformMessageId;
         this.deliverId = deliverId;
         this.deliverUserId = deliverUserId;
         this.deliverName = deliverName;
@@ -109,6 +115,7 @@ public class AlarmCreateResponseDto {
             ConsumerDeliveryManager manager,
             DeliveryManagerRequestDto request
     ) {
+        // TODO : alarm과 feign 연결된 이후에 alarm에서 response 해준 값으로 aiId와 platformMessageId를 추가해주어야합니다..!
         return AlarmCreateResponseDto.builder()
                                      .deliverId(manager.getConsumerDeliveryManagerId())
                                      .deliverUserId(manager.getUserId())
