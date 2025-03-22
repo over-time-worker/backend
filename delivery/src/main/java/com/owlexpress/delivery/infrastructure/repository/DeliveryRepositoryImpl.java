@@ -41,4 +41,14 @@ public class DeliveryRepositoryImpl implements DeliveryRepository {
     public Delivery save(Delivery delivery) {
         return deliveryJpaRepository.save(delivery);
     }
+
+    @Override
+    public Optional<Delivery> findByConsumerCompanyId(UUID consumerId) {
+        return deliveryJpaRepository.findByConsumerCompanyId(consumerId);
+    }
+
+    @Override
+    public Boolean isExistByConsumerCompanyId(UUID consumerId) {
+        return deliveryJpaRepository.existsByConsumerCompanyId(consumerId);
+    }
 }

@@ -29,5 +29,7 @@ public interface DeliveryService {
 
     void completeCompanyDelivery(UUID deliveryId, UUID deliveryHistoryId, DeliveryCompleteRequestDto deliveryCompleteRequestDto, String passport);
 
-//    DeliveryHistoryCreateResponseDto createDeliveryHistory(Delivery delivery, DeliveryCreateRequestDto deliveryCreateRequestDto, Long userId);
+    Boolean findByConsumer(UUID consumerId);
+
+    //    DeliveryHistoryCreateResponseDto createDeliveryHistory(Delivery delivery, DeliveryCreateRequestDto deliveryCreateRequestDto, Long userId);
 }

@@ -1,10 +1,5 @@
 package com.owlexpress.delivery.application.service;
 
-import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_DELETE_FAIL_MESSAGE;
-import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_HISTORY_NOT_FOUND_MESSAGE;
-import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_MANAGER_RETURN_FAIL_MESSAGE;
-import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_NOT_FOUND_MESSAGE;
-
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
@@ -23,8 +18,6 @@ import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import com.owlexpress.delivery.domain.entity.DeliveryHistory;
 import com.owlexpress.delivery.domain.repository.DeliveryRepository;
 import feign.FeignException;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +25,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+import static com.owlexpress.delivery.common.exception.ExceptionMessage.*;
 
 @Slf4j
 @Service
@@ -210,6 +208,12 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE , requestDto, userId);
 
         deliveryUsecase.returnCompanyDeliverToDeliveryManager(deliveryHistory.getDeliverId());
+    }
+
+    @Override
+    public Boolean findByConsumer(UUID consumerId) {
+
+        return deliveryRepository.isExistByConsumerCompanyId(consumerId);
     }
 
     @Transactional
