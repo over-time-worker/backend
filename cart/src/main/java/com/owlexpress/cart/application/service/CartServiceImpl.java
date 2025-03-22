@@ -83,9 +83,9 @@ public class CartServiceImpl implements CartService {
 
     @Transactional
     @Override
-    public void deleteCart(UUID cartId, String passport) {
+    public void deleteCart(UUID consumerId, String passport) {
         PassportDto passportDto = getPassport(passport);
-        Cart cart = findCartByCartId(cartId);
+        Cart cart = findCartByConsumerId(consumerId);
         cart.removeCart(passportDto.getUserId());
     }
 
@@ -99,7 +99,7 @@ public class CartServiceImpl implements CartService {
 
         CommonDto<List<HubProductIsEnoughResponseDto>> hubProductStock = hubProductFeignClient
                 .findHubProductStock(
-                        passportDto.toString(),
+                        passport,
                         cart.getCartProductList()
                         .stream()
                         .map(cp -> HubProductIsEnoughRequestDto
