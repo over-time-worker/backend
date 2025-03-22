@@ -6,28 +6,38 @@ import com.owlexpress.consumer.common.dto.response.GetUserInfoResponseDto;
 import com.owlexpress.consumer.common.dto.response.HubFindResponseDto;
 import com.owlexpress.consumer.common.dto.response.PassportDto;
 import com.owlexpress.consumer.common.exceptions.ConsumerException;
+import com.owlexpress.consumer.common.exceptions.ExceptionMessage;
 import com.owlexpress.consumer.common.helper.PassportHelper;
 import com.owlexpress.consumer.common.util.ConsumerHelper;
 import com.owlexpress.consumer.common.util.GeoUtil;
 import com.owlexpress.consumer.domain.entity.Consumer;
 import com.owlexpress.consumer.domain.repository.ConsumerRepository;
+import com.owlexpress.consumer.infrastructure.feignClient.CartClient;
+import com.owlexpress.consumer.infrastructure.feignClient.DeliveryClient;
 import com.owlexpress.consumer.infrastructure.feignClient.HubFeignClient;
 import com.owlexpress.consumer.infrastructure.feignClient.UserFeignClient;
+import feign.FeignException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.owlexpress.consumer.common.exceptions.ExceptionMessage.DELIVERY_EXIST;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsumerUsecase {
     private final ConsumerRepository consumerRepository;
     private final UserFeignClient userFeignClient;
     private final HubFeignClient hubFeignClient;
     private final ConsumerHelper consumerHelper;
     private final PassportHelper passportHelper;
+    private final DeliveryClient deliveryClient;
+    private final CartClient cartClient;
 
     @Transactional
     public void create(CreateConsumerRequestDto consumerRequestDto,
@@ -80,15 +90,21 @@ public class ConsumerUsecase {
     @Transactional
     public void delete(UUID consumerId,
                        String passport
-    ) {
+    ) throws ConsumerException.ConsumerDeliveryException {
         Consumer consumer = consumerHelper.getConsumer(consumerId);
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
         //배송쪽 수령업체 조회 후 데이터가 현재 이후인 경우 삭제 불가 예외 처리
-        //TODO:: 배송쪽에 수령업체로 현재 진행중인게 있는지 체크하는 API 필요
-        //주문쪽 수령업체 조회 후 데이터가 현재 이후인경우 삭제 불가 예외 처리
-        //TODO :: 주문쪽도 동일한 요구사항 필요
-        //장바구니 삭제 이벤트 발생
+        if (deliveryClient.findByConsumer(consumerId)
+                          .getData()) {
+            throw new ConsumerException.ConsumerDeliveryException(DELIVERY_EXIST);
+        }
+        try{
+            cartClient.deleteCart(passport,consumerId);
+        }catch (FeignException e){
+            log.error("error Message ={}",e.getMessage());
+            consumer.softDeleteData(passportDto.getUserId());
+        }
 
         consumer.softDeleteData(passportDto.getUserId());
     }

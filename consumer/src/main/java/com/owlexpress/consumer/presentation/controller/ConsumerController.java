@@ -4,6 +4,7 @@ import com.owlexpress.consumer.application.usecase.ConsumerUsecase;
 import com.owlexpress.consumer.common.CommonDto;
 import com.owlexpress.consumer.common.dto.request.CreateConsumerRequestDto;
 import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
+import com.owlexpress.consumer.common.exceptions.ConsumerException;
 import com.owlexpress.consumer.domain.service.ConsumerService;
 import com.owlexpress.consumer.presentation.dto.response.ConsumerResponseDto;
 import com.owlexpress.consumer.presentation.dto.response.SearchConsumerResponseDto;
@@ -112,7 +113,7 @@ public class ConsumerController {
     public ResponseEntity<CommonDto<Void>> delete(
             @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID consumerId
-    ) {
+    ) throws ConsumerException.ConsumerDeliveryException {
         consumerUsecase.delete(consumerId,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
