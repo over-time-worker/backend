@@ -107,6 +107,7 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
                         Projections.constructor(
                                 HubProductInfoResponseDto.class,
                                 hubProduct.hub.hubId,
+                                hubProduct.hub.name,
                                 hubProduct.hub.location,
                                 hubProduct.hubProductId,
                                 hubProduct.productId,

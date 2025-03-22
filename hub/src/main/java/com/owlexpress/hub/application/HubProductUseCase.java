@@ -199,6 +199,7 @@ public class HubProductUseCase {
         HubProductOrderConfirmResponseDto confirmResponseDto =
                 HubProductOrderConfirmResponseDto.builder()
                         .hubId(toBeApply.get(0).getHubId())
+                        .hubName(toBeApply.get(0).getHubName())
                         .products(new ArrayList<>())
                         .build();
 
