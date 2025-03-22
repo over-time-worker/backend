@@ -2,17 +2,20 @@ package com.owlexpress.order.application.service;
 
 import static com.owlexpress.order.common.exception.ExceptionMessage.ORDER_NOT_FOUND_EXCEPTION_MESSAGE;
 
-import com.owlexpress.order.application.dto.request.HubProductIsEnoughRequestDto;
+import com.owlexpress.order.application.dto.request.ConfirmHubStockRequestDto;
+import com.owlexpress.order.application.dto.request.CreatePaymentRequestDto;
+import com.owlexpress.order.application.dto.response.ConfirmHubStockResponseDto;
 import com.owlexpress.order.application.dto.response.GetConsumerInfoResponseDto;
-import com.owlexpress.order.application.dto.response.HubProductIsEnoughResponseDto;
 import com.owlexpress.order.application.exception.OrderNotFoundException;
 import com.owlexpress.order.common.dto.CommonDto;
 import com.owlexpress.order.common.dto.PassportDto;
 import com.owlexpress.order.common.helper.PassportHelper;
+import com.owlexpress.order.common.util.GeoUtil;
 import com.owlexpress.order.common.util.PageUtil;
 import com.owlexpress.order.domain.entity.Order;
 import com.owlexpress.order.domain.entity.OrderProduct;
 import com.owlexpress.order.domain.repository.OrderRepository;
+import com.owlexpress.order.infrastructure.client.CartFeignClient;
 import com.owlexpress.order.infrastructure.client.ConsumerFeignClient;
 import com.owlexpress.order.infrastructure.client.HubFeignClient;
 import com.owlexpress.order.infrastructure.client.PaymentFeignClient;
@@ -42,6 +45,7 @@ public class OrderServiceImpl implements OrderService{
     private final ConsumerFeignClient consumerFeignClient;
     private final HubFeignClient hubFeignClient;
     private final PaymentFeignClient paymentFeignClient;
+    private final CartFeignClient cartFeignClient;
 
     @Transactional
     @Override
@@ -53,22 +57,41 @@ public class OrderServiceImpl implements OrderService{
                 passport, request.getConsumerId());
 
         // 2. 허브로 재고 확인 요청
-        List<HubProductIsEnoughRequestDto> dtos = request.getProducts().stream()
-                .map(orderProductRequestDto -> HubProductIsEnoughRequestDto.builder()
-                        .hubProductId(orderProductRequestDto.getProductId())
-                        .quantity(orderProductRequestDto.getQuantity())
-                        .build())
-                .collect(Collectors.toList());
+        ConfirmHubStockRequestDto dtos = ConfirmHubStockRequestDto.builder()
+                .consumerId(request.getConsumerId())
+                .location(GeoUtil.createPoint(
+                        consumerInfo.getData().getLatitude(),
+                        consumerInfo.getData().getLongitude())
+                )
+                .orderProducts(
+                        request.getProducts().stream()
+                                .map(hubProduct ->
+                                        new ConfirmHubStockRequestDto.HubProduct(
+                                                hubProduct.getProductId(),
+                                                hubProduct.getQuantity()
+                                        ))
+                                .collect(Collectors.toList())
+                )
+                .build();
 
-        CommonDto<List<HubProductIsEnoughResponseDto>> hubProductStock = hubFeignClient
+        CommonDto<ConfirmHubStockResponseDto> hubProductStock = hubFeignClient
                 .findHubProductStock(
                     passport, dtos
                 );
 
-        // 3. payment service에 모든 정보를 담아 전달
+        // 5. 주문 저장
+
         BigDecimal calcTotalPrice = calculateTotalPrice(request.getProducts());
 
-        Order order = buildOrder(passportDto.getUserId(), request, calcTotalPrice);
+        StringBuilder sb = new StringBuilder();
+        if (request.getProducts().size() > 1){
+            sb.append(request.getProducts().get(0).getProductName())
+                    .append("외 ").append(request.getProducts().size() - 1).append("건");
+        } else{
+            sb.append(request.getProducts().get(0).getProductName());
+        }
+
+        Order order = buildOrder(passportDto.getUserId(), request, calcTotalPrice, sb.toString());
 
         addOrderProducts(order, request.getProducts());
 
@@ -76,8 +99,28 @@ public class OrderServiceImpl implements OrderService{
         save.updateCreateData(passportDto.getUserId());
 
 
-        // TODO:: 1. Payment Service로 FeignClient Request send
-        // TODO:: 2. Transaction이 정상적으로 종료되면 Cart Service로 FeignClient Request send하여 항목 삭제
+        // 4. payment service에 모든 정보를 담아 전달
+        CreatePaymentRequestDto paymentRequestDto = CreatePaymentRequestDto.builder()
+                .orderId(save.getOrderId())
+                .price(calculateTotalPrice(request.getProducts()))
+                .transactionId(UUID.randomUUID().toString())
+                .productInfo(order.getProductInfo())
+                .startHubId(hubProductStock.getData().getHubId())
+                .startHubName(hubProductStock.getData().getHubName())
+                .orderType(request.getOrderType())
+                .shippingAddress(request.getConsumerAddress())
+                .description(request.getDescription())
+                .requestArrivalTime(request.getRequestArrivalTime())
+                .consumerCompanyId(request.getConsumerId())
+                .consumerLatitude(consumerInfo.getData().getLatitude())
+                .consumerLongitude(consumerInfo.getData().getLongitude())
+                .consumerPhoneNumber(consumerInfo.getData().getUserPhoneNumber())
+                .consumerName(consumerInfo.getData().getUserName())
+                .build();
+        paymentFeignClient.sendPaymentRequest(passport, paymentRequestDto);
+
+        // TODO 장바구니 상품 List 삭제 feign
+//        cartFeignClient.deleteCartProductsFromOrder();
 
         return CreateOrderResponseDto.toDto(save);
     }
@@ -155,7 +198,12 @@ public class OrderServiceImpl implements OrderService{
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private Order buildOrder(Long userId, CreateOrderRequestDto request, BigDecimal totalPrice) {
+    private Order buildOrder(
+            Long userId,
+            CreateOrderRequestDto request,
+            BigDecimal totalPrice,
+            String productInfo
+    ) {
         return Order.builder()
                 .userId(userId)
                 .consumerId(request.getConsumerId())
@@ -167,7 +215,7 @@ public class OrderServiceImpl implements OrderService{
                 .requestArrivalTime(request.getRequestArrivalTime())
                 .orderType(request.getOrderType())
                 .orderStatus(request.getOrderStatus())
-                .productInfo(request.getProductInfo())
+                .productInfo(productInfo)
                 .build();
     }
 

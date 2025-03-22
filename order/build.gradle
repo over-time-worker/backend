@@ -46,7 +46,10 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2' // test db
 
-    //QueryDSL
+    // ✅ for PostGIS
+    implementation 'org.hibernate.orm:hibernate-spatial:6.6.11.Final'
+
+    // QueryDSL
     implementation "com.querydsl:querydsl-jpa:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     implementation "com.querydsl:querydsl-core"
     implementation "com.querydsl:querydsl-collections"
