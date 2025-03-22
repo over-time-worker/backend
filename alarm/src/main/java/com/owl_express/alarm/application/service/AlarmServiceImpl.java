@@ -63,7 +63,7 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Override
     @Transactional
-    public void createAlarmForHubDeliver(
+    public AlarmCreateResponseDto createAlarmForHubDeliver(
             AlarmCreateRequestDto requestDto,
             String passport
     ) {
@@ -91,7 +91,10 @@ public class AlarmServiceImpl implements AlarmService {
             );
 
             alarmRepository.save(alarm);
+
+            return AlarmCreateResponseDto.toDto(alarm, null);
         }
+        return AlarmCreateResponseDto.builder().build();
     }
 
     @Override
