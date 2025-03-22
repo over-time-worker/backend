@@ -238,32 +238,34 @@ public class DeliveryServiceImpl implements DeliveryService {
             Long userId,
             String passport
     ) {
-        List<HubListDto> hubListDtos;
-
-        if(deliveryCreateRequestDto.getDestinationHubId() == null) {
-            hubListDtos = List.of(deliveryCreateRequestDto.getHubList().get(0));
-
-        } else{
-            hubListDtos = deliveryCreateRequestDto.getHubList();
-
-        }
+         List<HubListDto> hubListDtos = getHubList(deliveryCreateRequestDto);
 
          List<DeliveryHistory> deliveryHistoryList = DeliveryHistory.createDeliveryHistoryList(delivery, hubListDtos, userId);
-
          delivery.updateDeliverHistoryList(deliveryHistoryList);
 
          DeliveryHistory firstDeliveryHistory = deliveryHistoryList.get(0);
-
          DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
                 delivery,
                  firstDeliveryHistory,
                 delivery.getDeliveryHistories()
          );
 
-         AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
-         delivery.updateHubDeliverInfo(firstDeliveryHistory, alarmCreateResponseDto, userId);
+        AlarmCreateResponseDto alarmCreateResponseDto = assignDelivery(deliveryCreateRequestDto, deliveryManagerRequestDto, passport);
 
+         delivery.updateHubDeliverInfo(firstDeliveryHistory, alarmCreateResponseDto, userId);
          deliveryRepository.save(delivery);
+    }
+
+    private List<HubListDto> getHubList(DeliveryCreateRequestDto dto) {
+        return dto.getDestinationHubId() == null
+                ? List.of(dto.getHubList().get(0))
+                : dto.getHubList();
+    }
+
+    private AlarmCreateResponseDto assignDelivery(DeliveryCreateRequestDto dto, DeliveryManagerRequestDto requestDto, String passport) {
+        return dto.getDestinationHubId() == null
+                ? deliveryUsecase.assignCompanyDeliverFromDeliveryManager(requestDto, passport)
+                : deliveryUsecase.assignHubDeliverFromDeliveryManager(requestDto, passport);
     }
 
     private Delivery getDeliveryById(UUID deliveryId) {

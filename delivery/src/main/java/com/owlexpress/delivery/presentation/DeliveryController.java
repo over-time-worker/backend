@@ -24,7 +24,6 @@ import static com.owlexpress.delivery.presentation.ApiResponseMessageConstant.*;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
-    private final PassportHelper passportHelper;
 
     @PostMapping()
     public ResponseEntity<CommonDto<DeliveryCreateResponseDto>> create(
