@@ -2,6 +2,7 @@ package com.owlexpress.hub.application;
 
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
+import com.owlexpress.hub.common.exception.HubProductException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.helper.PassportHelper;
@@ -14,6 +15,8 @@ import com.owlexpress.hub.infrastructure.client.ProductClient;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto.Product;
+import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto;
+import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto.ConfirmedHubProductResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -37,18 +40,18 @@ public class HubProductUseCase {
     private final HubProductRepository hubProductRepository;
 
     public HubProduct create(HubProductCreateRequestDto requestDto,
-                             String passport
+            String passport
     ) {
-        log.info("producerId= {} " , requestDto.getProducerId());
+        log.info("producerId= {} ", requestDto.getProducerId());
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
         Hub hub = HubHelper.findByHubId(requestDto.getHubId(), hubRepository);
 
-        HubProduct hubProduct = requestDto.toEntityWithHub(hub,requestDto);
+        HubProduct hubProduct = requestDto.toEntityWithHub(hub, requestDto);
         hubProduct.createdEntity(passportDto.getUserId());
         hubProductRepository.save(hubProduct);
         hub.getHubProduct()
-           .add(hubProduct);
+                .add(hubProduct);
 
         hubRepository.save(hub);
         return hubProduct;
@@ -56,11 +59,11 @@ public class HubProductUseCase {
 
     @Transactional
     public void delete(UUID hubProductId,
-                       String passport
+            String passport
     ) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         HubProduct hubProduct = hubRepository.findByHubProductId(hubProductId)
-                                             .orElseThrow(HubProductNotFoundException::new);
+                .orElseThrow(HubProductNotFoundException::new);
 
         hubProduct.deleteEntity(passportDto.getUserId());
 
@@ -82,20 +85,23 @@ public class HubProductUseCase {
 
     }
 
-    public void confirmOrder(OrderConfirmRequestDto requestDto) {
+    public synchronized HubProductOrderConfirmResponseDto confirmOrder(
+            OrderConfirmRequestDto requestDto
+    ) {
         /* TODO:
-            1. 상품 UUID로 검색 -> (hub.hubId, hub.Location, hub.huProduct.hubProductId, hub.huProduct.productName, hub.hubProduct.productType)
-            2. 검색된 상품들 hubId기준 으로 Map<UUID, List<hubProductDto>>로 그루핑
-            3. 우선순위 큐로 거리 기준으로 넣어버림. Comparator -> (o1, o2) -> o1.getDistance(o2)
-            4. 일단 조회된 상품 리스트 사이즈 == 넘겨받은 상품 사이즈랑 같은지 비교
-            5. 다르면 넘기고 같은 경우에만 실제 재고 비교.
-            6. 충분한 재고 확보하고 있으면 실제 재고 감소 시킴.
-            7. DTO 패킹해서 반환
+            ✅ 1. 상품 UUID로 검색 -> (hub.hubId, hub.Location, hub.huProduct.hubProductId, hub.huProduct.productName, hub.hubProduct.productType)
+            ✅ 2. 검색된 상품들 hubId기준 으로 Map<UUID, List<hubProductDto>>로 그룹화
+            ✅ 3. 우선순위 큐로 거리 기준으로 넣어버림. Comparator -> (o1, o2) -> o1.getDistance(o2)
+            ✅ 4. 일단 조회된 상품 리스트 사이즈 == 넘겨받은 상품 사이즈랑 같은지 비교
+            ✅ 5. 다르면 넘기고 같은 경우에만 실제 재고 비교.
+            ✅ 6. 충분한 재고 확보하고 있으면 실제 재고 감소 시킴.
+            ✅ 7. DTO 패킹해서 반환
          */
 
         Point consumerLocation = requestDto.getLocation();
         List<Product> orderProducts = requestDto.getOrderProducts();
 
+        // 상품 재고 파악용
         Map<UUID, Product> productByProductId = new HashMap<>();
 
         orderProducts.forEach(
@@ -103,20 +109,12 @@ public class HubProductUseCase {
         );
 
         // 상품 아이디 추출
-
         List<UUID> productIds = orderProducts.stream()
                 .map(Product::getProductId)
                 .toList();
 
         Map<UUID, List<HubProductInfoResponseDto>> hubProductSetByHub =
-                // 상품UUID로 검색해서 같은 허브끼리 묶음.
-                hubRepository.findAllHubProductsInOrders(
-                                productIds)
-                        .stream()
-                        .collect(Collectors.groupingBy(
-                                HubProductInfoResponseDto::getHubId,
-                                Collectors.toList())
-                        );
+                findHubProductsGroupByHubId(productIds);
 
         // 수령업체에서 가장 가까운 허브부터 검색
         PriorityQueue<List<HubProductInfoResponseDto>> hubProductSetByDistance =
@@ -125,6 +123,7 @@ public class HubProductUseCase {
                         hp -> hp.get(0).getLocation().distance(consumerLocation)
                 ));
 
+        // 직선 거리 최단 순 우선순위 큐
         hubProductSetByDistance.addAll(hubProductSetByHub.values());
 
         while (!hubProductSetByDistance.isEmpty()) {
@@ -135,7 +134,7 @@ public class HubProductUseCase {
                 continue;
             }
 
-            List<HubProductInfoResponseDto> toBeReduced = new ArrayList<>();
+            List<HubProductInfoResponseDto> toBeApply = new ArrayList<>();
 
             // O(N)
             for (HubProductInfoResponseDto hubProductInfo : currentHub) {
@@ -151,28 +150,80 @@ public class HubProductUseCase {
                                 || orderProduct.getQuantity() > hubProductInfo.getProductStock()) {
                     continue;
                 }
-
-                // 트랜잭션 분리 고려 (Propatgion.REQUIRES_NEW) -> 실제 재고 감소 로직은 여기서 처리?
-
-                toBeReduced.add(hubProductInfo); // 감소시킬 재고도 기록해줘야 함.
-                break;
+                // 재고 미리 감소 시켜봄. -> 엔티티가 아니므로 저장 시점이전까지 반영 X
+                toBeApply.add(hubProductInfo); // 반영시킬 DTO 일단 넣어봄.
             }
 
             // 감소시킬 재고가 모두 있으면
-            if (toBeReduced.size() == orderProducts.size()) {
-                for (HubProductInfoResponseDto hubProduct : toBeReduced) {
-                    // TODO: HubProduct 엔티티로 변환 후 재고 감소 로직 실행.
-                }
+            if (toBeApply.size() == orderProducts.size()) {
 
-                /*
-                TODO: HubProduct 엔티티 saveAll()로 저장. 왜? 현재는 DTO 프로젝션으로 조회해왔기 떄문에 영속성 컨텍스트에 엔티티 X
-                    그렇기 때문에 저장을 직접 수행해줘야 함.
-                 */
-
+                return reduceStock(
+                        toBeApply,
+                        productByProductId
+                );
             }
 
         }
 
+        throw new HubProductException.HubProductStockNotEnoughException();
+    }
 
+    private Map<UUID, List<HubProductInfoResponseDto>> findHubProductsGroupByHubId(
+            List<UUID> productIds) {
+        // 요청 상품들과 일치하는 허브 상품 조회
+        // 허브ID 기준으로 그룹화
+        return hubRepository.findAllHubProductsInOrders(
+                        productIds)
+                .stream()
+                // 허브ID 기준으로 그룹화
+                .collect(Collectors.groupingBy(
+                        HubProductInfoResponseDto::getHubId,
+                        Collectors.toList())
+                );
+    }
+
+    private HubProductOrderConfirmResponseDto reduceStock(
+            List<HubProductInfoResponseDto> toBeApply, Map<UUID, Product> productByProductId) {
+        List<UUID> hubProductIds =
+                toBeApply.stream()
+                        .map(HubProductInfoResponseDto::getHubProductId)
+                        .toList();
+
+                /*
+                허브에서 아이디 바탕으로 조회(영속성 컨텍스틍에 저장) 후 변경 감지 기능 사용
+                 */
+        List<HubProduct> hubProducts = hubProductRepository.findAllHubProductsIn(
+                hubProductIds);
+
+        // 반환할 DTO 객체 준비
+        HubProductOrderConfirmResponseDto confirmResponseDto =
+                HubProductOrderConfirmResponseDto.builder()
+                        .hubId(toBeApply.get(0).getHubId())
+                        .products(new ArrayList<>())
+                        .build();
+
+        for (HubProduct hubProduct : hubProducts) {
+            Product product =
+                    productByProductId.getOrDefault(hubProduct.getProductId(), null);
+
+            // 상품 ID로 요청 수량 찾아오기
+            if (product == null) {
+                continue;
+            }
+            // 요청 수량만큼 재고 감소시킴
+            hubProduct.reduceStock(product.getQuantity());
+
+            // 반환 DTO에 넣기
+            ConfirmedHubProductResponseDto confirmed = ConfirmedHubProductResponseDto
+                    .builder()
+                    .hubProductId(hubProduct.getHubProductId())
+                    .productName(hubProduct.getProductName())
+                    .productType(hubProduct.getProductType())
+                    .quantity(Long.valueOf(product.getQuantity()))
+                    .build();
+
+            confirmResponseDto.addConfirmedProduct(confirmed);
+        }
+        return confirmResponseDto;
     }
 }

@@ -15,6 +15,7 @@ public class HubProductInfoResponseDto {
 
     private UUID hubId;
     private Point location;
+    private UUID hubProductId;
     private UUID productId;
     private String productName;
     private Long productStock;
@@ -24,6 +25,7 @@ public class HubProductInfoResponseDto {
     public HubProductInfoResponseDto(
             UUID hubId,
             Point location,
+            UUID hubProductId,
             UUID productId,
             String productName,
             Long productStock,
@@ -31,14 +33,10 @@ public class HubProductInfoResponseDto {
     ) {
         this.hubId = hubId;
         this.location = location;
+        this.hubProductId = hubProductId;
         this.productId = productId;
         this.productName = productName;
         this.productStock = productStock;
         this.productType = productType;
-    }
-
-    public HubProduct toEntity() {
-        // TODO: HubProduct 엔티티로 변환
-        return null;
     }
 }

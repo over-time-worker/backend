@@ -27,5 +27,6 @@ public class Constant {
         public static final String HUB_PRODUCT_SEARCH_SUCCESS = "허브 상품 검색 성공";
         public static final String HUB_PRODUCT_DELETE_SUCCESS = "허브 상품 삭제 성공";
         public static final String HUB_PRODUCT_STOCK_CHECK_SUCCESS = "허브 상품 재고 확인 성공";
+        public static final String HUB_PRODUCT_ORDER_SUCCESS = "허브 상품 주문 성공";
     }
 }

@@ -11,6 +11,7 @@ import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
+import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import java.util.List;
 import java.util.Objects;
@@ -158,20 +159,19 @@ public class HubProductController {
     }
 
     @PostMapping("/confirm-stock")
-    public ResponseEntity<CommonDto<?>> confirmStock(
+    public ResponseEntity<CommonDto<HubProductOrderConfirmResponseDto>> confirmStock(
             @RequestBody OrderConfirmRequestDto requestDto
-            // TODO: Passport 받아서 consumerID 체크 고려
-        //    @RequestHeader("X-User-Passport") String passport
-            ) {
-        hubProductUseCase.confirmOrder(requestDto);
-        CommonDto<List<HubProductIsEnoughResponseDto>> found =
-                CommonDto.<List<HubProductIsEnoughResponseDto>>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
-                        .message(ResponseMessage.HUB_PRODUCT_STOCK_CHECK_SUCCESS)
-                        .data(null)
+    ) {
+        HubProductOrderConfirmResponseDto confirmResponseDto = hubProductUseCase.confirmOrder(
+                requestDto);
+        CommonDto<HubProductOrderConfirmResponseDto> found =
+                CommonDto.<HubProductOrderConfirmResponseDto>builder()
+                        .status(HttpStatus.ACCEPTED)
+                        .code(HttpStatus.ACCEPTED.value())
+                        .message(ResponseMessage.HUB_PRODUCT_ORDER_SUCCESS)
+                        .data(confirmResponseDto)
                         .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(found);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(found);
     }
 }
