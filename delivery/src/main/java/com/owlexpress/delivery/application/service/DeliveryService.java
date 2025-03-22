@@ -3,6 +3,7 @@ package com.owlexpress.delivery.application.service;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
+import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import java.util.UUID;
 import org.springframework.data.web.PagedModel;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface DeliveryService {
 
-    void create(DeliveryCreateRequestDto deliveryCreateRequestDto, String passport);
+    DeliveryCreateResponseDto create(DeliveryCreateRequestDto deliveryCreateRequestDto, String passport);
 
     void update(UUID deliveryId, DeliveryUpdateRequestDto deliveryUpdateRequestDto, String passport);
 

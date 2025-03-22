@@ -4,6 +4,7 @@ import com.owlexpress.delivery.application.dtos.CommonDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
+import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.service.DeliveryService;
 import com.owlexpress.delivery.common.helper.PassportHelper;
@@ -26,18 +27,18 @@ public class DeliveryController {
     private final PassportHelper passportHelper;
 
     @PostMapping()
-    public ResponseEntity<CommonDto<Void>> create(
+    public ResponseEntity<CommonDto<DeliveryCreateResponseDto>> create(
             @RequestBody DeliveryCreateRequestDto deliveryCreateRequestDto,
             @RequestHeader("X-User-Passport") String passport
     ) {
-        deliveryService.create(deliveryCreateRequestDto, passport);
+        DeliveryCreateResponseDto response = deliveryService.create(deliveryCreateRequestDto, passport);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(CommonDto.<Void>builder()
+                             .body(CommonDto.<DeliveryCreateResponseDto>builder()
                                             .status(HttpStatus.CREATED)
                                             .message(CREATE_DELIVERY_SUCCESS)
                                             .code(HttpStatus.CREATED.value())
-                                            .data(null)
+                                            .data(response)
                                             .build());
     }
 

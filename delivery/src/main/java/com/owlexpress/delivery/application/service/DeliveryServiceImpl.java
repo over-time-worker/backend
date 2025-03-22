@@ -7,6 +7,7 @@ import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDt
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
+import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliverReturnFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
@@ -43,7 +44,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public void create(
+    public DeliveryCreateResponseDto create(
             DeliveryCreateRequestDto deliveryCreateRequestDto,
             String passport
     ) {
@@ -51,6 +52,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         Delivery delivery = Delivery.create(deliveryCreateRequestDto, DeliveryStatus.PENDING_AT_HUB, userId);
         createDeliveryHistory(delivery, deliveryCreateRequestDto, userId, passport);
+
+        return DeliveryCreateResponseDto.toDto(delivery);
     }
 
     @Override
