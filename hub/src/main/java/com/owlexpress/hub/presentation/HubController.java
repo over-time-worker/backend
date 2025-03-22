@@ -18,7 +18,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/hub")
-//TODO:: passport 연결하기
 public class HubController {
 
     private final HubService hubService;
@@ -26,11 +25,13 @@ public class HubController {
     @GetMapping("/{hubId}")
     public ResponseEntity<CommonDto<HubFindResponseDto>> find(@PathVariable("hubId") UUID hubId) {
 
+        HubFindResponseDto hubFindResponseDto = hubService.find(hubId);
+
         CommonDto<HubFindResponseDto> found = CommonDto.<HubFindResponseDto>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
                 .message(ResponseMessage.HUB_FIND_SUCCESS)
-                .data(hubService.find(hubId))
+                .data(hubFindResponseDto)
                 .build();
 
         return ResponseEntity.ok(found);

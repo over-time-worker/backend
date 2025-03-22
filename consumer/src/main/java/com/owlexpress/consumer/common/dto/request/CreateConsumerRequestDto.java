@@ -18,11 +18,6 @@ public class CreateConsumerRequestDto {
      */
     private Long userId;
 
-    //TODO:: 어차피 조회로 가져오니까 아래 두 필드는 삭제하기
-    private String userName;
-
-    private String userPhoneNumber;
-
     /**
      *  Consumer(Entity) Info
      */
@@ -51,8 +46,6 @@ public class CreateConsumerRequestDto {
     @Builder
     public CreateConsumerRequestDto(
             Long userId,
-            String userName,
-            String userPhoneNumber,
             CompanyType companyType,
             String companyName,
             String companyAddress,
@@ -62,8 +55,6 @@ public class CreateConsumerRequestDto {
             UUID hubId
     ) {
         this.userId = userId;
-        this.userName = userName;
-        this.userPhoneNumber = userPhoneNumber;
         this.companyType = companyType;
         this.companyName = companyName;
         this.companyAddress = companyAddress;

@@ -23,12 +23,12 @@ public class ConsumerController {
     private final ConsumerUsecase consumerUsecase;
     private final ConsumerService consumerService;
 
-    @GetMapping
+    @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+           @RequestHeader("X-User-Passport") String passport,
            @Valid @RequestBody CreateConsumerRequestDto consumerRequestDto
     ) {
-        consumerUsecase.create(consumerRequestDto);
+        consumerUsecase.create(consumerRequestDto,passport);
         //메서드 넣기
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -43,13 +43,13 @@ public class ConsumerController {
 
     @PutMapping("/{consumerId}")
     public ResponseEntity<CommonDto<Void>> update(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
+             @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID consumerId,
             @Valid @RequestBody UpdateConsumerRequestDto updateConsumerRequestDto
     ) {
 
         //메서드 넣기
-        consumerUsecase.update(consumerId, updateConsumerRequestDto);
+        consumerUsecase.update(consumerId, updateConsumerRequestDto,passport);
 
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -64,7 +64,6 @@ public class ConsumerController {
 
     @GetMapping("/{consumerId}")
     public ResponseEntity<CommonDto<ConsumerResponseDto>> find(
-            //TODO:: gateway 반환 유저 데이터 @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID consumerId
     ) {
         //메서드 넣기
@@ -111,9 +110,10 @@ public class ConsumerController {
 
     @DeleteMapping("/{consumerId}")
     public ResponseEntity<CommonDto<Void>> delete(
+            @RequestHeader("X-User-Passport") String passport,
             @PathVariable UUID consumerId
     ) {
-        consumerUsecase.delete(consumerId);
+        consumerUsecase.delete(consumerId,passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
