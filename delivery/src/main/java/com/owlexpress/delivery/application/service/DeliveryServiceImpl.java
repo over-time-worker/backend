@@ -50,7 +50,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
         Delivery delivery = Delivery.create(deliveryCreateRequestDto, DeliveryStatus.PENDING_AT_HUB, userId);
-        createDeliveryHistory(delivery, deliveryCreateRequestDto, userId);
+        createDeliveryHistory(delivery, deliveryCreateRequestDto, userId, passport);
     }
 
     @Override
@@ -167,13 +167,13 @@ public class DeliveryServiceImpl implements DeliveryService {
         if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 1) {
             isHubDeliver = false;
 
-            alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto);
+            alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
             delivery.updateCompanyDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
 
             delivery.updateCompanyDeliver(UUID.randomUUID(), userId);
 
         } else {
-            alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto);
+            alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
             delivery.updateHubDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
         }
 
@@ -232,7 +232,8 @@ public class DeliveryServiceImpl implements DeliveryService {
     public void createDeliveryHistory(
             Delivery delivery,
             DeliveryCreateRequestDto deliveryCreateRequestDto,
-            Long userId
+            Long userId,
+            String passport
     ) {
         List<HubListDto> hubListDtos;
 
@@ -256,7 +257,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 delivery.getDeliveryHistories()
          );
 
-         AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto);
+         AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
          delivery.updateHubDeliverInfo(firstDeliveryHistory, alarmCreateResponseDto, userId);
 
          deliveryRepository.save(delivery);

@@ -23,11 +23,14 @@ public class DeliveryUsecase {
     private final DeliveryManagerClient deliveryManagerClient;
     private final AlarmClient alarmClient;
 
-    public AlarmCreateResponseDto assignHubDeliverFromDeliveryManager(DeliveryManagerRequestDto deliveryManagerRequestDto) {
+    public AlarmCreateResponseDto assignHubDeliverFromDeliveryManager(
+            DeliveryManagerRequestDto deliveryManagerRequestDto,
+            String passport
+    ) {
         AlarmCreateResponseDto messageCreateResponseDto;
 
         CommonDto<AlarmCreateResponseDto> responseEntity
-                = deliveryManagerClient.assignHub(deliveryManagerRequestDto);
+                = deliveryManagerClient.assignHub(passport, deliveryManagerRequestDto);
 
         messageCreateResponseDto = responseEntity.getData();
 
@@ -44,11 +47,14 @@ public class DeliveryUsecase {
 
     }
 
-    public AlarmCreateResponseDto assignCompanyDeliverFromDeliveryManager(DeliveryManagerRequestDto deliveryManagerRequestDto) {
+    public AlarmCreateResponseDto assignCompanyDeliverFromDeliveryManager(
+            DeliveryManagerRequestDto deliveryManagerRequestDto,
+            String passport
+    ) {
         AlarmCreateResponseDto messageCreateResponseDto;
 
         CommonDto<AlarmCreateResponseDto> responseEntity
-                = deliveryManagerClient.assignHub(deliveryManagerRequestDto);
+                = deliveryManagerClient.assignHub(passport, deliveryManagerRequestDto);
 
         messageCreateResponseDto = responseEntity.getData();
 
