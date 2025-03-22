@@ -234,7 +234,16 @@ public class DeliveryServiceImpl implements DeliveryService {
             DeliveryCreateRequestDto deliveryCreateRequestDto,
             Long userId
     ) {
-         List<HubListDto> hubListDtos = deliveryCreateRequestDto.getHubList();
+        List<HubListDto> hubListDtos;
+
+        if(deliveryCreateRequestDto.getDestinationHubId() == null) {
+            hubListDtos = List.of(deliveryCreateRequestDto.getHubList().get(0));
+
+        } else{
+            hubListDtos = deliveryCreateRequestDto.getHubList();
+
+        }
+
          List<DeliveryHistory> deliveryHistoryList = DeliveryHistory.createDeliveryHistoryList(delivery, hubListDtos, userId);
 
          delivery.updateDeliverHistoryList(deliveryHistoryList);
