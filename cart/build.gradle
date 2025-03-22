@@ -45,6 +45,17 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2' // test db
 
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // health check
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // zipkin
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'io.github.openfeign:feign-micrometer'
+    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+
     // spring cloud
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'

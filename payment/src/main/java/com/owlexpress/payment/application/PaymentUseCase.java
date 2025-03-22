@@ -19,6 +19,7 @@ import com.owlexpress.payment.presentation.dto.CommonDto;
 import com.owlexpress.payment.presentation.dto.request.PaymentCreateRequestDto;
 import com.owlexpress.payment.presentation.dto.request.PaymentDeleteRequestDto;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class PaymentUseCase {
     private final PassportHelper passportHelper;
 
     @Transactional
-    public void createPayment(PaymentCreateRequestDto requestDto, String passport) {
+    public UUID createPayment(PaymentCreateRequestDto requestDto, String passport) {
         Payment payment = requestDto.toEntity();
         // TODO : 결제사 승인 요청
 
@@ -79,12 +80,16 @@ public class PaymentUseCase {
                 .hubList(route.getHubList())
                 .build();
 
-        CommonDto<Void> delivery = deliveryClient.createDelivery(deliveryCreateRequestDto,
+        CommonDto<Map<String, UUID>> delivery = deliveryClient.createDelivery(
+                deliveryCreateRequestDto,
                 passport);
 
         if (delivery.getStatus() != HttpStatus.CREATED) {
             throw new DeliveryCreationFailException();
         }
+
+        return delivery.getData().getOrDefault("deliveryId", null);
+
     }
 
     @Transactional
