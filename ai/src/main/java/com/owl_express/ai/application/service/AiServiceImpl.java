@@ -15,6 +15,7 @@ import com.owl_express.ai.common.util.PageUtil;
 import com.owl_express.ai.domain.entity.Ai;
 import com.owl_express.ai.domain.repository.AiRepository;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -138,7 +139,9 @@ public class AiServiceImpl implements AiService {
         String hubDurationTimeList = "[ " +
                 messageCreateRequestDto.getTotalHubList().stream()
                         .map(HubListDto::getEstimateDurationTime)
-                        .map(duration -> duration.toMillis() + "ms ")
+                        .map(duration -> Optional.ofNullable(duration)
+                                .map(d -> d.toMillis() + "ms ")
+                                .orElse("N/A "))
                         .limit(Math.max(0, messageCreateRequestDto.getTotalHubList().size() - 1))
                         .collect(Collectors.joining(" "))
                 + " ]";
