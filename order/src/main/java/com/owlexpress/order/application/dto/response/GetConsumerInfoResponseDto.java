@@ -1,9 +1,6 @@
 package com.owlexpress.order.application.dto.response;
 
 import com.owlexpress.order.common.constant.CompanyType;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -14,9 +11,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GetConsumerInfoResponseDto {
+    private String userName;
 
-    @Column
-    @Enumerated(EnumType.STRING)
+    private String userPhoneNumber;
+
     private CompanyType companyType;
 
     @Size(min = 1, max = 50)
@@ -36,6 +34,8 @@ public class GetConsumerInfoResponseDto {
 
     @Builder
     public GetConsumerInfoResponseDto(
+            String userName,
+            String userPhoneNumber,
             CompanyType companyType,
             String companyName,
             String companyAddress,
@@ -44,6 +44,8 @@ public class GetConsumerInfoResponseDto {
             Double longitude,
             UUID hubId
     ) {
+        this.userName = userName;
+        this.userPhoneNumber = userPhoneNumber;
         this.companyType = companyType;
         this.companyName = companyName;
         this.companyAddress = companyAddress;
