@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AlarmCreateResponseDto {
 
+    private UUID aiId;
+    private String platformMessageId;
     private UUID deliverId;
     private Long deliverUserId;
     private String deliverName;
@@ -48,6 +50,8 @@ public class AlarmCreateResponseDto {
 
     @Builder
     public AlarmCreateResponseDto(
+            UUID aiId,
+            String platformMessageId,
             UUID deliverId,
             Long deliverUserId,
             String deliverName,
@@ -71,6 +75,8 @@ public class AlarmCreateResponseDto {
             List<DeliveryManagerRequestDto.HubListDto> totalHubList,
             Duration totalEstimateDurationTime
     ) {
+        this.aiId = aiId;
+        this.platformMessageId = platformMessageId;
         this.deliverId = deliverId;
         this.deliverUserId = deliverUserId;
         this.deliverName = deliverName;
