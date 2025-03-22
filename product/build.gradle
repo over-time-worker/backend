@@ -69,14 +69,18 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-    //zipkin
+    // ✅ Zipkin
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
     implementation 'io.github.openfeign:feign-micrometer'
     implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
-    //redis
+    // ✅redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // ✅ redisson
+    implementation group: 'org.redisson', name: 'redisson', version: '3.45.0'
+
 
 }
 
