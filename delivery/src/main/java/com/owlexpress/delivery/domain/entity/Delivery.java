@@ -231,7 +231,7 @@ public class Delivery extends BaseEntity {
     @RequiredArgsConstructor
     public enum OrderType {
         ROCKET("ROCKET"),
-        FRESH("FRESH");
+        NORMAL("NORMAL");
 
         private final String name;
 
