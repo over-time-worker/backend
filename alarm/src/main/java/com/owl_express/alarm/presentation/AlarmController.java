@@ -51,7 +51,7 @@ public class AlarmController {
                         .status(HttpStatus.CREATED)
                         .message(SEND_MESSAGE_SUCCESS)
                         .code(HttpStatus.CREATED.value())
-                        .data(null)
+                        .data(responseDto)
                         .build());
     }
 
