@@ -19,4 +19,10 @@ public class ConsumerException extends RuntimeException {
             super(message);
         }
     }
+
+    public static class ConsumerDeliveryException extends Throwable {
+        public ConsumerDeliveryException(String message) {
+            super(message);
+        }
+    }
 }
