@@ -1,6 +1,7 @@
 package com.owlexpress.consumer.common.exceptions;
 
 import com.owlexpress.consumer.common.CommonDto;
+import com.owlexpress.consumer.common.exceptions.ConsumerException.ConsumerDeliveryException;
 import com.owlexpress.consumer.common.exceptions.ConsumerException.FeignClientException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,17 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(ConsumerNameDuplicateExceptoin.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleConsumerNameDuplicateExceptoin(ConsumerNameDuplicateExceptoin e) {
+        log.error("error ={}", e.getMessage(), e);
+
+        return CommonDto.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage()) // Ensure the message is included
+                .data(null)
+                .build();
+    }@ExceptionHandler(ConsumerDeliveryException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleConsumerDeliveryException(ConsumerDeliveryException e) {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
