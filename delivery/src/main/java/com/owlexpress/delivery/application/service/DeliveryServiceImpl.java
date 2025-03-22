@@ -5,6 +5,7 @@ import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
+import com.owlexpress.delivery.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliverReturnFailException;
@@ -182,8 +183,19 @@ public class DeliveryServiceImpl implements DeliveryService {
 
             if(isHubDeliver) {
                 deliveryUsecase.returnHubDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId());
+
+                deliveryUsecase.sendFallbackHubDeliverMessageToAlarm(
+                        HubDeliverFallbackMessageCreateRequestDto.toDto(alarmCreateResponseDto),
+                        passport
+                );
             } else{
                 deliveryUsecase.returnCompanyDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId());
+
+                deliveryUsecase.DeleteCompanyDeliverMessageToAlarm(
+                        alarmCreateResponseDto.getDeliverChannelId(),
+                        alarmCreateResponseDto.getPlatformMessageId(),
+                        passport
+                );
             }
 
             throw new DeliverReturnFailException(DELIVERY_MANAGER_RETURN_FAIL_MESSAGE);
