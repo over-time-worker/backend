@@ -4,15 +4,16 @@ import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.DELE
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.GET_ALARM_SUCCESS;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.RESERVE_MESSAGE_SUCCESS;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEARCH_ALARM_SUCCESS;
+import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEND_FALLBACK_MESSAGE_SUCCESS;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEND_MESSAGE_SUCCESS;
 
 import com.owl_express.alarm.application.dtos.CommonDto;
 import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
 import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
 import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
 import com.owl_express.alarm.application.service.AlarmService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -131,6 +132,22 @@ public class AlarmController {
                         .message(SEARCH_ALARM_SUCCESS)
                         .code(HttpStatus.OK.value())
                         .data(response)
+                        .build());
+    }
+
+    @PostMapping("/hub/fallback")
+    public ResponseEntity<CommonDto<Void>> hubFallback(
+            @RequestBody HubDeliverFallbackMessageCreateRequestDto requestDto,
+            @RequestHeader("X-User-Passport") String passport
+    ) {
+        alarmService.hubFallback(requestDto, passport);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(
+                CommonDto.<Void>builder()
+                        .status(HttpStatus.ACCEPTED)
+                        .message(SEND_FALLBACK_MESSAGE_SUCCESS)
+                        .code(HttpStatus.ACCEPTED.value())
+                        .data(null)
                         .build());
     }
 
