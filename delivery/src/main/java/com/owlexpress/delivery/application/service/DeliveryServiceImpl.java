@@ -2,6 +2,7 @@ package com.owlexpress.delivery.application.service;
 
 import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_DELETE_FAIL_MESSAGE;
 import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_HISTORY_NOT_FOUND_MESSAGE;
+import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_MANAGER_RETURN_FAIL_MESSAGE;
 import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_NOT_FOUND_MESSAGE;
 
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
@@ -11,6 +12,7 @@ import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDt
 import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
 import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
+import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliverReturnFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryNotFoundException;
@@ -20,6 +22,7 @@ import com.owlexpress.delivery.domain.entity.Delivery;
 import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import com.owlexpress.delivery.domain.entity.DeliveryHistory;
 import com.owlexpress.delivery.domain.repository.DeliveryRepository;
+import feign.FeignException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -153,23 +156,40 @@ public class DeliveryServiceImpl implements DeliveryService {
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, deliveryHistoryList);
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,userId);
 
-        deliveryUsecase.returnHubDeliverToDeliveryManager(deliveryHistory.getDeliverId());
-
         DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
                 delivery,
                 deliveryHistory,
                 delivery.getDeliveryHistories()
         );
 
-        if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 1) {
+        AlarmCreateResponseDto alarmCreateResponseDto;
+        Boolean isHubDeliver = true;
 
-            AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto);
+        if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 1) {
+            isHubDeliver = false;
+
+            alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto);
             delivery.updateCompanyDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
 
             delivery.updateCompanyDeliver(UUID.randomUUID(), userId);
+
         } else {
-            AlarmCreateResponseDto alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto);
+            alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto);
             delivery.updateHubDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
+        }
+
+        try {
+            deliveryUsecase.returnHubDeliverToDeliveryManager(deliveryHistory.getDeliverId());
+        } catch(FeignException e) {
+
+            if(isHubDeliver) {
+                deliveryUsecase.returnHubDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId());
+            } else{
+                deliveryUsecase.returnCompanyDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId());
+            }
+
+            throw new DeliverReturnFailException(DELIVERY_MANAGER_RETURN_FAIL_MESSAGE);
+
         }
     }
 

@@ -8,5 +8,6 @@ public class ExceptionMessage {
     public static final String DELIVERY_DELETE_FAIL_MESSAGE = "배송 취소에 실패했습니다. 이미 배송이 시작되었습니다.";
     public static final String DELIVERY_UPDATE_FAIL_MESSAGE = "배송 수정에 실패했습니다.";
     public static final String DELIVERY_MANAGER_ASSIGN_FAIL_MESSAGE = "배송 담당자 배정에 실패했습니다.";
+    public static final String DELIVERY_MANAGER_RETURN_FAIL_MESSAGE = "배송 담당자 반환에 실패했습니다.";
 
 }

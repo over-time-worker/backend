@@ -44,4 +44,9 @@ public class DeliveryException extends RuntimeException {
         }
     }
 
+    public static class DeliverReturnFailException extends RuntimeException {
+        public DeliverReturnFailException(String message) {
+            super(message);
+        }
+    }
 }
