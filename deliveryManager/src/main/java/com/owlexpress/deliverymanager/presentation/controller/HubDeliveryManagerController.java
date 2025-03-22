@@ -25,10 +25,10 @@ public class HubDeliveryManagerController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> create(
-//            @RequestHeader(name = "X-User-Passport") String passport,
+            @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody CreateHubDeliveryManagerRequestDto createHubDeliveryManagerRequestDto
     ) {
-        hubDeliveryManagerUsecase.create(createHubDeliveryManagerRequestDto);
+        hubDeliveryManagerUsecase.create(createHubDeliveryManagerRequestDto, passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.CREATED)
@@ -36,15 +36,17 @@ public class HubDeliveryManagerController {
                                              .message("허브 배송 관리자 생성 성공")
                                              .build();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(commonDto);
     }
 
     @PutMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> update(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId,
-            @RequestBody  UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
+            @RequestBody UpdateHubDeliveryManagerRequestDto updateHubDeliveryManagerRequestDto
     ) throws HubDeliveryManagerException.HubDuplicateAssignNumber {
-        hubDeliveryManagerUsecase.update(updateHubDeliveryManagerRequestDto,hubDeliveryManagerId);
+        hubDeliveryManagerUsecase.update(updateHubDeliveryManagerRequestDto, hubDeliveryManagerId, passport);
 
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -53,25 +55,28 @@ public class HubDeliveryManagerController {
                                              .message("허브 배송 관리자 수정 성공")
                                              .build();
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
     }
 
     @GetMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<FindHubDeliveryResponseDto>> get(
             @PathVariable("hubDeliveryManagerId") UUID consumerDeliveryManagerId
-    ){
+    ) {
 
-        FindHubDeliveryResponseDto findHubDeliveryResponseDto = hubDeliveryManagerUsecase.find(consumerDeliveryManagerId);
+        FindHubDeliveryResponseDto findHubDeliveryResponseDto = hubDeliveryManagerUsecase.find(
+                consumerDeliveryManagerId);
 
 
         CommonDto<FindHubDeliveryResponseDto> commonDto = CommonDto.<FindHubDeliveryResponseDto>builder()
-                                         .status(HttpStatus.OK)
-                                         .code(HttpStatus.OK.value())
-                                         .message("허브 배송 관리자 조회 성공")
-                                         .data(findHubDeliveryResponseDto)
-                                         .build();
+                                                                   .status(HttpStatus.OK)
+                                                                   .code(HttpStatus.OK.value())
+                                                                   .message("허브 배송 관리자 조회 성공")
+                                                                   .data(findHubDeliveryResponseDto)
+                                                                   .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(commonDto);
+        return ResponseEntity.status(HttpStatus.OK)
+                             .body(commonDto);
     }
 
     @GetMapping("/search")
@@ -82,14 +87,15 @@ public class HubDeliveryManagerController {
             @RequestParam(name = "q", defaultValue = "") String q,
             @RequestParam(name = "orderBy", defaultValue = "createdAt") String orderBy
     ) {
-        PagedModel<FindHubDeliveryResponseDto> searchResult = hubDeliveryManagerUsecase.search(page, size, sort, q, orderBy);
+        PagedModel<FindHubDeliveryResponseDto> searchResult = hubDeliveryManagerUsecase.search(
+                page, size, sort, q, orderBy);
 
         CommonDto<PagedModel<FindHubDeliveryResponseDto>> commonDto = CommonDto.<PagedModel<FindHubDeliveryResponseDto>>builder()
-                                                     .status(HttpStatus.OK)
-                                                     .code(HttpStatus.OK.value())
-                                                     .message("허브 배송관리자 조회 성공")
-                                                     .data(searchResult)
-                                                     .build();
+                                                                               .status(HttpStatus.OK)
+                                                                               .code(HttpStatus.OK.value())
+                                                                               .message("허브 배송관리자 조회 성공")
+                                                                               .data(searchResult)
+                                                                               .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                              .body(commonDto);
@@ -97,9 +103,10 @@ public class HubDeliveryManagerController {
 
     @DeleteMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> delete(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId
     ) throws HubDeliveryManagerException.HubIsNotAvailableStatusException {
-        hubDeliveryManagerUsecase.delete(hubDeliveryManagerId);
+        hubDeliveryManagerUsecase.delete(hubDeliveryManagerId, passport);
 
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -108,15 +115,17 @@ public class HubDeliveryManagerController {
                                              .message("허브 배송 관리자 삭제 성공")
                                              .build();
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(commonDto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                             .body(commonDto);
     }
 
     @PostMapping("/assign")
     public ResponseEntity<CommonDto<AlarmCreateResponseDto>> assign(
+            @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody DeliveryManagerRequestDto deliveryManagerRequestDto
     ) {
 
-        AlarmCreateResponseDto assign = hubDeliveryManagerUsecase.assign(deliveryManagerRequestDto);
+        AlarmCreateResponseDto assign = hubDeliveryManagerUsecase.assign(deliveryManagerRequestDto,passport);
 
         CommonDto<AlarmCreateResponseDto> commonDto = CommonDto.<AlarmCreateResponseDto>builder()
                                                                .status(HttpStatus.ACCEPTED)

@@ -14,7 +14,7 @@ public class CreateConsumerDeliveryManagerRequestDto {
     private String user_name;
     private String user_phone_number;
     private PlatformType platform_type;
-    private UUID channelId;
+    private String channelId;
     private UUID hubId;
 
     @Builder
@@ -24,7 +24,7 @@ public class CreateConsumerDeliveryManagerRequestDto {
             String user_name,
             String user_phone_number,
             PlatformType platform_type,
-            UUID channelId,
+            String channelId,
             UUID hubId
     ) {
         this.userId = userId;

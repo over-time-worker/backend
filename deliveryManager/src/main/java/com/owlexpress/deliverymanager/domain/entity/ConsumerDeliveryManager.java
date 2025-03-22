@@ -44,7 +44,7 @@ public class ConsumerDeliveryManager extends BaseEntity {
     private PlatformType platformType;
 
     @Column(name = "channel_id")
-    private UUID channelId;
+    private String channelId;
 
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;
@@ -57,7 +57,7 @@ public class ConsumerDeliveryManager extends BaseEntity {
             String userName,
             String userPhoneNumber,
             PlatformType platformType,
-            UUID channelId,
+            String channelId,
             Boolean isAvaliable
     ) {
         this.consumerDeliveryManagerId = consumerDeliveryManagerId;

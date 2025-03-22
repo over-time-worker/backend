@@ -1,5 +1,6 @@
 package com.owlexpress.deliverymanager.application.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import com.owlexpress.deliverymanager.domain.entity.HubDeliveryManager;
 import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
@@ -42,6 +43,7 @@ public class AlarmCreateResponseDto {
     private String nextHubName;
     private String orderDescription;
     private String shippingAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime requestArrivalTime;
     private Double totalEstimateDistance;
     List<DeliveryManagerRequestDto.HubListDto> totalHubList;
@@ -115,13 +117,11 @@ public class AlarmCreateResponseDto {
             ConsumerDeliveryManager manager,
             DeliveryManagerRequestDto request
     ) {
-        // TODO : alarm과 feign 연결된 이후에 alarm에서 response 해준 값으로 aiId와 platformMessageId를 추가해주어야합니다..!
         return AlarmCreateResponseDto.builder()
                                      .deliverId(manager.getConsumerDeliveryManagerId())
                                      .deliverUserId(manager.getUserId())
                                      .deliverName(manager.getUserName())
-                                     .deliverChannelId(manager.getChannelId()
-                                                              .toString()) // Long -> String 변환 필요
+                                     .deliverChannelId(manager.getChannelId())
                                      .platformName(manager.getPlatformType()
                                                           .name()) // Enum -> String 변환
                                      .deliveryId(request.getDeliveryId())
@@ -146,16 +146,54 @@ public class AlarmCreateResponseDto {
 
     public static AlarmCreateResponseDto from(
             HubDeliveryManager manager,
-            DeliveryManagerRequestDto request
+            DeliveryManagerRequestDto request,
+            AlarmCreateResponseDto alarmCreateResponseDto
     ) {
         return AlarmCreateResponseDto.builder()
                                      .deliverId(manager.getHubDeliveryManagerId())
                                      .deliverUserId(manager.getUserId())
                                      .deliverName(manager.getUserName())
-                                     .deliverChannelId(manager.getChannelId()
-                                                              .toString()) // Long -> String 변환 필요
+                                     .deliverChannelId(manager.getChannelId())
+                                     .deliverPhoneNumber(manager.getUserPhoneNumber())
                                      .platformName(manager.getPlatformType()
                                                           .name()) // Enum -> String 변환
+                                     .aiId(alarmCreateResponseDto.getAiId())
+                                     .platformMessageId(alarmCreateResponseDto.getPlatformMessageId())
+                                     .deliveryId(request.getDeliveryId())
+                                     .orderId(request.getOrderId())
+                                     .productInfo(request.getProductInfo())
+                                     .ordererName(request.getOrdererName())
+                                     .startHubName(request.getStartHubName())
+                                     .endHubName(request.getEndHubName())
+                                     .currentHubId(request.getCurrentHubId())
+                                     .currentHubName(request.getCurrentHubName())
+                                     .nextHubId(request.getNextHubId())
+                                     .nextHubName(request.getNextHubName())
+                                     .orderDescription(request.getOrderDescription())
+                                     .shippingAddress(request.getShippingAddress())
+                                     .requestArrivalTime(request.getRequestArrivalTime())
+                                     .totalEstimateDistance(request.getTotalEstimateDistance())
+                                     .totalEstimateDurationTime(request.getTotalEstimateDurationTime())
+                                     .totalHubList(request.getTotalHubList())
+                                     .build();
+    }
+
+
+    public static AlarmCreateResponseDto from(
+            ConsumerDeliveryManager manager,
+            DeliveryManagerRequestDto request,
+            AlarmCreateResponseDto alarmCreateResponseDto
+    ) {
+        return AlarmCreateResponseDto.builder()
+                                     .deliverId(manager.getConsumerDeliveryManagerId())
+                                     .deliverUserId(manager.getUserId())
+                                     .deliverName(manager.getUserName())
+                                     .deliverChannelId(manager.getChannelId())
+                                     .deliverPhoneNumber(manager.getUserPhoneNumber())
+                                     .platformName(manager.getPlatformType()
+                                                          .name()) // Enum -> String 변환
+                                     .aiId(alarmCreateResponseDto.getAiId())
+                                     .platformMessageId(alarmCreateResponseDto.getPlatformMessageId())
                                      .deliveryId(request.getDeliveryId())
                                      .orderId(request.getOrderId())
                                      .productInfo(request.getProductInfo())
