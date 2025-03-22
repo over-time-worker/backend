@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.owlexpress.product.common.exceptions.ProductException.*;
-import static com.owlexpress.product.common.exceptions.ProductException.ProductNameDuplicateExceptoin;
-import static com.owlexpress.product.common.exceptions.ProductException.ProductNotFoundException;
 
 @ControllerAdvice
 @RestController
@@ -26,11 +24,11 @@ public class GlobalExceptionAdvice {
     public CommonDto<Object> handleProductNotFoundException(ProductNotFoundException e) {
         log.error("error ={}", e.getMessage(), e);
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message(e.getMessage()) // Ensure the message is included
-                .data(null)
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(ProductNameDuplicateExceptoin.class)
@@ -39,23 +37,50 @@ public class GlobalExceptionAdvice {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message(e.getMessage()) // Ensure the message is included
-                .data(null)
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
+
     @ExceptionHandler(HubInfoNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleHubInfoNotFoundException(HubInfoNotFoundException e) {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message(e.getMessage()) // Ensure the message is included
-                .data(null)
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+
+    @ExceptionHandler(ProductCreateFailException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleProductCreateFailException(ProductCreateFailException e) {
+        log.error("error ={}", e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
+    }
+
+    @ExceptionHandler(ProductUpdateFailException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CommonDto<Object> handleProductUpdateFailException(ProductUpdateFailException e) {
+        log.error("error ={}", e.getMessage(), e);
+
+        return CommonDto.builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage()) // Ensure the message is included
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -64,11 +89,12 @@ public class GlobalExceptionAdvice {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message("입력값이 유효하지 않습니다.")
-                .data(e.getBindingResult().getFieldErrors()) // 어떤 필드가 오류인지 포함
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message("입력값이 유효하지 않습니다.")
+                        .data(e.getBindingResult()
+                               .getFieldErrors()) // 어떤 필드가 오류인지 포함
+                        .build();
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -77,11 +103,11 @@ public class GlobalExceptionAdvice {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message("입력값이 유효하지 않습니다.")
-                .data(e.getConstraintViolations()) // 어떤 제약 조건이 실패했는지 포함
-                .build();
+                        .status(HttpStatus.BAD_REQUEST)
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message("입력값이 유효하지 않습니다.")
+                        .data(e.getConstraintViolations()) // 어떤 제약 조건이 실패했는지 포함
+                        .build();
     }
 
     @ExceptionHandler(IllegalAccessException.class)
@@ -90,11 +116,11 @@ public class GlobalExceptionAdvice {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.FORBIDDEN)
-                .code(HttpStatus.FORBIDDEN.value())
-                .message("권한이 없습니다.")
-                .data(null)
-                .build();
+                        .status(HttpStatus.FORBIDDEN)
+                        .code(HttpStatus.FORBIDDEN.value())
+                        .message("권한이 없습니다.")
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(DataAccessException.class)
@@ -103,11 +129,11 @@ public class GlobalExceptionAdvice {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("데이터베이스 오류가 발생했습니다.")
-                .data(null)
-                .build();
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .message("데이터베이스 오류가 발생했습니다.")
+                        .data(null)
+                        .build();
     }
 
     @ExceptionHandler(Exception.class)
@@ -116,11 +142,11 @@ public class GlobalExceptionAdvice {
         log.error("error ={}", e.getMessage(), e);
 
         return CommonDto.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("예기치 않은 오류가 발생했습니다.")
-                .data(null)
-                .build();
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .message("예기치 않은 오류가 발생했습니다.")
+                        .data(null)
+                        .build();
     }
 
 }

@@ -4,6 +4,7 @@ import com.owlexpress.product.application.ProductUsecase;
 import com.owlexpress.product.application.dto.response.FindProductResponseDto;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import com.owlexpress.product.common.CommonDto;
+import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.domain.service.ProductDomainService;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
@@ -26,7 +27,7 @@ public class ProductController {
     public ResponseEntity<CommonDto<Void>> create(
             @RequestHeader("X-User-Passport") String passport,
             @RequestBody CreateProductRequestDto createProductRequestDto
-    ) {
+    ) throws ProductException.ProductCreateFailException {
         productUsecase.createProduct(createProductRequestDto, passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
@@ -44,7 +45,7 @@ public class ProductController {
             @RequestHeader("X-User-Passport") String passport,
             @RequestBody UpdateProductDto updateProductDto,
             @PathVariable UUID productsId
-    ) {
+    ) throws ProductException.ProductUpdateFailException {
 
         productUsecase.updateProduct(updateProductDto, productsId, passport);
 
