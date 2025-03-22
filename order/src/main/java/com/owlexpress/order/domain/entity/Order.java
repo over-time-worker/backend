@@ -46,7 +46,7 @@ public class Order extends BaseEntity {
     @Column(name = "consumer_address", nullable = false)
     private String consumerAddress;
 
-    @Column(name = "delivery_id", nullable = false)
+    @Column(name = "delivery_id")
     private UUID deliveryId;
 
     @Column(name = "total_price", nullable = false)
@@ -108,6 +108,10 @@ public class Order extends BaseEntity {
         this.orderStatus = OrderStatus.CANCEL;
         this.orderProducts.forEach(orderProduct -> orderProduct.softDeleteData(userId));
         super.softDeleteData(userId);
+    }
+
+    public void setDeliveryId(UUID deliveryId) {
+        this.deliveryId = deliveryId;
     }
 
     public void setDescription(String description, Long userId) {

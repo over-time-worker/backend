@@ -5,6 +5,7 @@ import static com.owlexpress.order.common.exception.ExceptionMessage.ORDER_NOT_F
 import com.owlexpress.order.application.dto.request.ConfirmHubStockRequestDto;
 import com.owlexpress.order.application.dto.request.CreatePaymentRequestDto;
 import com.owlexpress.order.application.dto.response.ConfirmHubStockResponseDto;
+import com.owlexpress.order.application.dto.response.CreatePaymentResponseDto;
 import com.owlexpress.order.application.dto.response.GetConsumerInfoResponseDto;
 import com.owlexpress.order.application.exception.OrderNotFoundException;
 import com.owlexpress.order.common.dto.CommonDto;
@@ -12,6 +13,7 @@ import com.owlexpress.order.common.dto.PassportDto;
 import com.owlexpress.order.common.helper.PassportHelper;
 import com.owlexpress.order.common.util.GeoUtil;
 import com.owlexpress.order.common.util.PageUtil;
+import com.owlexpress.order.domain.constant.OrderStatus;
 import com.owlexpress.order.domain.entity.Order;
 import com.owlexpress.order.domain.entity.OrderProduct;
 import com.owlexpress.order.domain.repository.OrderRepository;
@@ -92,20 +94,25 @@ public class OrderServiceImpl implements OrderService{
             sb.append(request.getProducts().get(0).getProductName());
         }
 
-        Order order = buildOrder(passportDto.getUserId(), request, calcTotalPrice, sb.toString());
+        Order savedOrder = buildOrder(
+                passportDto.getUserId(),
+                request,
+                calcTotalPrice,
+                sb.toString(),
+                consumerInfo.getData().getHubId()
+        );
 
-        addOrderProducts(order, request.getProducts());
+        addOrderProducts(savedOrder, request.getProducts());
 
-        Order save = orderRepository.save(order);
+        Order save = orderRepository.save(savedOrder);
         save.updateCreateData(passportDto.getUserId());
-
 
         // 4. payment service에 모든 정보를 담아 전달
         CreatePaymentRequestDto paymentRequestDto = CreatePaymentRequestDto.builder()
                 .orderId(save.getOrderId())
                 .price(calculateTotalPrice(request.getProducts()))
                 .transactionId(UUID.randomUUID().toString())
-                .productInfo(order.getProductInfo())
+                .productInfo(savedOrder.getProductInfo())
                 .startHubId(hubProductStock.getData().getHubId())
                 .startHubName(hubProductStock.getData().getHubName())
                 .orderType(request.getOrderType())
@@ -118,7 +125,11 @@ public class OrderServiceImpl implements OrderService{
                 .consumerPhoneNumber(consumerInfo.getData().getUserPhoneNumber())
                 .consumerName(consumerInfo.getData().getUserName())
                 .build();
-        paymentFeignClient.sendPaymentRequest(passport, paymentRequestDto);
+        CommonDto<CreatePaymentResponseDto> createPaymentResponseDtoCommonDto = paymentFeignClient.sendPaymentRequest(
+                passport, paymentRequestDto);
+
+        UUID deliveryId = createPaymentResponseDtoCommonDto.getData().getDeliveryId();
+        savedOrder.setDeliveryId(deliveryId);
 
         // TODO 장바구니 상품 List 삭제 feign
 //        cartFeignClient.deleteCartProductsFromOrder();
@@ -203,19 +214,20 @@ public class OrderServiceImpl implements OrderService{
             Long userId,
             CreateOrderRequestDto request,
             BigDecimal totalPrice,
-            String productInfo
+            String productInfo,
+            UUID hubId
     ) {
         return Order.builder()
                 .userId(userId)
                 .consumerId(request.getConsumerId())
-                .hubId(request.getHubId())
+                .hubId(hubId)
                 .consumerAddress(request.getConsumerAddress())
-                .deliveryId(request.getDeliveryId())
+                .deliveryId(null)
                 .totalPrice(totalPrice)
                 .description(request.getDescription())
                 .requestArrivalTime(request.getRequestArrivalTime())
                 .orderType(request.getOrderType())
-                .orderStatus(request.getOrderStatus())
+                .orderStatus(OrderStatus.COMPLETE)
                 .productInfo(productInfo)
                 .build();
     }
