@@ -146,7 +146,7 @@ public class HubDeliveryManagerUsecase {
                                                            Manager_NOT_FOUND_MESSAGE));
     }
 
-    @Transactional
+//    @Transactional
     public AlarmCreateResponseDto assign(DeliveryManagerRequestDto deliveryManagerRequestDto,
                                          String passport
     ) {
@@ -158,7 +158,7 @@ public class HubDeliveryManagerUsecase {
             throw new HubDeliveryManagerException.ConsumerEmptyException(ExceptionMessage.HUB_NOT_ENOUGH);
         }
         HubDeliveryManager manager = optionalManager.get();
-        manager.setIsAvaliable(false);
+        manager.setIsAvaliable(true);
         manager.updateModifiedData(passportDto.getUserId());
         log.info("manager channelId = {} , number ={} " , manager.getChannelId(), manager.getUserPhoneNumber());
 

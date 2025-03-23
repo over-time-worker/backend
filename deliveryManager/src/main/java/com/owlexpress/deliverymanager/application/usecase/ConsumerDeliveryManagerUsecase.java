@@ -18,6 +18,11 @@ import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRe
 import com.owlexpress.deliverymanager.presentation.dto.request.UpdateConsumerDeliveryManagerRequestDto;
 import com.owlexpress.deliverymanager.presentation.dto.response.FindConsumerResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -28,20 +33,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.*;
 import static com.owlexpress.deliverymanager.common.exception.ExceptionMessage.Manager_NOT_FOUND_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsumerDeliveryManagerUsecase {
     private final ConsumerDeliveryManagerRepository consumerDeliveryManagerRepository;
     private final DeliveryManagerSearchConfig deliveryManagerSearchConfig;
     private final HubClient hubClient;
     private final PassportHelper passportHelper;
     private final AlarmClient alarmClient;
+    private final RedissonClient redissonClient;
 
     @Transactional
+    @CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
     public void create(
             CreateConsumerDeliveryManagerRequestDto consumerDeliveryManagerUsecase,
             String passport
@@ -70,6 +79,7 @@ public class ConsumerDeliveryManagerUsecase {
 
 
     @Transactional
+    @CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
     public void update(
             UpdateConsumerDeliveryManagerRequestDto updateConsumerDeliveryManagerRequestDto,
             UUID consumerDeliveryManagerId,
@@ -102,12 +112,14 @@ public class ConsumerDeliveryManagerUsecase {
         consumerDeliveryManager.updateModifiedData(passportDto.getUserId());
     }
 
+    @Cacheable(value = "unassignedDeliveryManagers", key = "#consumerDeliveryManagerId")
     @Transactional(readOnly = true)
     public FindConsumerResponseDto find(UUID consumerDeliveryManagerId) {
         ConsumerDeliveryManager consumerDeliveryManager = getConsumerDeliveryManager(consumerDeliveryManagerId);
         return FindConsumerResponseDto.fromEntity(consumerDeliveryManager);
     }
 
+    @Cacheable(value = "searchConsumerDeliveryManagers", key = "'page:' + #page + ':size:' + #size + ':sort:' + #sort + ':q:' + #q + ':orderBy:' + #orderBy")
     @Transactional(readOnly = true)
     public PagedModel<FindConsumerResponseDto> search(
             Integer page,
@@ -142,6 +154,7 @@ public class ConsumerDeliveryManagerUsecase {
     }
 
     @Transactional
+    @CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
     public void delete(
             UUID consumerDeliveryManagerId,
             String passport
@@ -155,11 +168,30 @@ public class ConsumerDeliveryManagerUsecase {
         consumerDeliveryManager.softDeleteData(passportDto.getUserId());
     }
 
-    @Transactional
+//    @Transactional
+@CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
     public AlarmCreateResponseDto assign(
             DeliveryManagerRequestDto deliveryManagerRequestDto,
             String passport
-    ) throws HubNotFoundException, ConsumerEmptyException {
+    ) throws HubNotFoundException, ConsumerEmptyException, InterruptedException, LockExistException {
+        //허브별 단위 격리하기
+        RLock lock = redissonClient.getLock("assignDeliveryManagerLock:" + deliveryManagerRequestDto.getCurrentHubId());
+        boolean isLocked = false;
+        int retryCount = 3;
+        int attempts = 0;
+
+        while (attempts < retryCount) {//3번정도 시도
+            isLocked = lock.tryLock(3, 2, TimeUnit.SECONDS);
+            if (isLocked) break;
+            attempts++;
+            Thread.sleep(500);  // optional backoff
+        }
+
+        if (!isLocked) {
+            log.warn("배송 담당자 락 획득 실패 - HubId: {}, 시도 횟수: {}", deliveryManagerRequestDto.getCurrentHubId(), attempts);
+            throw new LockExistException(ExceptionMessage.LOCK_IS_EXIST);
+        }
+
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         CommonDto<HubFindResponseDto> hubFindResponseDtoCommonDto = hubClient.find(
                 deliveryManagerRequestDto.getCurrentHubId());
@@ -184,12 +216,11 @@ public class ConsumerDeliveryManagerUsecase {
 
         AlarmCreateRequestDto alarmCreateRequestDto = AlarmCreateRequestDto.toDto(deliveryManagerRequestDto, manager);
         AlarmCreateResponseDto alarmCreateResponseDto = alarmClient.createAlarmForCompanyDeliver(
-                                                                           alarmCreateRequestDto, passport)
-                                                                   .getData();
+                                                                       alarmCreateRequestDto, passport)
+                                                               .getData();
 
-        manager.setIsAvaliable(false);
+        manager.setIsAvaliable(true);
         manager.updateModifiedData(passportDto.getUserId());
-
 
         // DTO 변환 및 반환
         return AlarmCreateResponseDto.from(manager, deliveryManagerRequestDto, alarmCreateResponseDto);
@@ -207,6 +238,7 @@ public class ConsumerDeliveryManagerUsecase {
     }
 
     @Transactional
+    @CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
     public void returnHub(UUID deliveryManagerId) {
         getConsumerDeliveryManager(deliveryManagerId).setIsAvaliable(true);
     }

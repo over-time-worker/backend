@@ -120,7 +120,7 @@ public class ConsumerDeliveryManagerController {
     public ResponseEntity<CommonDto<AlarmCreateResponseDto>> assign(
             @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody DeliveryManagerRequestDto deliveryManagerRequestDto
-    ) throws HubNotFoundException, ConsumerDeliveryManagerException.ConsumerEmptyException {
+    ) throws HubNotFoundException, ConsumerDeliveryManagerException.ConsumerEmptyException, InterruptedException, ConsumerDeliveryManagerException.LockExistException {
         AlarmCreateResponseDto assign = consumerDeliveryManagerUsecase.assign(deliveryManagerRequestDto,passport);
 
         CommonDto<AlarmCreateResponseDto> commonDto = CommonDto.<AlarmCreateResponseDto>builder()
