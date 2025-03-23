@@ -45,4 +45,9 @@ public class HubDeliveryManagerRepositoryImpl implements HubDeliveryManagerRepos
     public Optional<HubDeliveryManager> findFirstByOrderByAssignNumberDesc() {
         return hubDeliveryManagerJpaRepository.findFirstByOrderByAssignNumberDesc();
     }
+
+    @Override
+    public Optional<HubDeliveryManager> findFirstByOrderByAssignNumberAsc() {
+        return hubDeliveryManagerJpaRepository.findFirstByOrderByAssignNumberAsc();
+    }
 }
