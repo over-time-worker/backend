@@ -75,11 +75,8 @@ dependencies {
     implementation 'io.github.openfeign:feign-micrometer'
     implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
-    // ✅redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
     // ✅ redisson
-    implementation group: 'org.redisson', name: 'redisson', version: '3.45.0'
+    implementation 'org.redisson:redisson:3.22.0'
 
 
 }
