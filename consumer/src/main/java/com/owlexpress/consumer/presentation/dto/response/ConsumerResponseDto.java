@@ -83,9 +83,9 @@ public class ConsumerResponseDto {
                                   .companyAddress(consumer.getCompanyAddress())
                                   .businessNumber(consumer.getBusinessNumber())
                                   .latitude(consumer.getLocation()
-                                                    .getX())
+                                                    .getY())
                                   .longitude(consumer.getLocation()
-                                                     .getY())
+                                                     .getX())
                                   .hubId(consumer.getHubId())
                                   .build();
     }
