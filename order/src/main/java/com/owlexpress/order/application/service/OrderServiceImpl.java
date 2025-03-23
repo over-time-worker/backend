@@ -11,7 +11,6 @@ import com.owlexpress.order.application.exception.OrderNotFoundException;
 import com.owlexpress.order.common.dto.CommonDto;
 import com.owlexpress.order.common.dto.PassportDto;
 import com.owlexpress.order.common.helper.PassportHelper;
-import com.owlexpress.order.common.util.GeoUtil;
 import com.owlexpress.order.common.util.PageUtil;
 import com.owlexpress.order.domain.constant.OrderStatus;
 import com.owlexpress.order.domain.entity.Order;
@@ -33,12 +32,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService{
@@ -54,17 +55,19 @@ public class OrderServiceImpl implements OrderService{
     public CreateOrderResponseDto createOrder(String passport, CreateOrderRequestDto request) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
+        log.info("consumerId : {}", request.getConsumerId());
         // 1. consumer 업체 정보 조회 feign request
         CommonDto<GetConsumerInfoResponseDto> consumerInfo = consumerFeignClient.getConsumerInfo(
                 passport, request.getConsumerId());
 
+        log.info("업체 통과");
         // 2. 허브로 재고 확인 요청
         ConfirmHubStockRequestDto dtos = ConfirmHubStockRequestDto.builder()
                 .consumerId(request.getConsumerId())
-                .location(GeoUtil.createPoint(
-                        consumerInfo.getData().getLatitude(),
-                        consumerInfo.getData().getLongitude())
-                )
+//                .latitude(consumerInfo.getData().getLongitude())
+                .latitude(consumerInfo.getData().getLatitude())
+//                .longitude(consumerInfo.getData().getLatitude())
+                .longitude(consumerInfo.getData().getLongitude())
                 .orderProducts(
                         request.getProducts().stream()
                                 .map(hubProduct ->
@@ -76,12 +79,12 @@ public class OrderServiceImpl implements OrderService{
                                 .collect(Collectors.toList())
                 )
                 .build();
-
         CommonDto<ConfirmHubStockResponseDto> hubProductStock = hubFeignClient
                 .findHubProductStock(
                     passport, dtos
                 );
 
+        log.info("허브 통과");
         // 5. 주문 저장
 
         BigDecimal calcTotalPrice = calculateTotalPrice(request.getProducts());
@@ -99,7 +102,7 @@ public class OrderServiceImpl implements OrderService{
                 request,
                 calcTotalPrice,
                 sb.toString(),
-                consumerInfo.getData().getHubId()
+                consumerInfo.getData()
         );
 
         addOrderProducts(savedOrder, request.getProducts());
@@ -128,6 +131,7 @@ public class OrderServiceImpl implements OrderService{
         CommonDto<CreatePaymentResponseDto> createPaymentResponseDtoCommonDto = paymentFeignClient.sendPaymentRequest(
                 passport, paymentRequestDto);
 
+        log.info("결제 통과");
         UUID deliveryId = createPaymentResponseDtoCommonDto.getData().getDeliveryId();
         savedOrder.setDeliveryId(deliveryId);
 
@@ -215,12 +219,12 @@ public class OrderServiceImpl implements OrderService{
             CreateOrderRequestDto request,
             BigDecimal totalPrice,
             String productInfo,
-            UUID hubId
+            GetConsumerInfoResponseDto dto
     ) {
         return Order.builder()
                 .userId(userId)
                 .consumerId(request.getConsumerId())
-                .hubId(hubId)
+                .hubId(dto.getHubId())
                 .consumerAddress(request.getConsumerAddress())
                 .deliveryId(null)
                 .totalPrice(totalPrice)
