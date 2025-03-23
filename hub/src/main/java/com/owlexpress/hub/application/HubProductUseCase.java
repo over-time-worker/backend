@@ -6,6 +6,7 @@ import com.owlexpress.hub.common.exception.HubProductException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.helper.PassportHelper;
+import com.owlexpress.hub.common.util.GeoUtil;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubProductRepository;
@@ -39,7 +40,8 @@ public class HubProductUseCase {
     private final PassportHelper passportHelper;
     private final HubProductRepository hubProductRepository;
 
-    public HubProduct create(HubProductCreateRequestDto requestDto,
+    public HubProduct create(
+            HubProductCreateRequestDto requestDto,
             String passport
     ) {
         log.info("producerId= {} ", requestDto.getProducerId());
@@ -58,7 +60,8 @@ public class HubProductUseCase {
     }
 
     @Transactional
-    public void delete(UUID hubProductId,
+    public void delete(
+            UUID hubProductId,
             String passport
     ) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
@@ -98,7 +101,10 @@ public class HubProductUseCase {
             ✅ 7. DTO 패킹해서 반환
          */
 
-        Point consumerLocation = requestDto.getLocation();
+        Point consumerLocation = GeoUtil.createPoint(
+                requestDto.getLatitude(),
+                requestDto.getLongitude()
+        );
         List<Product> orderProducts = requestDto.getOrderProducts();
 
         // 상품 재고 파악용
@@ -169,7 +175,8 @@ public class HubProductUseCase {
     }
 
     private Map<UUID, List<HubProductInfoResponseDto>> findHubProductsGroupByHubId(
-            List<UUID> productIds) {
+            List<UUID> productIds
+    ) {
         // 요청 상품들과 일치하는 허브 상품 조회
         // 허브ID 기준으로 그룹화
         return hubRepository.findAllHubProductsInOrders(
@@ -177,8 +184,9 @@ public class HubProductUseCase {
                 .stream()
                 // 허브ID 기준으로 그룹화
                 .collect(Collectors.groupingBy(
-                        HubProductInfoResponseDto::getHubId,
-                        Collectors.toList())
+                                 HubProductInfoResponseDto::getHubId,
+                                 Collectors.toList()
+                         )
                 );
     }
 
