@@ -22,4 +22,6 @@ public interface HubDeliveryManagerRepository {
     );
 
     Optional<HubDeliveryManager> findFirstByOrderByAssignNumberDesc();
+
+    Optional<HubDeliveryManager> findFirstByOrderByAssignNumberAsc();
 }

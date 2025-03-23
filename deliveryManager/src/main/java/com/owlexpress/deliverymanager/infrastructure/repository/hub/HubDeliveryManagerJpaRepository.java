@@ -10,4 +10,6 @@ public interface HubDeliveryManagerJpaRepository extends JpaRepository<HubDelive
     boolean existsByAssignNumber(Integer assignNumber);
 
     Optional<HubDeliveryManager> findFirstByOrderByAssignNumberDesc();
+
+    Optional<HubDeliveryManager> findFirstByOrderByAssignNumberAsc();
 }

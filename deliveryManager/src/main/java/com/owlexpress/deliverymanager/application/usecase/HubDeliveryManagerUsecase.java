@@ -151,7 +151,7 @@ public class HubDeliveryManagerUsecase {
                                          String passport
     ) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
-        Optional<HubDeliveryManager> optionalManager = hubDeliveryManagerRepository.findFirstByOrderByAssignNumberDesc();
+        Optional<HubDeliveryManager> optionalManager = hubDeliveryManagerRepository.findFirstByOrderByAssignNumberAsc();
 
         // 담당자가 없는 경우 예외 처리 또는 기본 응답
         if (optionalManager.isEmpty()) {
