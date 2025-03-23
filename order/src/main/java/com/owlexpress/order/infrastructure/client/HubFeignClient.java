@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient("hub-service")
 public interface HubFeignClient {
-    @PostMapping("/api/hub/product/check-stock")
+    @PostMapping("/api/hub/product/confirm-stock")
     CommonDto<ConfirmHubStockResponseDto> findHubProductStock(
             @RequestHeader("X-User-Passport") String passport,
             @RequestBody ConfirmHubStockRequestDto requestDtos

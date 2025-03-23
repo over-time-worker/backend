@@ -17,7 +17,6 @@ public class CreateOrderRequestDto {
     private String description;
     private LocalDateTime requestArrivalTime;
     private OrderType orderType;
-    private String productInfo;
     private List<CreateOrderProductRequestDto> products;
 
     @Builder
@@ -27,7 +26,6 @@ public class CreateOrderRequestDto {
             String description,
             LocalDateTime requestArrivalTime,
             OrderType orderType,
-            String productInfo,
             List<CreateOrderProductRequestDto> products
     ){
         this.consumerId = consumerId;
@@ -35,7 +33,6 @@ public class CreateOrderRequestDto {
         this.description = description;
         this.requestArrivalTime = requestArrivalTime;
         this.orderType = orderType;
-        this.productInfo = productInfo;
         this.products = products;
     }
 }
