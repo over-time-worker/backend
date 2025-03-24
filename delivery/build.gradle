@@ -29,6 +29,9 @@ ext {
 
 dependencies {
 
+	// okhttp
+	implementation 'io.github.openfeign:feign-okhttp:13.5'
+
 	// ✅ zipkin
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
@@ -39,7 +42,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// ✅ redisson
-	implementation 'org.redisson:redisson:3.22.0'
+	implementation 'org.redisson:redisson-spring-data-34:3.45.1'
 
 	//hibernate-type
 //	implementation group: 'com.vladmihalcea', name: 'hibernate-types-60', version: '2.21.0'

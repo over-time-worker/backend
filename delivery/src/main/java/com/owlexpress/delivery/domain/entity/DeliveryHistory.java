@@ -1,5 +1,7 @@
 package com.owlexpress.delivery.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.owlexpress.delivery.application.dtos.DeliveryCacheDto.DeliveryHistoryCacheDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
 import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
@@ -18,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +40,7 @@ import org.springframework.util.StringUtils;
 @Table(name = "p_delivery_history")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class DeliveryHistory extends BaseEntity {
+public class DeliveryHistory extends BaseEntity implements Serializable {
     @Id
     @Column(name = "delivery_history_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,6 +48,7 @@ public class DeliveryHistory extends BaseEntity {
 
     @JoinColumn(name = "delivery_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private Delivery delivery;
 
     @Column(name = "sequence", columnDefinition = "SMALLINT", nullable = false)
@@ -101,6 +105,7 @@ public class DeliveryHistory extends BaseEntity {
 
     @Builder
     public DeliveryHistory(
+            UUID id,
             Delivery delivery,
             Integer sequence,
             UUID startHubId,
@@ -119,6 +124,7 @@ public class DeliveryHistory extends BaseEntity {
             PlatformType platformType,
             String deliverChannelId
     ){
+        this.id = id;
         this.delivery = delivery;
         this.sequence = sequence;
         this.startHubId = startHubId;
@@ -179,6 +185,28 @@ public class DeliveryHistory extends BaseEntity {
         deliveryHistoryList.add(deliveryHistory);
 
         return deliveryHistoryList;
+    }
+
+    public static DeliveryHistory toEntity(DeliveryHistoryCacheDto deliveryHistoryCacheDto) {
+        return DeliveryHistory.builder()
+                .id(deliveryHistoryCacheDto.getId())
+                .sequence(deliveryHistoryCacheDto.getSequence())
+                .startHubId(deliveryHistoryCacheDto.getStartHubId())
+                .startHubName(deliveryHistoryCacheDto.getStartHubName())
+                .destinationHubId(deliveryHistoryCacheDto.getDestinationHubId())
+                .destinationHubName(deliveryHistoryCacheDto.getDestinationHubName())
+                .shippingAddress(deliveryHistoryCacheDto.getShippingAddress())
+                .deliveryStatus(deliveryHistoryCacheDto.getDeliveryStatus())
+                .estimateDistance(deliveryHistoryCacheDto.getEstimateDistance())
+                .estimateDurationTime(deliveryHistoryCacheDto.getEstimateDurationTime())
+                .actualDistance(deliveryHistoryCacheDto.getActualDistance())
+                .actualTime(deliveryHistoryCacheDto.getActualTime())
+                .deliverId(deliveryHistoryCacheDto.getDeliverId())
+                .deliverPhoneNumber(deliveryHistoryCacheDto.getDeliverPhoneNumber())
+                .deliverName(deliveryHistoryCacheDto.getDeliverName())
+                .platformType(deliveryHistoryCacheDto.getPlatformType())
+                .deliverChannelId(deliveryHistoryCacheDto.getDeliverChannelId())
+                .build();
     }
 
     public void updateDelivery(Delivery delivery) {

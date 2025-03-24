@@ -68,11 +68,29 @@ services:
       - overtime_network
     platform: linux/amd64
 
+  redis:
+    image: redis:latest
+    networks:
+      - overtime_network
+    ports:
+      - "6378:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+
+  zipkin:
+    image: openzipkin/zipkin
+    networks:
+      - overtime_network
+    ports:
+      - "9411:9411"
+    restart: always  # 선택사항: 실패 시 자동 재시작
+
 networks:
   overtime_network:
     driver: bridge
 
 volumes:
-  postgres_data:
-
-
+  postgres_data:  # 볼륨 추가하여 데이터 유지
+  redis_data:
