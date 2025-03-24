@@ -21,7 +21,7 @@ public interface ConsumerDeliveryManagerRepository {
             PageRequest pageRequest
     );
 
-    Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberDesc();
+    Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberAsc();
 
     Optional<ConsumerDeliveryManager> findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(UUID hubId);
 }

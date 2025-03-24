@@ -1,5 +1,6 @@
 package com.owlexpress.deliverymanager.application.usecase;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlexpress.deliverymanager.application.dto.response.AlarmCreateResponseDto;
 import com.owlexpress.deliverymanager.common.dto.request.AlarmCreateRequestDto;
 import com.owlexpress.deliverymanager.common.dto.response.PassportDto;
@@ -26,17 +27,21 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.connection.stream.*;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.web.PagedModel;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.*;
-import static com.owlexpress.deliverymanager.common.exception.ExceptionMessage.Manager_NOT_FOUND_MESSAGE;
+import static com.owlexpress.deliverymanager.common.exception.ExceptionMessage.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +53,8 @@ public class ConsumerDeliveryManagerUsecase {
     private final PassportHelper passportHelper;
     private final AlarmClient alarmClient;
     private final RedissonClient redissonClient;
+    private final RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+    private final RedisTemplate<String, Object> redisStreamTemplate = new RedisTemplate<>();
 
     @Transactional
     @CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
@@ -64,7 +71,7 @@ public class ConsumerDeliveryManagerUsecase {
             throw new HubNotFoundException(ExceptionMessage.HUB_NOT_FOUND);
         }
 
-        int lastAssignNumber = consumerDeliveryManagerRepository.findFirstByOrderByAssignNumberDesc()
+        int lastAssignNumber = consumerDeliveryManagerRepository.findFirstByOrderByAssignNumberAsc()
                                                                 .map(ConsumerDeliveryManager::getAssignNumber)  // 가장 큰 assignNumber 조회
                                                                 .orElse(0);
         int newAssignNumber = lastAssignNumber + 1;
@@ -168,62 +175,126 @@ public class ConsumerDeliveryManagerUsecase {
         consumerDeliveryManager.softDeleteData(passportDto.getUserId());
     }
 
-//    @Transactional
-@CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
+    @Transactional
+    @CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
     public AlarmCreateResponseDto assign(
             DeliveryManagerRequestDto deliveryManagerRequestDto,
             String passport
-    ) throws HubNotFoundException, ConsumerEmptyException, InterruptedException, LockExistException {
+    ) throws HubNotFoundException, ConsumerEmptyException, InterruptedException, LockExistException, IOException {
         //허브별 단위 격리하기
         RLock lock = redissonClient.getLock("assignDeliveryManagerLock:" + deliveryManagerRequestDto.getCurrentHubId());
         boolean isLocked = false;
         int retryCount = 3;
         int attempts = 0;
+        try {
+            while (attempts < retryCount) {//3번정도 시도
+                isLocked = lock.tryLock(5, 3, TimeUnit.SECONDS);
+                if (isLocked)
+                    break;
+                attempts++;
+                Thread.sleep(500);  // optional backoff
+            }
 
-        while (attempts < retryCount) {//3번정도 시도
-            isLocked = lock.tryLock(3, 2, TimeUnit.SECONDS);
-            if (isLocked) break;
-            attempts++;
-            Thread.sleep(500);  // optional backoff
+            if (!isLocked) {
+                //Redis Stream
+                try {
+                    Map<String, String> streamMessage = new HashMap<>();
+                    streamMessage.put(
+                            "hubId", deliveryManagerRequestDto.getCurrentHubId()
+                                                              .toString());
+                    streamMessage.put("passport", passport);
+                    streamMessage.put("requestBody", new ObjectMapper().writeValueAsString(deliveryManagerRequestDto));
+
+                    redisTemplate.opsForStream()
+                                 .add("assign-delivery-manager-stream", streamMessage);
+                } catch (Exception e) {
+                    //3단 Fallback 이래도 안되면 로그에 기록
+                    FileWriter writer = new FileWriter("delivery-assign-fallback.log", true);
+                    writer.write(LocalDateTime.now() + " - Failed assign request: " + deliveryManagerRequestDto + "\n");
+                    writer.close();
+                    throw new LockExistException(ExceptionMessage.LOCK_IS_EXIST);
+                }
+                throw new LockExistException(ExceptionMessage.WAIT_PLEASE);
+            }
+
+            PassportDto passportDto = passportHelper.getPassportDto(passport);
+            CommonDto<HubFindResponseDto> hubFindResponseDtoCommonDto = hubClient.find(
+                    deliveryManagerRequestDto.getCurrentHubId());
+
+            // 허브가 존재하는지 확인
+            if (hubFindResponseDtoCommonDto == null || hubFindResponseDtoCommonDto.getData() == null) {
+                throw new HubNotFoundException(ExceptionMessage.HUB_NOT_FOUND);
+            }
+
+            // 가장 낮은 assignNumber를 가진 isAvailable = true인 담당자 조회
+            UUID hubId = hubFindResponseDtoCommonDto.getData()
+                                                    .getHubId();
+
+            Optional<ConsumerDeliveryManager> optionalManager = consumerDeliveryManagerRepository.findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(
+                    hubId);
+
+            // 담당자가 없는 경우 예외 처리 또는 기본 응답
+            if (optionalManager.isEmpty()) {
+                throw new ConsumerDeliveryManagerException.ConsumerEmptyException(
+                        ExceptionMessage.CONSUMER_NOT_ENOUGH + hubId);
+            }
+
+            ConsumerDeliveryManager manager = optionalManager.get();
+
+            AlarmCreateRequestDto alarmCreateRequestDto = AlarmCreateRequestDto.toDto(
+                    deliveryManagerRequestDto, manager);
+            AlarmCreateResponseDto alarmCreateResponseDto = alarmClient.createAlarmForCompanyDeliver(
+                                                                               alarmCreateRequestDto, passport)
+                                                                       .getData();
+
+            manager.setIsAvaliable(false);
+            manager.updateModifiedData(passportDto.getUserId());
+
+            // DTO 변환 및 반환
+            return AlarmCreateResponseDto.from(manager, deliveryManagerRequestDto, alarmCreateResponseDto);
+        } finally {
+            if (isLocked && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
+    }
 
-        if (!isLocked) {
-            log.warn("배송 담당자 락 획득 실패 - HubId: {}, 시도 횟수: {}", deliveryManagerRequestDto.getCurrentHubId(), attempts);
-            throw new LockExistException(ExceptionMessage.LOCK_IS_EXIST);
+
+    @Scheduled(fixedDelay = 5000)
+    public void processAssignRetryQueue() {
+        try {
+            List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream().read(
+                    Consumer.from("assign-group", "consumer-1"),
+                    StreamReadOptions.empty().count(5),
+                    StreamOffset.create("assign-delivery-manager-stream", ReadOffset.lastConsumed())
+            );
+
+            for (MapRecord<String, Object, Object> message : messages) {
+                try {
+                    String hubId = (String) message.getValue().get("hubId");
+                    String passport = (String) message.getValue().get("passport");
+                    String requestBody = (String) message.getValue().get("requestBody");
+                    log.info("restart Object hubId= {} , passport = {} , requestBody = {}", hubId, passport, requestBody);
+                    DeliveryManagerRequestDto dto = new ObjectMapper().readValue(requestBody, DeliveryManagerRequestDto.class);
+
+                    assign(dto, passport);
+
+                    redisStreamTemplate.opsForStream().acknowledge("assign-delivery-manager-stream", "assign-group",
+                                                                   (RecordId) message
+                    );
+                } catch (Exception e) {
+                    log.error("Failed to reprocess assign request from Redis Stream", e);
+                } catch (ConsumerEmptyException e) {
+                    throw new ConsumerEmptyException(CONSUMER_NOT_ENOUGH);
+                } catch (LockExistException e) {
+                    throw new LockExistException(LOCK_IS_EXIST);
+                } catch (HubNotFoundException e) {
+                    throw new HubNotFoundException(HUB_NOT_FOUND);
+                }
+            }
+        } catch (Exception | ConsumerEmptyException | LockExistException | HubNotFoundException outer) {
+            log.error("Error reading from Redis Stream for assign retry", outer);
         }
-
-        PassportDto passportDto = passportHelper.getPassportDto(passport);
-        CommonDto<HubFindResponseDto> hubFindResponseDtoCommonDto = hubClient.find(
-                deliveryManagerRequestDto.getCurrentHubId());
-
-        // 허브가 존재하는지 확인
-        if (hubFindResponseDtoCommonDto == null || hubFindResponseDtoCommonDto.getData() == null) {
-            throw new HubNotFoundException(ExceptionMessage.HUB_NOT_FOUND);
-        }
-
-        // 가장 낮은 assignNumber를 가진 isAvailable = true인 담당자 조회
-        UUID hubId = hubFindResponseDtoCommonDto.getData()
-                                                .getHubId();
-        Optional<ConsumerDeliveryManager> optionalManager = consumerDeliveryManagerRepository.findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(
-                hubId);
-
-        // 담당자가 없는 경우 예외 처리 또는 기본 응답
-        if (optionalManager.isEmpty()) {
-            throw new ConsumerDeliveryManagerException.ConsumerEmptyException(
-                    ExceptionMessage.CONSUMER_NOT_ENOUGH + hubId);
-        }
-        ConsumerDeliveryManager manager = optionalManager.get();
-
-        AlarmCreateRequestDto alarmCreateRequestDto = AlarmCreateRequestDto.toDto(deliveryManagerRequestDto, manager);
-        AlarmCreateResponseDto alarmCreateResponseDto = alarmClient.createAlarmForCompanyDeliver(
-                                                                       alarmCreateRequestDto, passport)
-                                                               .getData();
-
-        manager.setIsAvaliable(true);
-        manager.updateModifiedData(passportDto.getUserId());
-
-        // DTO 변환 및 반환
-        return AlarmCreateResponseDto.from(manager, deliveryManagerRequestDto, alarmCreateResponseDto);
     }
 
     private boolean validateAssignNumber(UpdateConsumerDeliveryManagerRequestDto updateConsumerDeliveryManagerRequestDto) {
