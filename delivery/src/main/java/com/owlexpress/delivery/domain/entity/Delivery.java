@@ -1,6 +1,11 @@
 package com.owlexpress.delivery.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.DurationDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.DurationSerializer;
+import com.owlexpress.delivery.application.dtos.DeliveryCacheDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
@@ -18,11 +23,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,7 +43,7 @@ import org.hibernate.annotations.Type;
 @Table(name = "p_delivery")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Delivery extends BaseEntity {
+public class Delivery extends BaseEntity implements Serializable {
 
     @Id
     @Column(name = "delivery_id", length = 50)
@@ -97,11 +104,13 @@ public class Delivery extends BaseEntity {
     @Column(name = "shipping_address", length = 50, nullable = false)
     private String shippingAddress;
 
-    @OneToMany(mappedBy = "delivery", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+
+    @OneToMany(mappedBy = "delivery", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<DeliveryHistory> deliveryHistories = new ArrayList<>();
 
     @Builder
     public Delivery(
+            UUID id,
             UUID orderId,
             String productInfo,
             UUID startHubId,
@@ -121,6 +130,7 @@ public class Delivery extends BaseEntity {
             String shippingAddress,
             List<DeliveryHistory> deliveryHistories
     ) {
+        this.id = id;
         this.orderId = orderId;
         this.productInfo = productInfo;
         this.startHubId = startHubId;
@@ -170,9 +180,38 @@ public class Delivery extends BaseEntity {
         return delivery;
     }
 
-    public void updateDeliverHistory(DeliveryHistory deliveryHistory) {
+    public static Delivery toEntity(DeliveryCacheDto deliveryCacheDto) {
+        return Delivery.builder()
+                .id(deliveryCacheDto.getId())
+                .orderId(deliveryCacheDto.getOrderId())
+                .productInfo(deliveryCacheDto.getProductInfo())
+                .startHubId(deliveryCacheDto.getStartHubId())
+                .startHubName(deliveryCacheDto.getStartHubName())
+                .destinationHubId(deliveryCacheDto.getDestinationHubId())
+                .destinationHubName(deliveryCacheDto.getDestinationHubName())
+                .orderType(deliveryCacheDto.getOrderType())
+                .description(deliveryCacheDto.getDescription())
+                .requestArrivalTime(deliveryCacheDto.getRequestArrivalTime())
+                .totalEstimateDurationTime(deliveryCacheDto.getTotalEstimateDurationTime())
+                .totalEstimateDistance(deliveryCacheDto.getTotalEstimateDistance())
+                .deliveryStatus(deliveryCacheDto.getDeliveryStatus())
+                .consumerCompanyId(deliveryCacheDto.getConsumerCompanyId())
+                .consumerPhoneNumber(deliveryCacheDto.getConsumerPhoneNumber())
+                .consumerName(deliveryCacheDto.getConsumerName())
+                .shippingAddress(deliveryCacheDto.getShippingAddress())
+                .deliveryHistories(deliveryCacheDto.getDeliveryHistories().stream()
+                        .map(DeliveryHistory::toEntity)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    public void updateDeliveryHistory(DeliveryHistory deliveryHistory) {
         this.deliveryHistories.add(deliveryHistory);
         deliveryHistory.updateDelivery(this);
+    }
+
+    public void updateDeliveryToDeliveryHistory(List<DeliveryHistory> deliveryHistories) {
+        deliveryHistories.forEach(deliveryHistory -> deliveryHistory.updateDelivery(this));
     }
 
     public void updateDeliverHistoryList(List<DeliveryHistory> deliveryHistoryList) {
