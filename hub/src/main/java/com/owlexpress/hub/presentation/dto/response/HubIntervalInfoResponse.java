@@ -51,9 +51,12 @@ public class HubIntervalInfoResponse {
         RouteResponseDto destinationHub = route.get(route.size() - 1);
 
         // 전체 거리 및 시간 계산
-        double totalDistance = route.stream().mapToDouble(RouteResponseDto::getEstimateDistance).sum();
+        double totalDistance = route.stream()
+                                    .mapToDouble(RouteResponseDto::getEstimateDistance)
+                                    .sum();
         long totalDuration = route.stream()
-                                  .mapToLong(routeResponseDto -> routeResponseDto.getEstimateDurationTime().toSeconds())
+                                  .mapToLong(routeResponseDto -> routeResponseDto.getEstimateDurationTime()
+                                                                                 .toSeconds())
                                   .sum();
 
         return HubIntervalInfoResponse.builder()
