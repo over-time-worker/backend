@@ -3,12 +3,10 @@ package com.owlexpress.payment.application.dto.response;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
+import lombok.*;
+
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RouteResponseDto {
 

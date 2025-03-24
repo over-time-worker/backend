@@ -21,10 +21,14 @@ public class DeliveryManagerAssignLoggingAspect {
     public Object logAssignExecution(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;
+        Exception error = null;
 
         try {
             result = joinPoint.proceed(); // 실제 메서드 실행
             return result;
+        } catch (Exception e) {
+            error = e;
+            throw e;
         } finally {
             long duration = System.currentTimeMillis() - start;
 
@@ -44,6 +48,13 @@ public class DeliveryManagerAssignLoggingAspect {
                 }
             }
 
+            if (error == null) {
+                logMap.put("status", "SUCCESS");
+            } else {
+                logMap.put("status", "FAILURE");
+                logMap.put("exception", error.getClass().getSimpleName());
+                logMap.put("message", error.getMessage());
+            }
 
             log.info(new ObjectMapper().writeValueAsString(logMap));
         }
