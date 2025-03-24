@@ -1,9 +1,13 @@
 package com.owlexpress.hub.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
+import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.common.exception.HubProductException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
+import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException.LockAcquisitionFailedException;
 import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.helper.PassportHelper;
 import com.owlexpress.hub.common.util.GeoUtil;
@@ -18,15 +22,25 @@ import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto.Product;
 import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto.ConfirmedHubProductResponseDto;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.connection.stream.Consumer;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.ReadOffset;
+import org.springframework.data.redis.connection.stream.RecordId;
+import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StreamReadOptions;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -42,7 +56,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Slf4j
 public class HubProductUseCase {
 
-    private static final String REDISSON_LOCK_PREFIX = "Lock:CONFIRM_ORDER:";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String REDISSON_LOCK_PREFIX = "LOCK:CONFIRM_ORDER:";
+    private static final int MAX_RETRY = 3;
 
     private final HubRepository hubRepository;
     private final ProductClient productClient;
@@ -83,21 +99,6 @@ public class HubProductUseCase {
         hubProduct.deleteEntity(passportDto.getUserId());
 
         LocalDateTime deletedAt = hubProduct.getDeletedAt();
-
-        /* TODO: 한 페이지가 끝이 아니라면, 전체 사이즈 / 사이즈(50)으로 반복 요청..?
-            1. 변경 이후 시점의 모든 주문 검색
-            PagedModel<OrderSearchResponseDto> data = orderClient.orderSearch(deletedAt, 1).getData();
-            List<OrderSearchResponseDto> content = data.getContent();
-         */
-
-        /* TODO: <2 ~ 3>. 해당 주문들의 주문 내역에서 변경 상품이 있는지 확인
-            List<UUID> cancelOrders = content.stream()
-                .flatMap(order -> order.getOrderProducts().stream())
-                .filter(orderProduct -> orderProduct.getProductId().equals(hubProductId))
-                .map(OrderProduct::getOrderId)
-                .forEach(orderId -> orderClient.deleteOrder(orderId));
-         */
-
     }
 
     public HubProductOrderConfirmResponseDto confirmOrder(
@@ -122,47 +123,69 @@ public class HubProductUseCase {
         // 상품ID로 락 획득
         List<RLock> productLocks = productIds.stream()
                 .map(id -> {
-                    log.info("상품 ID로 락 획득 : {}", id);
                     return redissonClient.getLock(REDISSON_LOCK_PREFIX + id);
                 })
                 .toList();
 
+        String threadName = Thread.currentThread().getName();
         // multiLock 획득
         RLock orderLock = redissonClient.getMultiLock(productLocks.toArray(new RLock[0]));
         boolean available = false;
-        log.info("{}, multiLock 획득 시도", Thread.currentThread().getName());
+        log.info("{}, multiLock 획득 시도", threadName);
         HubProductOrderConfirmResponseDto confirmResponseDto = null;
+
         try {
-            available = orderLock.tryLock(9L, 5L, TimeUnit.SECONDS);
+            // 최대 3번까지 실행
+            for (int attempts = 0; attempts < MAX_RETRY; attempts++) {
+                available = orderLock.tryLock(9L, 6L, TimeUnit.SECONDS);
+                if (available) {
+                    break;
+                }
+                // 지수 백오프 적용
+                long expBackOffMillis = (long) Math.pow(2, attempts) * 100
+                        + ThreadLocalRandom.current().nextInt(100);
+                Thread.sleep(expBackOffMillis);
+            }
+
             // 락 획득 실패 시 예외
             if (!available) {
+                // TODO: fallback 전략 추가 => RedisStream
+                log.info("{} - fallback 발생!", threadName);
                 throw new HubProductNotFoundException.LockAcquisitionFailedException();
+
             }
-            log.info("{}, 락 획득 성공", Thread.currentThread().getName());
+
+            log.info("{}, 락 획득 성공", threadName);
             confirmResponseDto = (HubProductOrderConfirmResponseDto) transactionTemplate.execute(
                     new TransactionCallback() {
                         @Override
                         public Object doInTransaction(TransactionStatus status) {
-                            return confirmOrderWithResponse(
-                                    requestDto, orderProducts, productIds);
+                            try {
+                                return confirmOrderWithResponse(
+                                        requestDto, orderProducts, productIds);
+                            } catch (Exception e) {
+                                status.setRollbackOnly();
+                                return null;
+                            }
                         }
                     });
 
         } catch (InterruptedException e) {
-            throw new RuntimeException("(락 획득 실패) 재고 동시성 이슈 발생!");
+            throw new LockAcquisitionFailedException();
         } finally {
-            log.info("작업 수행 완료 & 락 방출");
+            log.info("작업 수행 완료");
             // 락 가지고 있을 때만 방출
             if (available) {
                 orderLock.unlock();
             }
-            log.info("{} 모든 락 해제 완료", Thread.currentThread().getName());
+            log.info("{} 모든 락 해제 완료", threadName);
         }
         return confirmResponseDto;
     }
 
     protected HubProductOrderConfirmResponseDto confirmOrderWithResponse(
-            OrderConfirmRequestDto requestDto, List<Product> orderProducts, List<UUID> productIds) {
+            OrderConfirmRequestDto
+                    requestDto, List<Product> orderProducts, List<UUID> productIds) {
         Point consumerLocation = GeoUtil.createPoint(
                 requestDto.getLatitude(),
                 requestDto.getLongitude()
@@ -251,16 +274,18 @@ public class HubProductUseCase {
 
     // 명시적으로 트랜잭션 종료 시켜 변경 내역 커밋
     protected HubProductOrderConfirmResponseDto reduceStock(
-            List<HubProductInfoResponseDto> toBeApply, Map<UUID, Product> productByProductId
+            List<HubProductInfoResponseDto> toBeApply,
+            Map<UUID, Product> productByProductId
     ) {
 
         // 트랜잭션 추적
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                log.info("{} 트랜잭션 커밋 완료", Thread.currentThread().getName());
-            }
-        });
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        log.info("{} 트랜잭션 커밋 완료", Thread.currentThread().getName());
+                    }
+                });
 
         List<UUID> hubProductIds =
                 toBeApply.stream()
