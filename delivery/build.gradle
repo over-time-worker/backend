@@ -32,6 +32,9 @@ dependencies {
 	// okhttp
 	implementation 'io.github.openfeign:feign-okhttp:13.5'
 
+	// prometheus
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
 	// ✅ zipkin
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
