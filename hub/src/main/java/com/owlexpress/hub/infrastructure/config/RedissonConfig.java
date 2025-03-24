@@ -31,9 +31,9 @@ public class RedissonConfig {
     ) {
         Map<String, org.redisson.spring.cache.CacheConfig> config = new HashMap<>();
 
-        config.put("cacheName", new CacheConfig(
-                TimeUnit.HOURS.toMillis(1), // TTL
-                TimeUnit.MINUTES.toMillis(30) // Max idle time
+        config.put("shortestRoutes", new CacheConfig(
+                TimeUnit.DAYS.toMillis(7),   // TTL: 7 days
+                TimeUnit.DAYS.toMillis(1)    // Max idle time: 1 day
         ));
 
         return new RedissonSpringCacheManager(redissonClient, config);

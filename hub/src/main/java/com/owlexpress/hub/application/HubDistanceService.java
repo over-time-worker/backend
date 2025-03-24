@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -87,6 +88,10 @@ public class HubDistanceService {
         log.info(" [END] 허브 간 거리 계산 완료");
     }
 
+    @Cacheable(
+        value = "shortestRoutes",
+        key = "'from:' + #startHubId + ':to:' + #consumerId + ':lon:' + #consumerLongitude + ':lat:' + #consumerLatitude + ':depart:' + #departureTime"
+    )
     @Transactional
     public List<RouteResponseDto> findShortestPath(
             UUID startHubId,
