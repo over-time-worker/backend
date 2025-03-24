@@ -65,8 +65,8 @@ public class DeliveryUsecase {
         return messageCreateResponseDto;
     }
 
-    public void returnCompanyDeliverToDeliveryManager(UUID hubDeliverId) {
-        deliveryManagerClient.returnCompany(hubDeliverId);
+    public void returnCompanyDeliverToDeliveryManager(UUID hubDeliverId, String passport) {
+        deliveryManagerClient.returnCompany(passport, hubDeliverId);
     }
 
     public void DeleteCompanyDeliverMessageToAlarm(

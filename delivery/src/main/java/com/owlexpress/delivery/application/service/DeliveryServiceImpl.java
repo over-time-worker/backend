@@ -220,7 +220,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                         passport
                 );
             } else{
-                deliveryUsecase.returnCompanyDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId());
+                deliveryUsecase.returnCompanyDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId(), passport);
 
                 deliveryUsecase.DeleteCompanyDeliverMessageToAlarm(
                         alarmCreateResponseDto.getDeliverChannelId(),
@@ -253,7 +253,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE , requestDto, userId);
 
-        deliveryUsecase.returnCompanyDeliverToDeliveryManager(deliveryHistory.getDeliverId());
+        deliveryUsecase.returnCompanyDeliverToDeliveryManager(deliveryHistory.getDeliverId(), passport);
 
         deliveryRepository.save(delivery);
         removeCachedDelivery(deliveryId);
