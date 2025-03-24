@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -29,7 +30,7 @@ public class ConsumerDeliveryManagerController {
             @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody CreateConsumerDeliveryManagerRequestDto createConsumerDeliveryManagerRequestDto
     ) throws HubNotFoundException {
-        consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto,passport);
+        consumerDeliveryManagerUsecase.create(createConsumerDeliveryManagerRequestDto, passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.CREATED)
@@ -47,7 +48,8 @@ public class ConsumerDeliveryManagerController {
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId,
             @RequestBody UpdateConsumerDeliveryManagerRequestDto updateConsumerDeliveryManagerRequestDto
     ) throws ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException {
-        consumerDeliveryManagerUsecase.update(updateConsumerDeliveryManagerRequestDto, consumerDeliveryManagerId,passport);
+        consumerDeliveryManagerUsecase.update(updateConsumerDeliveryManagerRequestDto, consumerDeliveryManagerId,
+                                              passport);
 
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
@@ -105,7 +107,7 @@ public class ConsumerDeliveryManagerController {
             @PathVariable("consumerDeliveryManagerId") UUID consumerDeliveryManagerId
     ) throws ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotAvailableException {
 
-        consumerDeliveryManagerUsecase.delete(consumerDeliveryManagerId,passport);
+        consumerDeliveryManagerUsecase.delete(consumerDeliveryManagerId, passport);
         CommonDto<Void> commonDto = CommonDto.<Void>builder()
                                              .status(HttpStatus.ACCEPTED)
                                              .code(HttpStatus.ACCEPTED.value())
@@ -120,8 +122,8 @@ public class ConsumerDeliveryManagerController {
     public ResponseEntity<CommonDto<AlarmCreateResponseDto>> assign(
             @RequestHeader(name = "X-User-Passport") String passport,
             @RequestBody DeliveryManagerRequestDto deliveryManagerRequestDto
-    ) throws HubNotFoundException, ConsumerDeliveryManagerException.ConsumerEmptyException {
-        AlarmCreateResponseDto assign = consumerDeliveryManagerUsecase.assign(deliveryManagerRequestDto,passport);
+    ) throws HubNotFoundException, ConsumerDeliveryManagerException.ConsumerEmptyException, InterruptedException, ConsumerDeliveryManagerException.LockExistException, IOException {
+        AlarmCreateResponseDto assign = consumerDeliveryManagerUsecase.assign(deliveryManagerRequestDto, passport);
 
         CommonDto<AlarmCreateResponseDto> commonDto = CommonDto.<AlarmCreateResponseDto>builder()
                                                                .status(HttpStatus.ACCEPTED)

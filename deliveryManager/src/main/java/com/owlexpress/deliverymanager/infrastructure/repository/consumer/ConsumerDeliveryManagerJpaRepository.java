@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface ConsumerDeliveryManagerJpaRepository extends JpaRepository<ConsumerDeliveryManager, UUID> {
     boolean existsByAssignNumber(Integer assignNumber);
 
-    Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberDesc();
+    Optional<ConsumerDeliveryManager> findFirstByOrderByAssignNumberAsc();
 
 
     Optional<ConsumerDeliveryManager> findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(UUID hubId);

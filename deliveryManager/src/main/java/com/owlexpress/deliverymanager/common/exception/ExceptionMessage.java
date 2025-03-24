@@ -8,4 +8,6 @@ public class ExceptionMessage {
     public static final String HUB_NOT_FOUND = "존재하지 않는 허브입니다.";
     public static final String CONSUMER_NOT_ENOUGH = "사용 가능한 업체 배송 담당자가 없습니다.";
     public static final String HUB_NOT_ENOUGH = "사용 가능한 허브 배송 담당자가 없습니다." ;
+    public static final String LOCK_IS_EXIST ="다른 요청이 처리 중입니다. 잠시 후 다시 시도해주세요." ;
+    public static final String WAIT_PLEASE = "요청 대기중입니다.";
 }
