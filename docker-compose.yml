@@ -1,14 +1,4 @@
 services:
-  # Redis
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - "6378:6379"  # 외부 포트 6368 -> 컨테이너 내부 기본 포트 6379
-    networks:
-      - overtime_network
-    platform: linux/amd64
-
   # PostgreSQL + PostGIS
   postgres:
     image: postgis/postgis:latest
@@ -78,7 +68,6 @@ services:
       - redis_data:/data
     restart: always
 
-
   zipkin:
     image: openzipkin/zipkin
     networks:
@@ -87,6 +76,25 @@ services:
       - "9411:9411"
     restart: always  # 선택사항: 실패 시 자동 재시작
 
+  prometheus:
+    image: prom/prometheus
+    networks:
+      - overtime_network
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    networks:
+      - overtime_network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: always
 networks:
   overtime_network:
     driver: bridge

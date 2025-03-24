@@ -36,6 +36,8 @@ dependencyManagement {
 }
 
 dependencies {
+    // prometheus
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     //health check
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     // ORM

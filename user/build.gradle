@@ -35,6 +35,9 @@ dependencyManagement {
 
 dependencies {
 
+    // prometheus
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
     // springboot
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
