@@ -7,9 +7,9 @@ export const options = {
   scenarios: {
     limited_requests: {
       executor: 'shared-iterations',
-      vus: 10,              // 동시에 10명의 가상 사용자가 실행됨
-      iterations: 500,      // 총 500회의 요청만 실행
-      maxDuration: '1m',    // 1분 내에 테스트가 끝나도록 설정 (옵션)
+      vus: 100,              // 동시에 100명의 가상 사용자가 실행됨
+      iterations: 1000,      // 총 1000회의 요청만 실행
+      maxDuration: '1m30s',    // 1분30초 내에 테스트가 끝나도록 설정 (옵션)
     },
   },
   thresholds: {

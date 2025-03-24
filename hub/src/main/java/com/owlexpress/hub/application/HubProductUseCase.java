@@ -25,16 +25,20 @@ import org.locationtech.jts.geom.Point;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 @RequiredArgsConstructor
-//@Transactional
 @Slf4j
 public class HubProductUseCase {
 
@@ -46,6 +50,7 @@ public class HubProductUseCase {
     private final PassportHelper passportHelper;
     private final HubProductRepository hubProductRepository;
     private final RedissonClient redissonClient; // 분산 락 적용
+    private final TransactionTemplate transactionTemplate; // 트랜잭션 경계 설정
 
     public HubProduct create(
             HubProductCreateRequestDto requestDto,
@@ -95,7 +100,6 @@ public class HubProductUseCase {
 
     }
 
-    @Transactional
     public HubProductOrderConfirmResponseDto confirmOrder(
             OrderConfirmRequestDto requestDto
     ) {
@@ -126,7 +130,7 @@ public class HubProductUseCase {
         // multiLock 획득
         RLock orderLock = redissonClient.getMultiLock(productLocks.toArray(new RLock[0]));
         boolean available = false;
-        log.info("multiLock 획득 시도");
+        log.info("{}, multiLock 획득 시도", Thread.currentThread().getName());
         HubProductOrderConfirmResponseDto confirmResponseDto = null;
         try {
             available = orderLock.tryLock(9L, 5L, TimeUnit.SECONDS);
@@ -134,9 +138,15 @@ public class HubProductUseCase {
             if (!available) {
                 throw new HubProductNotFoundException.LockAcquisitionFailedException();
             }
-            log.info("락 획득 성공");
-            confirmResponseDto = confirmOrderWithResponse(
-                    requestDto, orderProducts, productIds);
+            log.info("{}, 락 획득 성공", Thread.currentThread().getName());
+            confirmResponseDto = (HubProductOrderConfirmResponseDto) transactionTemplate.execute(
+                    new TransactionCallback() {
+                        @Override
+                        public Object doInTransaction(TransactionStatus status) {
+                            return confirmOrderWithResponse(
+                                    requestDto, orderProducts, productIds);
+                        }
+                    });
 
         } catch (InterruptedException e) {
             throw new RuntimeException("(락 획득 실패) 재고 동시성 이슈 발생!");
@@ -146,11 +156,11 @@ public class HubProductUseCase {
             if (available) {
                 orderLock.unlock();
             }
-            log.info("모든 락 해제 완료");
+            log.info("{} 모든 락 해제 완료", Thread.currentThread().getName());
         }
         return confirmResponseDto;
     }
-    @Transactional
+
     protected HubProductOrderConfirmResponseDto confirmOrderWithResponse(
             OrderConfirmRequestDto requestDto, List<Product> orderProducts, List<UUID> productIds) {
         Point consumerLocation = GeoUtil.createPoint(
@@ -240,9 +250,18 @@ public class HubProductUseCase {
     }
 
     // 명시적으로 트랜잭션 종료 시켜 변경 내역 커밋
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected HubProductOrderConfirmResponseDto reduceStock(
-            List<HubProductInfoResponseDto> toBeApply, Map<UUID, Product> productByProductId) {
+            List<HubProductInfoResponseDto> toBeApply, Map<UUID, Product> productByProductId
+    ) {
+
+        // 트랜잭션 추적
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                log.info("{} 트랜잭션 커밋 완료", Thread.currentThread().getName());
+            }
+        });
+
         List<UUID> hubProductIds =
                 toBeApply.stream()
                         .map(HubProductInfoResponseDto::getHubProductId)
@@ -284,9 +303,6 @@ public class HubProductUseCase {
 
             confirmResponseDto.addConfirmedProduct(confirmed);
         }
-
-        // 명시적으로 트랜잭션 방출
-        hubProductRepository.saveAll(hubProducts);
         return confirmResponseDto;
     }
 }
