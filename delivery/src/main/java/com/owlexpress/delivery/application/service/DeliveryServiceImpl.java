@@ -1,5 +1,13 @@
 package com.owlexpress.delivery.application.service;
 
+import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_DELETE_FAIL_MESSAGE;
+import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_HISTORY_NOT_FOUND_MESSAGE;
+import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_MANAGER_RETURN_FAIL_MESSAGE;
+import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY_NOT_FOUND_MESSAGE;
+import static com.owlexpress.delivery.infrastructure.config.RedissonConfig.DELIVERY_IDLE_HOURS;
+import static com.owlexpress.delivery.infrastructure.config.RedissonConfig.DELIVERY_TTL_HOURS;
+
+import com.owlexpress.delivery.application.dtos.DeliveryCacheDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
 import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
@@ -20,18 +28,18 @@ import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import com.owlexpress.delivery.domain.entity.DeliveryHistory;
 import com.owlexpress.delivery.domain.repository.DeliveryRepository;
 import feign.FeignException;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RMapCache;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
-
-import static com.owlexpress.delivery.common.exception.ExceptionMessage.*;
 
 @Slf4j
 @Service
@@ -41,6 +49,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final PassportHelper passportHelper;
     private final DeliveryUsecase deliveryUsecase;
+    private final RedissonClient redissonClient;
 
     @Override
     @Transactional
@@ -65,8 +74,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     ) {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
-        Delivery delivery = getDeliveryById(deliveryId);
+        Delivery delivery = getCachedDelivery(deliveryId);
         delivery.updateDeliveryStatus(DeliveryStatus.getStatus(deliveryUpdateRequestDto.getDeliveryStatus()), userId);
+        removeCachedDelivery(deliveryId);
     }
 
     @Override
@@ -77,18 +87,23 @@ public class DeliveryServiceImpl implements DeliveryService {
     ) {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
-        Delivery delivery = getDeliveryById(deliveryId);
+        Delivery delivery = getCachedDelivery(deliveryId);
 
         if(!delivery.getDeliveryStatus().equals(DeliveryStatus.PENDING_AT_HUB)) {
             throw new DeliveryDeleteFailException(DELIVERY_DELETE_FAIL_MESSAGE);
         }
+
         delivery.deleteDelivery(userId);
+        removeCachedDelivery(deliveryId);
     }
 
     @Override
     public DeliveryFindResponseDto find(UUID deliveryId) {
 
-        return DeliveryFindResponseDto.toDto(getDeliveryById(deliveryId));
+        Delivery delivery = getCachedDelivery(deliveryId);
+
+        return DeliveryFindResponseDto.toDto(delivery);
+
     }
 
     @Override
@@ -117,11 +132,14 @@ public class DeliveryServiceImpl implements DeliveryService {
     ) {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
-        Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
+        Delivery delivery = getCachedDeliveryWithDeliveryHistory(deliveryId);
         delivery.updateDeliveryStatus(DeliveryStatus.SHIPPING_TO_HUB, userId);
 
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
         delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.SHIPPING_TO_HUB ,userId);
+
+        deliveryRepository.save(delivery);
+        removeCachedDelivery(deliveryId);
     }
 
     @Override
@@ -133,11 +151,14 @@ public class DeliveryServiceImpl implements DeliveryService {
     ) {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
-        Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
+        Delivery delivery = getCachedDeliveryWithDeliveryHistory(deliveryId);
         delivery.updateDeliveryStatus(DeliveryStatus.SHIPPING_TO_COMPANY, userId);
 
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
         delivery.updateDeliveryHistoryStatus(deliveryHistory ,DeliveryStatus.SHIPPING_TO_COMPANY ,userId);
+
+        deliveryRepository.save(delivery);
+        removeCachedDelivery(deliveryId);
     }
 
     @Override
@@ -150,7 +171,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     ) {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
-        Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
+        Delivery delivery = getCachedDeliveryWithDeliveryHistory(deliveryId);
         delivery.updateDeliveryStatus(DeliveryStatus.ARRIVED_AT_HUB, userId);
 
         List<DeliveryHistory> deliveryHistoryList = delivery.getDeliveryHistories();
@@ -158,26 +179,33 @@ public class DeliveryServiceImpl implements DeliveryService {
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, deliveryHistoryList);
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,userId);
 
-        DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
-                delivery,
-                deliveryHistory,
-                delivery.getDeliveryHistories()
-        );
-
         AlarmCreateResponseDto alarmCreateResponseDto;
+        DeliveryHistory nextHistory = deliveryHistoryList.get(deliveryHistoryList.indexOf(deliveryHistory) + 1);
         Boolean isHubDeliver = true;
 
-        if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 1) {
+        if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 2) {
             isHubDeliver = false;
 
-            alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
-            delivery.updateCompanyDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
+            DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
+                    delivery,
+                    nextHistory,
+                    delivery.getDeliveryHistories()
+            );
 
-            delivery.updateCompanyDeliver(UUID.randomUUID(), userId);
+            alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
+            delivery.updateCompanyDeliverInfo(nextHistory, alarmCreateResponseDto, userId);
+
+            delivery.updateCompanyDeliver(alarmCreateResponseDto.getDeliverId(), userId);
 
         } else {
+            DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
+                    delivery,
+                    nextHistory,
+                    delivery.getDeliveryHistories()
+            );
+
             alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
-            delivery.updateHubDeliverInfo(deliveryHistory, alarmCreateResponseDto, userId);
+            delivery.updateHubDeliverInfo(nextHistory, alarmCreateResponseDto, userId);
         }
 
         try {
@@ -204,6 +232,9 @@ public class DeliveryServiceImpl implements DeliveryService {
             throw new DeliverReturnFailException(DELIVERY_MANAGER_RETURN_FAIL_MESSAGE);
 
         }
+
+        deliveryRepository.save(delivery);
+        removeCachedDelivery(deliveryId);
     }
 
     @Override
@@ -216,13 +247,16 @@ public class DeliveryServiceImpl implements DeliveryService {
     ) {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
-        Delivery delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
+        Delivery delivery = getCachedDeliveryWithDeliveryHistory(deliveryId);
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETE, userId);
 
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, delivery.getDeliveryHistories());
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE , requestDto, userId);
 
         deliveryUsecase.returnCompanyDeliverToDeliveryManager(deliveryHistory.getDeliverId());
+
+        deliveryRepository.save(delivery);
+        removeCachedDelivery(deliveryId);
     }
 
     @Override
@@ -245,15 +279,19 @@ public class DeliveryServiceImpl implements DeliveryService {
 
          DeliveryHistory firstDeliveryHistory = deliveryHistoryList.get(0);
          DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
-                delivery,
+                 delivery,
                  firstDeliveryHistory,
-                delivery.getDeliveryHistories()
+                 delivery.getDeliveryHistories()
          );
 
         AlarmCreateResponseDto alarmCreateResponseDto = assignDelivery(deliveryCreateRequestDto, deliveryManagerRequestDto, passport);
 
          delivery.updateHubDeliverInfo(firstDeliveryHistory, alarmCreateResponseDto, userId);
-         deliveryRepository.save(delivery);
+         Delivery savedDelivery = deliveryRepository.save(delivery);
+
+        RMapCache<UUID, DeliveryCacheDto> cache = redissonClient.getMapCache("deliveryCacheDto");
+        DeliveryCacheDto deliveryCacheDto = DeliveryCacheDto.toCacheDto(savedDelivery);
+        cache.put(savedDelivery.getId(), deliveryCacheDto, DELIVERY_TTL_HOURS, TimeUnit.HOURS, DELIVERY_IDLE_HOURS, TimeUnit.HOURS);
     }
 
     private List<HubListDto> getHubList(DeliveryCreateRequestDto dto) {
@@ -283,5 +321,46 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .filter(history -> history.getId().equals(deliveryHistoryId))
                 .findFirst()
                 .orElseThrow(() -> new DeliveryHistoryNotFoundException(DELIVERY_HISTORY_NOT_FOUND_MESSAGE));
+    }
+
+    private Delivery getCachedDelivery(UUID deliveryId) {
+        RMapCache<UUID, DeliveryCacheDto> cache = redissonClient.getMapCache("deliveryCacheDto");
+        DeliveryCacheDto deliveryCacheDto = cache.get(deliveryId);
+        Delivery delivery;
+
+        if(deliveryCacheDto == null) {
+            delivery = getDeliveryById(deliveryId);
+            cache.put(deliveryId, DeliveryCacheDto.toCacheDto(delivery) , DELIVERY_TTL_HOURS, TimeUnit.HOURS, DELIVERY_IDLE_HOURS, TimeUnit.HOURS);
+
+        } else {
+            delivery = Delivery.toEntity(deliveryCacheDto);
+        }
+        return delivery;
+    }
+
+    private Delivery getCachedDeliveryWithDeliveryHistory(UUID deliveryId) {
+        RMapCache<UUID, DeliveryCacheDto> cache = redissonClient.getMapCache("deliveryCacheDto");
+        DeliveryCacheDto deliveryCacheDto = cache.get(deliveryId);
+        Delivery delivery;
+
+        if(deliveryCacheDto == null) {
+            delivery = getDeliveryByIdWithDeliveryHistories(deliveryId);
+            cache.put(deliveryId, DeliveryCacheDto.toCacheDto(delivery) , DELIVERY_TTL_HOURS, TimeUnit.HOURS, DELIVERY_IDLE_HOURS, TimeUnit.HOURS);
+
+        } else {
+            delivery = Delivery.toEntity(deliveryCacheDto);
+            delivery.updateDeliveryToDeliveryHistory(delivery.getDeliveryHistories());
+        }
+        return delivery;
+    }
+
+    private void putDeliveryToCached(Delivery delivery) {
+        RMapCache<UUID, DeliveryCacheDto> cache = redissonClient.getMapCache("deliveryCacheDto");
+        cache.put(delivery.getId(), DeliveryCacheDto.toCacheDto(delivery) , DELIVERY_TTL_HOURS, TimeUnit.HOURS, DELIVERY_IDLE_HOURS, TimeUnit.HOURS);
+    }
+
+    private void removeCachedDelivery(UUID deliveryId) {
+        RMapCache<UUID, DeliveryCacheDto> cache = redissonClient.getMapCache("deliveryCacheDto");
+        cache.remove(deliveryId);
     }
 }
