@@ -8,6 +8,13 @@ public class HubProductException {
             super("허브 상품이 존재하지 않습니다.");
 
         }
+
+        public static class LockAcquisitionFailedException extends RuntimeException {
+
+            public LockAcquisitionFailedException() {
+                super("상품 재고 락 획득 실패");
+            }
+        }
     }
 
     public static class HubProductStockNotEnoughException extends RuntimeException {

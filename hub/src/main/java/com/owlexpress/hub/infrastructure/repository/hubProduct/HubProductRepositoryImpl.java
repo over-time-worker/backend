@@ -21,6 +21,11 @@ public class HubProductRepositoryImpl implements HubProductRepository {
     }
 
     @Override
+    public void saveAll(List<HubProduct> hubProducts) {
+        hubProductJpaRepository.saveAllAndFlush(hubProducts);
+    }
+
+    @Override
     public HubProduct save(HubProduct hubProduct) {
         return hubProductJpaRepository.save(hubProduct);
     }

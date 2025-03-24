@@ -53,11 +53,9 @@ public class HubProductOrderLoggingAspect {
                         .toList());
             }
 
-            if (result != null) {
+            if (error == null) {
                 logMap.put("status", "SUCCESS");
-            }
-
-            if (error != null) {
+            } else {
                 logMap.put("status", "FAILURE");
                 logMap.put("exception", error.getClass().getSimpleName());
                 logMap.put("message", error.getMessage());

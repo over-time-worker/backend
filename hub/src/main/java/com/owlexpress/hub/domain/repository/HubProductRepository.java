@@ -11,6 +11,8 @@ public interface HubProductRepository {
 
     HubProduct save(HubProduct hubProduct);
 
+    void saveAll(List<HubProduct> hubProducts);
+
     Optional<HubProduct> findByHubProductId(UUID hubProductId);
 
     List<HubProduct> findAllHubProductsIn(List<UUID> productIds);
