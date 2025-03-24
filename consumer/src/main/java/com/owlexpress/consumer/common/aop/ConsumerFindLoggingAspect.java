@@ -41,12 +41,12 @@ public class ConsumerFindLoggingAspect {
             logMap.put("timestamp", Instant.now().toString());
             logMap.put("consumerId", consumerId.toString());
 
-            if (error != null) {
+            if (error == null) {
+                logMap.put("status", "SUCCESS");
+            } else {
                 logMap.put("status", "FAILURE");
                 logMap.put("exception", error.getClass().getSimpleName());
                 logMap.put("message", error.getMessage());
-            } else {
-                logMap.put("status", "SUCCESS");
             }
 
             log.info(objectMapper.writeValueAsString(logMap));

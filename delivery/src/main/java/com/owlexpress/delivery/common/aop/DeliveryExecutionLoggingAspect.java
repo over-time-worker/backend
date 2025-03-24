@@ -15,16 +15,20 @@ import java.util.Map;
 @Aspect
 @Component
 @Slf4j
-public class DeliveryManagerExecutionLoggingAspect {
+public class DeliveryExecutionLoggingAspect {
 
-    @Around("execution(* com.owlexpress.delivery.application.service.DeliveryUsecase..assign(..))")
-    public Object logAssignExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("execution(* com.owlexpress.delivery.application.service.DeliveryServiceImpl.create(..))")
+    public Object logCreateDeliveryExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;
+        Exception error = null;
 
         try {
             result = joinPoint.proceed(); // 실제 메서드 실행
             return result;
+        } catch (Exception e) {
+            error = e;
+            throw e;
         } finally {
             long duration = System.currentTimeMillis() - start;
 
@@ -35,7 +39,6 @@ public class DeliveryManagerExecutionLoggingAspect {
             logMap.put("duration_ms", duration);
             logMap.put("timestamp", Instant.now().toString());
 
-            // 인자 중에서 request DTO의 허브 ID 추출
             Object[] args = joinPoint.getArgs();
             if (args != null && args.length > 0) {
                 Object dto = args[0];
@@ -45,6 +48,14 @@ public class DeliveryManagerExecutionLoggingAspect {
                     logMap.put("deliveryId", requestDto.getDeliveryId());
                     logMap.put("orderId", requestDto.getOrderId());
                 }
+            }
+
+            if (error == null) {
+                logMap.put("status", "SUCCESS");
+            } else {
+                logMap.put("status", "FAILURE");
+                logMap.put("exception", error.getClass().getSimpleName());
+                logMap.put("message", error.getMessage());
             }
 
             log.info(new ObjectMapper().writeValueAsString(logMap));
