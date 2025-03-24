@@ -40,7 +40,7 @@ public class HubDeliveryManagerController {
                              .body(commonDto);
     }
 
-    @PutMapping("/{hubDeliveryManagerId}")
+    @PostMapping("/{hubDeliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> update(
             @RequestHeader(name = "X-User-Passport") String passport,
             @PathVariable("hubDeliveryManagerId") UUID hubDeliveryManagerId,
@@ -138,7 +138,7 @@ public class HubDeliveryManagerController {
                              .body(commonDto);
     }
 
-    @PatchMapping("/return-hub/{deliveryManagerId}")
+    @PostMapping("/return-hub/{deliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> returnHub(
             @PathVariable UUID deliveryManagerId
     ) {

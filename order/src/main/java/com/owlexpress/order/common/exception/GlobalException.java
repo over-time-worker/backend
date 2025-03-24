@@ -49,6 +49,7 @@ public class GlobalException {
                 .build();
     }
 
+
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public CommonDto<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {

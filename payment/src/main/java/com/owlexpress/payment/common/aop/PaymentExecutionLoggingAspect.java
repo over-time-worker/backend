@@ -21,14 +21,17 @@ public class PaymentExecutionLoggingAspect {
     public Object logCreatePaymentExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;
+        Exception error = null;
 
         try {
             result = joinPoint.proceed();
             return result;
+        } catch (Exception e) {
+            error = e;
+            throw e;
         } finally {
             long duration = System.currentTimeMillis() - start;
 
-            // Logging details
             Map<String, Object> logMap = new HashMap<>();
             logMap.put("type", "execution-time");
             logMap.put("service", "payment-service");
@@ -36,7 +39,6 @@ public class PaymentExecutionLoggingAspect {
             logMap.put("duration_ms", duration);
             logMap.put("timestamp", Instant.now().toString());
 
-            // Extract arguments (optional)
             Object[] args = joinPoint.getArgs();
             if (args != null && args.length > 0) {
                 Object dto = args[0];
@@ -45,6 +47,14 @@ public class PaymentExecutionLoggingAspect {
                     logMap.put("consumerCompanyId", requestDto.getConsumerCompanyId());
                     logMap.put("startHubId", requestDto.getStartHubId());
                 }
+            }
+
+            if (error == null) {
+                logMap.put("status", "SUCCESS");
+            } else {
+                logMap.put("status", "FAILURE");
+                logMap.put("exception", error.getClass().getSimpleName());
+                logMap.put("message", error.getMessage());
             }
 
             log.info(new ObjectMapper().writeValueAsString(logMap));

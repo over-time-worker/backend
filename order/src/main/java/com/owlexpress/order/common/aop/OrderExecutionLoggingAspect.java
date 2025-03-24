@@ -14,16 +14,20 @@ import java.util.Map;
 @Aspect
 @Component
 @Slf4j
-public class ExecutionTimeLoggingAspect {
+public class OrderExecutionLoggingAspect {
 
     @Around("execution(* com.owlexpress.order.application.service.OrderServiceImpl.createOrder(..))")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
-        Object result;
+        Object result = null;
+        Exception error = null;
 
         try {
             result = joinPoint.proceed();
             return result;
+        } catch (Exception e) {
+            error = e;
+            throw e;
         } finally {
             long end = System.currentTimeMillis();
             long duration = end - start;
@@ -34,6 +38,14 @@ public class ExecutionTimeLoggingAspect {
             logMap.put("method", joinPoint.getSignature().toShortString());
             logMap.put("duration_ms", duration);
             logMap.put("timestamp", Instant.now().toString());
+
+            if (error == null) {
+                logMap.put("status", "SUCCESS");
+            } else {
+                logMap.put("status", "FAILURE");
+                logMap.put("exception", error.getClass().getSimpleName());
+                logMap.put("message", error.getMessage());
+            }
 
             log.info(new ObjectMapper().writeValueAsString(logMap));
         }
