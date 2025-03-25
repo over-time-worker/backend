@@ -5,8 +5,8 @@
 
     <!-- Logstash로 전송할 Appender -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5044</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        <destination>${LOGSTASH_HOST}:5044</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
     <!-- 콘솔 출력 -->
@@ -51,9 +51,9 @@
 
     <!-- Logger 설정 -->
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="LOGSTASH" />
         <appender-ref ref="Error"/>
     </root>
 </configuration>

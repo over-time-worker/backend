@@ -13,6 +13,7 @@ import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
 import org.redisson.spring.cache.CacheConfig;
 import org.redisson.spring.cache.RedissonSpringCacheManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -27,11 +28,18 @@ public class RedissonConfig {
     public final static Integer DELIVERY_TTL_HOURS = 48;
     public final static Integer DELIVERY_IDLE_HOURS = 24;
 
+
+    @Value("${spring.data.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port}")
+    private int redisPort;
+
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
 
-        config.useSingleServer().setAddress("redis://localhost:6378");
+        config.useSingleServer().setAddress("redis://"+redisHost+":"+redisPort);
         config.setCodec(new JsonJacksonCodec(new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .registerModule(new Jdk8Module())));

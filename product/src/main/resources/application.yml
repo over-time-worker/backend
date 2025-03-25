@@ -1,0 +1,51 @@
+server:
+  port: ${PRODUCT_SERVER_PORT}
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: product-service
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+product:
+  search:
+    default-page-size: 10
+    allowed-page-sizes: [10, 30, 50]
+    default-sort: "createdAt"
+    allowed-sorts: ["createdAt", "updatedAt"]
+
+management:
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
