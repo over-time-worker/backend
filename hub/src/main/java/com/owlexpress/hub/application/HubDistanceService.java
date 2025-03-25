@@ -146,6 +146,7 @@ public class HubDistanceService {
             log.info("responseDto route : {}", responseDto.getRoute());
             log.error(" API 응답이 올바르지 않습니다. startHub={}, Consumer({}, {})", startHub.getName(), consumerLongitude, consumerLatitude);
             throw new LocationNotExistException();
+
         }
 
         List<RouteOption> routeOptions = responseDto.getRoute().get("trafast");
