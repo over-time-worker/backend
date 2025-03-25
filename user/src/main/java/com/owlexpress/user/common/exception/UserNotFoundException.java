@@ -1,4 +1,4 @@
-package com.owlexpress.user.infrastructure.exception;
+package com.owlexpress.user.common.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 

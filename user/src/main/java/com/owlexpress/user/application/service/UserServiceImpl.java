@@ -4,13 +4,13 @@ import static com.owlexpress.user.common.exception.ExceptionMessage.NEW_PASSWORD
 import static com.owlexpress.user.common.exception.ExceptionMessage.PASSWORD_INCORRECT_MESSAGE;
 import static com.owlexpress.user.common.exception.ExceptionMessage.USER_NOT_FOUND_MESSAGE;
 
-import com.owlexpress.user.application.exception.NewPasswordNotMatchesException;
-import com.owlexpress.user.application.exception.PasswordIncorrectException;
+import com.owlexpress.user.common.exception.NewPasswordNotMatchesException;
+import com.owlexpress.user.common.exception.PasswordIncorrectException;
 import com.owlexpress.user.common.dto.PassportDto;
 import com.owlexpress.user.common.helper.PassportHelper;
 import com.owlexpress.user.domain.entity.User;
 import com.owlexpress.user.domain.repository.UserRepository;
-import com.owlexpress.user.infrastructure.exception.UserNotFoundException;
+import com.owlexpress.user.common.exception.UserNotFoundException;
 import com.owlexpress.user.presentation.dto.request.UpdatePasswordRequestDto;
 import com.owlexpress.user.presentation.dto.request.UserSigninRequestDto;
 import com.owlexpress.user.presentation.dto.request.UserSignupRequestDto;

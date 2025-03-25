@@ -7,7 +7,7 @@ import com.owlexpress.user.common.helper.PassportHelper;
 import com.owlexpress.user.common.util.PageUtil;
 import com.owlexpress.user.domain.entity.User;
 import com.owlexpress.user.domain.repository.UserRepository;
-import com.owlexpress.user.infrastructure.exception.UserNotFoundException;
+import com.owlexpress.user.common.exception.UserNotFoundException;
 import com.owlexpress.user.presentation.dto.request.ApprovalUserRequestDto;
 import com.owlexpress.user.presentation.dto.request.UpdateUserInfoRequestDto;
 import com.owlexpress.user.presentation.dto.request.UpdateUserRoleRequestDto;
