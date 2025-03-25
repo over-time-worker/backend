@@ -1,8 +1,8 @@
-package com.owlexpress.payment.common;
+package com.owlexpress.payment.common.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.owlexpress.payment.application.dto.PassportDto;
+import com.owlexpress.payment.common.PassportDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

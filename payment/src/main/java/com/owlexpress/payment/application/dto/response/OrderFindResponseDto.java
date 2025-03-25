@@ -1,6 +1,6 @@
 package com.owlexpress.payment.application.dto.response;
 
-import com.owlexpress.payment.application.constant.ProductType;
+import com.owlexpress.payment.common.constant.ProductType;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;

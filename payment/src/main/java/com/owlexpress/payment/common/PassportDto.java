@@ -1,6 +1,6 @@
-package com.owlexpress.payment.application.dto;
+package com.owlexpress.payment.common;
 
-import com.owlexpress.payment.application.constant.Role;
+import com.owlexpress.payment.common.constant.Role;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.owlexpress.payment.common;
+package com.owlexpress.payment.common.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

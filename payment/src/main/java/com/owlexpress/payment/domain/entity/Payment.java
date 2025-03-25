@@ -1,7 +1,7 @@
 package com.owlexpress.payment.domain.entity;
 
 import com.owlexpress.payment.common.BaseEntity;
-import com.owlexpress.payment.domain.constant.PaymentStatus;
+import com.owlexpress.payment.common.constant.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

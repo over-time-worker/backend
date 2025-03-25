@@ -1,4 +1,4 @@
-package com.owlexpress.payment.domain.constant;
+package com.owlexpress.payment.common.constant;
 
 import lombok.RequiredArgsConstructor;
 

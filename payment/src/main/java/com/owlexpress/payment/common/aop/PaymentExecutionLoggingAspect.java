@@ -17,7 +17,7 @@ import java.util.Map;
 @Slf4j
 public class PaymentExecutionLoggingAspect {
 
-    @Around("execution(* com.owlexpress.payment.application.PaymentUseCase.createPayment(..))")
+    @Around("execution(* com.owlexpress.payment.application.PaymentUseCaseImpl.createPayment(..))")
     public Object logCreatePaymentExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;

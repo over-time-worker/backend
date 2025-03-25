@@ -1,12 +1,12 @@
 package com.owlexpress.payment.application;
 
-import com.owlexpress.payment.application.dto.PassportDto;
+import com.owlexpress.payment.common.PassportDto;
 import com.owlexpress.payment.application.dto.request.DeliveryCreateRequestDto;
 import com.owlexpress.payment.application.dto.request.OptimalRouteRequestDto;
 import com.owlexpress.payment.application.dto.response.OrderFindResponseDto;
 import com.owlexpress.payment.application.dto.response.PaymentFindResponseDto;
 import com.owlexpress.payment.application.dto.response.RouteResponseDto;
-import com.owlexpress.payment.common.PassportHelper;
+import com.owlexpress.payment.common.helper.PassportHelper;
 import com.owlexpress.payment.common.exception.PaymentException.OrderDoesNotMatchException;
 import com.owlexpress.payment.common.exception.PaymentException.DeliveryCreationFailException;
 import com.owlexpress.payment.common.exception.PaymentException.PaymentNotFoundException;
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PaymentUseCase {
+public class PaymentUseCaseImpl implements com.owlexpress.payment.presentation.PaymentUseCase {
 
     private final PaymentRepository paymentRepository;
     private final OrderClient orderClient;
@@ -40,6 +40,7 @@ public class PaymentUseCase {
     private final PassportHelper passportHelper;
 
     @Transactional
+    @Override
     public UUID createPayment(PaymentCreateRequestDto requestDto, String passport) {
         Payment payment = requestDto.toEntity();
         // TODO : 결제사 승인 요청
@@ -93,6 +94,7 @@ public class PaymentUseCase {
     }
 
     @Transactional
+    @Override
     public void deletePayment(PaymentDeleteRequestDto requestDto, String passport) {
         Payment payment = paymentRepository.findByTransactionId(requestDto.getTransactionId())
                 .orElseThrow(PaymentNotFoundException::new);
@@ -104,6 +106,7 @@ public class PaymentUseCase {
         payment.deleteEntity(passportDto.getUserId());
     }
 
+    @Override
     public PaymentFindResponseDto find(UUID orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(OrderDoesNotMatchException::new);
