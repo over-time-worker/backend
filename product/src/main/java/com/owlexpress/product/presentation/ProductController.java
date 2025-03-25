@@ -1,6 +1,6 @@
 package com.owlexpress.product.presentation;
 
-import com.owlexpress.product.application.ProductUsecase;
+import com.owlexpress.product.application.ProductUsecaseImpl;
 import com.owlexpress.product.application.dto.response.FindProductResponseDto;
 import com.owlexpress.product.application.dto.response.SearchProductResponseDto;
 import com.owlexpress.product.common.CommonDto;

@@ -21,7 +21,6 @@ import com.owlexpress.product.infrastructure.feignClient.ProducerClient;
 import com.owlexpress.product.presentation.dto.request.CreateHubInfoRequestDto;
 import com.owlexpress.product.presentation.dto.request.CreateProductRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateProductDto;
-import feign.FeignException;
 import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductUsecase {
+public class ProductUsecaseImpl implements com.owlexpress.product.presentation.ProductUsecase {
 
     private final ProductRepository productRepository;
     private final ProductSearchConfig productSearchConfig; // 설정 클래스 주입
@@ -47,6 +46,7 @@ public class ProductUsecase {
     private final HubClient hubClient;
 
     @Transactional
+    @Override
     public void createProduct(
             CreateProductRequestDto createProductRequestDto,
             String passport
@@ -96,6 +96,7 @@ public class ProductUsecase {
     }
 
     @Transactional
+    @Override
     public void updateProduct(
             UpdateProductDto updateProductDto,
             UUID productsId,
@@ -139,6 +140,7 @@ public class ProductUsecase {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public FindProductResponseDto find(UUID productsId) {
         Product product = getProduct(productsId);
 
@@ -152,8 +154,9 @@ public class ProductUsecase {
      *
      * */
     @Transactional
+    @Override
     public void delete(UUID productsId,
-                       String passport
+            String passport
     ) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         Product product = getProduct(productsId);
@@ -165,6 +168,7 @@ public class ProductUsecase {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public PagedModel<SearchProductResponseDto> search(
             int page,
             int size,
@@ -203,6 +207,7 @@ public class ProductUsecase {
     }
 
     @Transactional
+    @Override
     public void connect(
             CreateHubInfoRequestDto createHubInfoRequestDto,
             HubInfo hubInfo
@@ -238,6 +243,7 @@ public class ProductUsecase {
     }
 
     @Transactional
+    @Override
     public void disConnect(HubInfo hubInfo) {
         Product product = hubInfo.getProduct();
         product.getHubInfo()
