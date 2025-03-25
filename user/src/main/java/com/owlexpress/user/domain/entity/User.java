@@ -1,9 +1,9 @@
 package com.owlexpress.user.domain.entity;
 
 import com.owlexpress.user.common.BaseEntity;
-import com.owlexpress.user.domain.constant.ApprovalStatus;
-import com.owlexpress.user.domain.constant.PlatformType;
-import com.owlexpress.user.domain.constant.Role;
+import com.owlexpress.user.common.constant.ApprovalStatus;
+import com.owlexpress.user.common.constant.PlatformType;
+import com.owlexpress.user.common.constant.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

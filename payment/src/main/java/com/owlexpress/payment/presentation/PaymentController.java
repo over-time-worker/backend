@@ -1,6 +1,6 @@
 package com.owlexpress.payment.presentation;
 
-import com.owlexpress.payment.application.PaymentUseCase;
+import com.owlexpress.payment.application.PaymentUseCaseImpl;
 import com.owlexpress.payment.application.dto.response.PaymentFindResponseDto;
 import com.owlexpress.payment.common.ResponseMessage;
 import com.owlexpress.payment.presentation.dto.CommonDto;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final PaymentUseCase paymentUseCase;
+    private final PaymentUseCase paymentUseCaseImpl;
 
     @PostMapping
     public ResponseEntity<CommonDto<Map<String, UUID>>> create(
@@ -34,7 +34,7 @@ public class PaymentController {
             @RequestHeader("X-User-Passport") String passport
     ) {
         // TODO : 주문에서 요청 넘어오면 정보 담아서 -> 허브 간 이동거리로 정보 전달
-        UUID payment = paymentUseCase.createPayment(requestDto, passport);
+        UUID payment = paymentUseCaseImpl.createPayment(requestDto, passport);
 
         CommonDto<Map<String, UUID>> created = CommonDto.<Map<String, UUID>>builder()
                 .status(HttpStatus.CREATED)
@@ -51,7 +51,7 @@ public class PaymentController {
             @RequestBody PaymentDeleteRequestDto requestDto,
             @RequestHeader("X-User-Passport") String passport
     ) {
-        paymentUseCase.deletePayment(requestDto, passport);
+        paymentUseCaseImpl.deletePayment(requestDto, passport);
 
         CommonDto<Void> deleted = CommonDto.<Void>builder()
                 .status(HttpStatus.ACCEPTED)
@@ -67,7 +67,7 @@ public class PaymentController {
     public ResponseEntity<CommonDto<PaymentFindResponseDto>> find(
             @PathVariable("orderId") UUID orderId
     ) {
-        PaymentFindResponseDto paymentFindResponseDto = paymentUseCase.find(orderId);
+        PaymentFindResponseDto paymentFindResponseDto = paymentUseCaseImpl.find(orderId);
 
         CommonDtoBuilder<PaymentFindResponseDto> found =
                 CommonDto.<PaymentFindResponseDto>builder()

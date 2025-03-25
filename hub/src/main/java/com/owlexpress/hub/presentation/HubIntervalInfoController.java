@@ -1,7 +1,7 @@
 package com.owlexpress.hub.presentation;
 
-import com.owlexpress.hub.application.HubDistanceService;
 import com.owlexpress.hub.common.dto.response.RouteResponseDto;
+import com.owlexpress.hub.domain.service.HubDistanceService;
 import com.owlexpress.hub.presentation.dto.request.RouteRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubIntervalInfoResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +18,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HubIntervalInfoController {
 
-    private final HubDistanceService hubDistanceService;
+    private final HubDistanceService hubDistanceServiceImpl;
 
     // 출발지 & 도착지 기준 최적 경로 조회
     @PostMapping("/route")
     public ResponseEntity<HubIntervalInfoResponse> findOptimalRoute(@RequestBody RouteRequestDto requestDto) {
-        List<RouteResponseDto> route = hubDistanceService.findShortestPath(requestDto.getStartHubId(),
+        List<RouteResponseDto> route = hubDistanceServiceImpl.findShortestPath(requestDto.getStartHubId(),
                                                                            requestDto.getConsumerId(),
                                                                            requestDto.getConsumerLongitude(),
                                                                            requestDto.getConsumerLatitude(),

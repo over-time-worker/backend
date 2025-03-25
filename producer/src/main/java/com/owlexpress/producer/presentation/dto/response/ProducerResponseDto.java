@@ -1,7 +1,7 @@
 package com.owlexpress.producer.presentation.dto.response;
 
 import com.owlexpress.producer.domain.entity.Producer;
-import com.owlexpress.producer.domain.entity.constant.CompanyType;
+import com.owlexpress.producer.common.constant.CompanyType;
 import lombok.Builder;
 import lombok.Data;
 

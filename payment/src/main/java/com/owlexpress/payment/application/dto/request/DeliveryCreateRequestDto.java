@@ -2,7 +2,7 @@ package com.owlexpress.payment.application.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.owlexpress.payment.application.dto.response.RouteInfoResponseDto;
-import com.owlexpress.payment.common.OrderType;
+import com.owlexpress.payment.common.constant.OrderType;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;

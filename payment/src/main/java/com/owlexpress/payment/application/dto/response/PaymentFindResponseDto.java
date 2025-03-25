@@ -1,7 +1,7 @@
 package com.owlexpress.payment.application.dto.response;
 
-import com.owlexpress.payment.application.constant.ProductType;
-import com.owlexpress.payment.domain.constant.PaymentStatus;
+import com.owlexpress.payment.common.constant.ProductType;
+import com.owlexpress.payment.common.constant.PaymentStatus;
 import com.owlexpress.payment.domain.entity.Payment;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

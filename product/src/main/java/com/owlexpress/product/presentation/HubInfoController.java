@@ -1,6 +1,6 @@
 package com.owlexpress.product.presentation;
 
-import com.owlexpress.product.application.ProductUsecase;
+import com.owlexpress.product.application.ProductUsecaseImpl;
 import com.owlexpress.product.common.CommonDto;
 import com.owlexpress.product.domain.entity.HubInfo;
 import com.owlexpress.product.domain.service.HubInfoService;

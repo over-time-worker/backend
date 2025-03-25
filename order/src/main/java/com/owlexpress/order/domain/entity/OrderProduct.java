@@ -1,7 +1,7 @@
 package com.owlexpress.order.domain.entity;
 
-import com.owlexpress.order.common.entity.BaseEntity;
-import com.owlexpress.order.domain.constant.ProductType;
+import com.owlexpress.order.common.BaseEntity;
+import com.owlexpress.order.common.constant.ProductType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

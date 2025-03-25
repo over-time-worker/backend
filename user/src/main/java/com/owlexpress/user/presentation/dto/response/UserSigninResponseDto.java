@@ -1,6 +1,6 @@
 package com.owlexpress.user.presentation.dto.response;
 
-import com.owlexpress.user.domain.constant.Role;
+import com.owlexpress.user.common.constant.Role;
 import com.owlexpress.user.domain.entity.User;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

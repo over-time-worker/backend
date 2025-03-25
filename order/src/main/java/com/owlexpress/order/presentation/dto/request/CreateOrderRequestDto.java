@@ -1,6 +1,6 @@
 package com.owlexpress.order.presentation.dto.request;
 
-import com.owlexpress.order.domain.constant.OrderType;
+import com.owlexpress.order.common.constant.OrderType;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

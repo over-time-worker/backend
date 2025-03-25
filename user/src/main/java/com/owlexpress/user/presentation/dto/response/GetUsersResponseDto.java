@@ -1,8 +1,8 @@
 package com.owlexpress.user.presentation.dto.response;
 
-import com.owlexpress.user.domain.constant.ApprovalStatus;
-import com.owlexpress.user.domain.constant.PlatformType;
-import com.owlexpress.user.domain.constant.Role;
+import com.owlexpress.user.common.constant.ApprovalStatus;
+import com.owlexpress.user.common.constant.PlatformType;
+import com.owlexpress.user.common.constant.Role;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

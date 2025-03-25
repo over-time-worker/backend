@@ -2,8 +2,7 @@ package com.owlexpress.auth.infrastructure;
 
 import com.owlexpress.auth.application.dto.request.UserLoginRequestDto;
 import com.owlexpress.auth.application.dto.response.UserInfoResponseDto;
-import com.owlexpress.auth.presentation.dto.CommonDto;
-import com.owlexpress.auth.presentation.dto.request.LoginRequestDto;
+import com.owlexpress.auth.application.dto.CommonDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 

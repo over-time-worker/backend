@@ -1,11 +1,12 @@
 package com.owlexpress.product.domain.service;
 
-import com.owlexpress.product.application.ProductUsecase;
+import com.owlexpress.product.application.ProductUsecaseImpl;
 import com.owlexpress.product.common.dto.response.PassportDto;
 import com.owlexpress.product.common.exceptions.ProductException;
 import com.owlexpress.product.common.helper.PassportHelper;
 import com.owlexpress.product.domain.entity.HubInfo;
 import com.owlexpress.product.domain.repository.HubInfoRepository;
+import com.owlexpress.product.presentation.ProductUsecase;
 import com.owlexpress.product.presentation.dto.request.CreateHubInfoRequestDto;
 import com.owlexpress.product.presentation.dto.request.UpdateHubInfoRequestDto;
 import lombok.RequiredArgsConstructor;

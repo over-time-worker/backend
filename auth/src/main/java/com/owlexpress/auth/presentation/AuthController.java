@@ -1,6 +1,5 @@
 package com.owlexpress.auth.presentation;
 
-import com.owlexpress.auth.application.AuthService;
 import com.owlexpress.auth.presentation.dto.request.LoginRequestDto;
 import com.owlexpress.auth.presentation.dto.response.TokenResponseDto;
 import jakarta.servlet.http.HttpServletResponse;

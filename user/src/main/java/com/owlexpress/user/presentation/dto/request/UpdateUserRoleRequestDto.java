@@ -1,6 +1,6 @@
 package com.owlexpress.user.presentation.dto.request;
 
-import com.owlexpress.user.domain.constant.Role;
+import com.owlexpress.user.common.constant.Role;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

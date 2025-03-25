@@ -21,7 +21,7 @@ public class HubProductOrderLoggingAspect {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Around("execution(* com.owlexpress.hub.application.HubProductUseCase.confirmOrder(..))")
+    @Around("execution(* com.owlexpress.hub.application.HubProductUseCaseImpl.confirmOrder(..))")
     public Object logConfirmOrderExecution(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;

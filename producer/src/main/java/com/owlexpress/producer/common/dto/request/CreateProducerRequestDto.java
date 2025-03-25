@@ -3,7 +3,7 @@ package com.owlexpress.producer.common.dto.request;
 import com.owlexpress.producer.common.dto.response.GetUserInfoResponseDto;
 import com.owlexpress.producer.common.util.GeoUtil;
 import com.owlexpress.producer.domain.entity.Producer;
-import com.owlexpress.producer.domain.entity.constant.CompanyType;
+import com.owlexpress.producer.common.constant.CompanyType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;

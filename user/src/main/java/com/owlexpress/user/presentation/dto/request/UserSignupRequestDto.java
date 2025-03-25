@@ -1,7 +1,7 @@
 package com.owlexpress.user.presentation.dto.request;
 
-import com.owlexpress.user.domain.constant.PlatformType;
-import com.owlexpress.user.domain.constant.Role;
+import com.owlexpress.user.common.constant.PlatformType;
+import com.owlexpress.user.common.constant.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;

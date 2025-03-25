@@ -1,8 +1,8 @@
 package com.owlexpress.payment.presentation.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.owlexpress.payment.common.OrderType;
-import com.owlexpress.payment.domain.constant.PaymentStatus;
+import com.owlexpress.payment.common.constant.OrderType;
+import com.owlexpress.payment.common.constant.PaymentStatus;
 import com.owlexpress.payment.domain.entity.Payment;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
