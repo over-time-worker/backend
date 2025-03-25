@@ -1,10 +1,8 @@
 package com.owlexpress.hub.application;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
-import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
 import com.owlexpress.hub.common.exception.HubProductException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException.LockAcquisitionFailedException;
@@ -17,13 +15,12 @@ import com.owlexpress.hub.domain.repository.HubProductRepository;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.infrastructure.client.OrderClient;
 import com.owlexpress.hub.infrastructure.client.ProductClient;
+import com.owlexpress.hub.presentation.HubProductUseCase;
 import com.owlexpress.hub.presentation.dto.request.HubProductCreateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto;
 import com.owlexpress.hub.presentation.dto.request.OrderConfirmRequestDto.Product;
 import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto.ConfirmedHubProductResponseDto;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.connection.stream.Consumer;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.ReadOffset;
-import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.connection.stream.StreamReadOptions;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +43,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class HubProductUseCase {
+public class HubProductUseCaseImpl implements HubProductUseCase {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String REDISSON_LOCK_PREFIX = "LOCK:CONFIRM_ORDER:";
@@ -68,6 +57,7 @@ public class HubProductUseCase {
     private final RedissonClient redissonClient; // 분산 락 적용
     private final TransactionTemplate transactionTemplate; // 트랜잭션 경계 설정
 
+    @Override
     public HubProduct create(
             HubProductCreateRequestDto requestDto,
             String passport
@@ -88,6 +78,7 @@ public class HubProductUseCase {
     }
 
     @Transactional
+    @Override
     public void delete(
             UUID hubProductId,
             String passport
@@ -101,6 +92,7 @@ public class HubProductUseCase {
         LocalDateTime deletedAt = hubProduct.getDeletedAt();
     }
 
+    @Override
     public HubProductOrderConfirmResponseDto confirmOrder(
             OrderConfirmRequestDto requestDto
     ) {

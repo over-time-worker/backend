@@ -16,7 +16,7 @@ import java.util.Map;
 @Slf4j
 public class HubRouteExecutionLoggingAspect {
 
-    @Around("execution(* com.owlexpress.hub.application.HubDistanceService.findShortestPath(..))")
+    @Around("execution(* com.owlexpress.hub.application.HubDistanceServiceImpl.findShortestPath(..))")
     public Object logFindShortestPath(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;

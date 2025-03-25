@@ -1,27 +1,17 @@
 package com.owlexpress.hub.domain.service;
 
-import com.owlexpress.hub.application.HubDistanceService;
-import com.owlexpress.hub.application.dto.response.HubProductIsEnoughResponseDto;
-import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
 import com.owlexpress.hub.common.helper.HubHelper;
 import com.owlexpress.hub.common.exception.HubException.HubNotFoundException;
-import com.owlexpress.hub.common.exception.HubProductException.HubProductNotFoundException;
 import com.owlexpress.hub.common.helper.PassportHelper;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubIntervalInfoRepository;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.request.HubCreateRequestDto;
-import com.owlexpress.hub.presentation.dto.request.HubProductCheckRequestDto;
-import com.owlexpress.hub.presentation.dto.request.HubProductUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.request.HubUpdateRequestDto;
 import com.owlexpress.hub.presentation.dto.response.HubFindResponseDto;
-import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
-import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -44,7 +34,7 @@ public class HubServiceImpl implements HubService {
     private final HubIntervalInfoRepository hubIntervalInfoRepository;
     private static final List<Integer> ALLOWED_SIZES = List.of(10, 30, 50);
     private static final Integer DEFAULT_SIZE = 10;
-    private final HubDistanceService hubDistanceService;
+    private final HubDistanceService hubDistanceServiceImpl;
     private final PassportHelper passportHelper;
 
     @Override
@@ -93,7 +83,7 @@ public class HubServiceImpl implements HubService {
                 .getX() != requestDto.getLatitude() || hub.getLocation()
                 .getY() != requestDto.getLongitude()) {
             hubIntervalInfoRepository.deleteContainsHub(hub);
-            hubDistanceService.calculateHubDistances(hub);
+            hubDistanceServiceImpl.calculateHubDistances(hub);
         }
         hub.modifiedEntity(passportDto.getUserId());
     }

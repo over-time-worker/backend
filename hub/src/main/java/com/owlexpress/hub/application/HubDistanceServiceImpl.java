@@ -8,6 +8,7 @@ import com.owlexpress.hub.common.exception.HubIntervalInfoException.LocationNotE
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.repository.HubIntervalInfoRepository;
 import com.owlexpress.hub.domain.repository.HubRepository;
+import com.owlexpress.hub.domain.service.HubDistanceService;
 import com.owlexpress.hub.infrastructure.api.NaverDirectionsClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +24,14 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class HubDistanceService {
+public class HubDistanceServiceImpl implements HubDistanceService {
     private final HubRepository hubRepository;
     private final HubIntervalInfoRepository hubIntervalInfoRepository;
     private final NaverDirectionsClient naverDirectionsClient;
     private final HubPathFinder hubPathFinder;
 
     @Transactional
+    @Override
     public void calculateAllHubDistances() {
         log.info(" [START] 허브 간 거리 계산 시작");
 
@@ -94,6 +96,7 @@ public class HubDistanceService {
             value = "shortestRoutes",
             key = "'from:' + #startHubId + ':to:' + #consumerId + ':lon:' + #consumerLongitude + ':lat:' + #consumerLatitude + ':depart:' + #departureTime"
     )
+    @Override
     public List<RouteResponseDto> findShortestPath(
             UUID startHubId,
             UUID consumerId,
@@ -183,6 +186,7 @@ public class HubDistanceService {
     }
 
     @Transactional
+    @Override
     public void calculateHubDistances(Hub startHub) {
         List<Hub> allHubs = hubRepository.findAllWithIntervals();
 
