@@ -1,15 +1,14 @@
 package com.owlexpress.delivery.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.owlexpress.delivery.application.dtos.DeliveryCacheDto.DeliveryHistoryCacheDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
-import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
-import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedPlatformTypeException;
-import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
+import com.owlexpress.delivery.common.dto.DeliveryCacheDto.DeliveryHistoryCacheDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCompleteRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCreateRequestDto.HubListDto;
+import com.owlexpress.delivery.common.dto.response.AlarmCreateResponseDto;
+import com.owlexpress.delivery.domain.entity.constant.DeliveryStatus;
+import com.owlexpress.delivery.domain.entity.constant.PlatformType;
 import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,7 +32,6 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Type;
-import org.springframework.util.StringUtils;
 
 @Getter
 @Entity
@@ -231,24 +229,6 @@ public class DeliveryHistory extends BaseEntity implements Serializable {
         this.deliverChannelId = alarmCreateResponseDto.getDeliverChannelId();
         this.deliverPhoneNumber = alarmCreateResponseDto.getDeliverPhoneNumber();
         this.modifiedEntity(userId);
-    }
-
-    @RequiredArgsConstructor
-    public enum PlatformType{
-        SLACK("slack");
-
-        private final String value;
-
-        public static PlatformType getType(String type) {
-            if(!StringUtils.hasText(type)) {
-                throw new NotSupportedPlatformTypeException("플랫폼 타입이 비어있습니다.");
-            }
-
-            return Arrays.stream(PlatformType.values())
-                    .filter(val -> val.name().equalsIgnoreCase(type.trim()))
-                    .findFirst()
-                    .orElseThrow(() -> new NotSupportedPlatformTypeException("지원하지 않는 플랫폼 타입 입니다. : " + type));
-        }
     }
 
 }

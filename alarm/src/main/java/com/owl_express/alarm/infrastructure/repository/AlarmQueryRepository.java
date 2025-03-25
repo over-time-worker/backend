@@ -1,6 +1,6 @@
 package com.owl_express.alarm.infrastructure.repository;
 
-import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
+import com.owl_express.alarm.common.dto.response.AlarmSearchResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;

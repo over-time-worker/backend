@@ -1,6 +1,6 @@
 package com.owlexpress.cart.common.exception;
 
-import com.owlexpress.cart.common.CommonDto;
+import com.owlexpress.cart.common.dto.CommonDto;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

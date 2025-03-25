@@ -7,11 +7,10 @@ import static com.owlexpress.cart.presentation.dto.ApiResponseMessageConstant.CA
 import static com.owlexpress.cart.presentation.dto.ApiResponseMessageConstant.CART_PRODUCT_INCREASE_SUCCESS_MESSAGE;
 import static com.owlexpress.cart.presentation.dto.ApiResponseMessageConstant.FIND_CART_PRODUCT_SUCCESS_MESSAGE;
 
-import com.owlexpress.cart.application.service.CartService;
-import com.owlexpress.cart.common.CommonDto;
-import com.owlexpress.cart.presentation.dto.request.AddCartProductRequestDto;
-import com.owlexpress.cart.presentation.dto.request.CartProductDeleteRequestDto;
-import com.owlexpress.cart.presentation.dto.response.CartResponseDto;
+import com.owlexpress.cart.common.dto.CommonDto;
+import com.owlexpress.cart.common.dto.request.AddCartProductRequestDto;
+import com.owlexpress.cart.common.dto.request.CartProductDeleteRequestDto;
+import com.owlexpress.cart.common.dto.response.CartResponseDto;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

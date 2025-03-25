@@ -1,6 +1,6 @@
 package com.owlexpress.delivery.application.exceptions;
 
-import com.owlexpress.delivery.application.dtos.CommonDto;
+import com.owlexpress.delivery.common.dto.CommonDto;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

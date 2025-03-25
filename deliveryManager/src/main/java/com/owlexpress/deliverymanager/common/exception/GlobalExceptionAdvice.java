@@ -5,7 +5,7 @@ import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerEx
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDeliveryManagerNotFoundException;
 import com.owlexpress.deliverymanager.common.exception.ConsumerDeliveryManagerException.ConsumerDuplicateAssignNumberException;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException.*;
-import com.owlexpress.deliverymanager.infrastructure.CommonDto;
+import com.owlexpress.deliverymanager.common.dto.CommonDto;
 import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;

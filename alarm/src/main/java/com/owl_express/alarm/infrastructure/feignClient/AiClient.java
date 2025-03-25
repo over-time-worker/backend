@@ -1,18 +1,14 @@
 package com.owl_express.alarm.infrastructure.feignClient;
 
-import com.owl_express.alarm.application.dtos.CommonDto;
-import com.owl_express.alarm.application.dtos.request.CompanyDeliverMessageCreateRequestDto;
-import com.owl_express.alarm.application.dtos.request.HubDeliverMessageCreateRequestDto;
-import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import com.owl_express.alarm.common.dto.CommonDto;
+import com.owl_express.alarm.common.dto.request.CompanyDeliverMessageCreateRequestDto;
+import com.owl_express.alarm.common.dto.request.HubDeliverMessageCreateRequestDto;
+import com.owl_express.alarm.common.dto.response.MessageCreateResponseDto;
 import java.util.UUID;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name="ai-service")

@@ -1,6 +1,6 @@
 package com.owl_express.ai.infrastructure;
 
-import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
+import com.owl_express.ai.common.dto.response.MessageFindResponseDto;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,6 +1,6 @@
 package com.owl_express.alarm.common.advice;
 
-import com.owl_express.alarm.application.dtos.CommonDto;
+import com.owl_express.alarm.common.dto.CommonDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AiFeignClientException;
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedMessageTypeException;

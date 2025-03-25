@@ -1,7 +1,7 @@
 package com.owlexpress.deliverymanager.common.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.common.dto.request.DeliveryManagerRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -17,7 +17,7 @@ import java.util.Map;
 @Slf4j
 public class DeliveryManagerAssignLoggingAspect {
 
-    @Around("execution(* com.owlexpress.deliverymanager.application.usecase.ConsumerDeliveryManagerUsecase.assign(..))")
+    @Around("execution(* com.owlexpress.deliverymanager.application.usecase.ConsumerDeliveryManagerUsecaseImpl.assign(..))")
     public Object logAssignExecution(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;

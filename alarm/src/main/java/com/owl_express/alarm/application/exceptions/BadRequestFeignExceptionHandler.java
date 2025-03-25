@@ -1,6 +1,6 @@
 package com.owl_express.alarm.application.exceptions;
 
-import com.owl_express.alarm.application.dtos.CommonDto;
+import com.owl_express.alarm.common.dto.CommonDto;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

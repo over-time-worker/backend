@@ -1,7 +1,7 @@
 package com.owlexpress.consumer.domain.service;
 
-import com.owlexpress.consumer.presentation.dto.response.ConsumerResponseDto;
-import com.owlexpress.consumer.presentation.dto.response.SearchConsumerResponseDto;
+import com.owlexpress.consumer.common.dto.response.ConsumerResponseDto;
+import com.owlexpress.consumer.common.dto.response.SearchConsumerResponseDto;
 import org.springframework.data.web.PagedModel;
 
 import java.util.UUID;

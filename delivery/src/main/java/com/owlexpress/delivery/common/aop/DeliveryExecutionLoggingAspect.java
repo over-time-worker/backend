@@ -1,7 +1,7 @@
 package com.owlexpress.delivery.common.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryManagerRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

@@ -1,6 +1,6 @@
 package com.owlexpress.delivery.infrastructure.repository;
 
-import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
+import com.owlexpress.delivery.common.dto.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.domain.entity.Delivery;
 import java.util.Optional;
 import java.util.UUID;

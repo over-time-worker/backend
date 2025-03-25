@@ -1,6 +1,6 @@
 package com.owlexpress.consumer.common.exceptions;
 
-import com.owlexpress.consumer.common.CommonDto;
+import com.owlexpress.consumer.common.dto.CommonDto;
 import com.owlexpress.consumer.common.exceptions.ConsumerException.ConsumerDeliveryException;
 import com.owlexpress.consumer.common.exceptions.ConsumerException.FeignClientException;
 import jakarta.validation.ConstraintViolationException;

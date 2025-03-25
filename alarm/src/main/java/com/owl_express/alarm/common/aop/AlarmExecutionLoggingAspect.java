@@ -1,7 +1,7 @@
 package com.owl_express.alarm.common.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.common.dto.request.AlarmCreateRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

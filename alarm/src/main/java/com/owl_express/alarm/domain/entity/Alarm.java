@@ -1,11 +1,12 @@
 package com.owl_express.alarm.domain.entity;
 
-import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
-import com.owl_express.alarm.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
-import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
-import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
+import com.owl_express.alarm.common.dto.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.common.dto.request.HubDeliverFallbackMessageCreateRequestDto;
+import com.owl_express.alarm.common.dto.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.NotSupportedPlatformTypeException;
 import com.owl_express.alarm.common.util.CommonUtil;
+import com.owl_express.alarm.domain.entity.constant.MessageType;
+import com.owl_express.alarm.domain.entity.constant.PlatformType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -131,38 +132,5 @@ public class Alarm extends BaseEntity {
         return alarm;
     }
 
-
-    @RequiredArgsConstructor
-    public enum PlatformType{
-        SLACK("slack");
-
-        private final String value;
-
-        public static PlatformType getType(String type) {
-            for(PlatformType pt : PlatformType.values()) {
-                if(pt.value.equalsIgnoreCase(type)) {
-                    return pt;
-                }
-            }
-            throw new NotSupportedPlatformTypeException("지원하지 않는 플랫폼 타입 입니다." + type);
-        }
-    }
-
-    @RequiredArgsConstructor
-    public enum MessageType{
-        NORMAL("일반 메세지"),
-        RESERVATION("예약 메세지");
-
-        private final String value;
-
-        public static MessageType getType(String type) {
-            for(MessageType mt : MessageType.values()) {
-                if(mt.value.equalsIgnoreCase(type)) {
-                    return mt;
-                }
-            }
-            throw new NotSupportedPlatformTypeException("지원하지 않는 메세지 타입 입니다." + type);
-        }
-    }
 }
 

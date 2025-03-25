@@ -1,6 +1,6 @@
 package com.owlexpress.deliverymanager.domain.entity;
 
-import com.owlexpress.deliverymanager.domain.constant.PlatformType;
+import com.owlexpress.deliverymanager.domain.entity.constant.PlatformType;
 import com.owlexpress.deliverymanager.infrastructure.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;

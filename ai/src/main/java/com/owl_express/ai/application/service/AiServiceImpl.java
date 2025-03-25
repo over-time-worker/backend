@@ -2,19 +2,18 @@ package com.owl_express.ai.application.service;
 
 import static com.owl_express.ai.common.exceptions.ExceptionMessage.MESSAGE_NOT_FOUND_MESSAGE;
 
-import com.owl_express.ai.application.dtos.request.CompanyDeliverMessageCreateRequestDto;
-import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateRequestDto;
-import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateRequestDto.HubListDto;
-import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
-import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
-import com.owl_express.ai.application.exceptions.AiException;
+import com.owl_express.ai.common.dto.request.CompanyDeliverMessageCreateRequestDto;
+import com.owl_express.ai.common.dto.request.HubDeliverMessageCreateRequestDto;
+import com.owl_express.ai.common.dto.request.HubDeliverMessageCreateRequestDto.HubListDto;
+import com.owl_express.ai.common.dto.response.MessageCreateResponseDto;
+import com.owl_express.ai.common.dto.response.MessageFindResponseDto;
 import com.owl_express.ai.application.exceptions.AiException.MessageNotFoundException;
 import com.owl_express.ai.common.helper.PassportHelper;
 import com.owl_express.ai.common.util.CommonUtil;
 import com.owl_express.ai.common.util.PageUtil;
 import com.owl_express.ai.domain.entity.Ai;
 import com.owl_express.ai.domain.repository.AiRepository;
-import java.time.Duration;
+import com.owl_express.ai.presentation.AiService;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;

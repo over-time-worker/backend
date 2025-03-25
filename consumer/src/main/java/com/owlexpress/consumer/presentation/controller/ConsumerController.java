@@ -1,13 +1,13 @@
 package com.owlexpress.consumer.presentation.controller;
 
 import com.owlexpress.consumer.application.usecase.ConsumerUsecase;
-import com.owlexpress.consumer.common.CommonDto;
+import com.owlexpress.consumer.common.dto.CommonDto;
 import com.owlexpress.consumer.common.dto.request.CreateConsumerRequestDto;
 import com.owlexpress.consumer.common.dto.request.UpdateConsumerRequestDto;
 import com.owlexpress.consumer.common.exceptions.ConsumerException;
 import com.owlexpress.consumer.domain.service.ConsumerService;
-import com.owlexpress.consumer.presentation.dto.response.ConsumerResponseDto;
-import com.owlexpress.consumer.presentation.dto.response.SearchConsumerResponseDto;
+import com.owlexpress.consumer.common.dto.response.ConsumerResponseDto;
+import com.owlexpress.consumer.common.dto.response.SearchConsumerResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;

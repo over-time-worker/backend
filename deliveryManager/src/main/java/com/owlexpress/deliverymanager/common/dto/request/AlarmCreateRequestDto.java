@@ -3,7 +3,6 @@ package com.owlexpress.deliverymanager.common.dto.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.owlexpress.deliverymanager.domain.entity.ConsumerDeliveryManager;
 import com.owlexpress.deliverymanager.domain.entity.HubDeliveryManager;
-import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
