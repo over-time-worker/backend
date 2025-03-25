@@ -172,38 +172,29 @@ public class DeliveryServiceImpl implements DeliveryService {
         Long userId = passportHelper.getPassportDto(passport).getUserId();
 
         Delivery delivery = getCachedDeliveryWithDeliveryHistory(deliveryId);
-        delivery.updateDeliveryStatus(DeliveryStatus.ARRIVED_AT_HUB, userId);
-
         List<DeliveryHistory> deliveryHistoryList = delivery.getDeliveryHistories();
-
         DeliveryHistory deliveryHistory = getDeliveryHistoryById(deliveryHistoryId, deliveryHistoryList);
+
+        delivery.updateDeliveryStatus(DeliveryStatus.ARRIVED_AT_HUB, userId);
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,userId);
 
+        int currentIndex = deliveryHistoryList.indexOf(deliveryHistory);
+        boolean isLastHub = (currentIndex == deliveryHistoryList.size() - 2);
+        DeliveryHistory nextHistory = deliveryHistoryList.get(currentIndex + 1);
+
+        DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
+                delivery,
+                nextHistory,
+                delivery.getDeliveryHistories()
+        );
+
         AlarmCreateResponseDto alarmCreateResponseDto;
-        DeliveryHistory nextHistory = deliveryHistoryList.get(deliveryHistoryList.indexOf(deliveryHistory) + 1);
-        Boolean isHubDeliver = true;
 
-        if(deliveryHistoryList.indexOf(deliveryHistory) == deliveryHistoryList.size() - 2) {
-            isHubDeliver = false;
-
-            DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
-                    delivery,
-                    nextHistory,
-                    delivery.getDeliveryHistories()
-            );
-
+        if(isLastHub) {
             alarmCreateResponseDto = deliveryUsecase.assignCompanyDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
             delivery.updateCompanyDeliverInfo(nextHistory, alarmCreateResponseDto, userId);
-
             delivery.updateCompanyDeliver(alarmCreateResponseDto.getDeliverId(), userId);
-
         } else {
-            DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
-                    delivery,
-                    nextHistory,
-                    delivery.getDeliveryHistories()
-            );
-
             alarmCreateResponseDto = deliveryUsecase.assignHubDeliverFromDeliveryManager(deliveryManagerRequestDto, passport);
             delivery.updateHubDeliverInfo(nextHistory, alarmCreateResponseDto, userId);
         }
@@ -211,26 +202,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         try {
             deliveryUsecase.returnHubDeliverToDeliveryManager(deliveryHistory.getDeliverId());
         } catch(FeignException e) {
-
-            if(isHubDeliver) {
-                deliveryUsecase.returnHubDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId());
-
-                deliveryUsecase.sendFallbackHubDeliverMessageToAlarm(
-                        HubDeliverFallbackMessageCreateRequestDto.toDto(alarmCreateResponseDto),
-                        passport
-                );
-            } else{
-                deliveryUsecase.returnCompanyDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId(), passport);
-
-                deliveryUsecase.DeleteCompanyDeliverMessageToAlarm(
-                        alarmCreateResponseDto.getDeliverChannelId(),
-                        alarmCreateResponseDto.getPlatformMessageId(),
-                        passport
-                );
-            }
-
-            throw new DeliverReturnFailException(DELIVERY_MANAGER_RETURN_FAIL_MESSAGE);
-
+            returnDeliverFallback(passport, !isLastHub, alarmCreateResponseDto);
         }
 
         deliveryRepository.save(delivery);
@@ -321,6 +293,29 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .filter(history -> history.getId().equals(deliveryHistoryId))
                 .findFirst()
                 .orElseThrow(() -> new DeliveryHistoryNotFoundException(DELIVERY_HISTORY_NOT_FOUND_MESSAGE));
+    }
+
+    private void returnDeliverFallback(String passport, Boolean isHubDeliver, AlarmCreateResponseDto alarmCreateResponseDto) {
+        if(isHubDeliver) {
+            deliveryUsecase.returnHubDeliverToDeliveryManager(alarmCreateResponseDto.getDeliverId());
+
+            deliveryUsecase.sendFallbackHubDeliverMessageToAlarm(
+                    HubDeliverFallbackMessageCreateRequestDto.toDto(alarmCreateResponseDto),
+                    passport
+            );
+        } else{
+            deliveryUsecase.returnCompanyDeliverToDeliveryManager(
+                    alarmCreateResponseDto.getDeliverId(),
+                    passport);
+
+            deliveryUsecase.DeleteCompanyDeliverMessageToAlarm(
+                    alarmCreateResponseDto.getDeliverChannelId(),
+                    alarmCreateResponseDto.getPlatformMessageId(),
+                    passport
+            );
+        }
+
+        throw new DeliverReturnFailException(DELIVERY_MANAGER_RETURN_FAIL_MESSAGE);
     }
 
     private Delivery getCachedDelivery(UUID deliveryId) {
