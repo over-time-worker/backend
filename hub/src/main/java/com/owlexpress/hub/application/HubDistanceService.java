@@ -88,11 +88,12 @@ public class HubDistanceService {
         log.info(" [END] 허브 간 거리 계산 완료");
     }
 
-    @Cacheable(
-        value = "shortestRoutes",
-        key = "'from:' + #startHubId + ':to:' + #consumerId + ':lon:' + #consumerLongitude + ':lat:' + #consumerLatitude + ':depart:' + #departureTime"
-    )
+
     @Transactional
+    @Cacheable(
+            value = "shortestRoutes",
+            key = "'from:' + #startHubId + ':to:' + #consumerId + ':lon:' + #consumerLongitude + ':lat:' + #consumerLatitude + ':depart:' + #departureTime"
+    )
     public List<RouteResponseDto> findShortestPath(
             UUID startHubId,
             UUID consumerId,
@@ -100,97 +101,32 @@ public class HubDistanceService {
             Double consumerLatitude,
             LocalDateTime departureTime
     ) {
-        log.info(" [START] findShortestPath: startHubId={}, consumerId={}, consumerLongitude={}, consumerLatitude={}, departureTime={}",
+        log.info("[START] findShortestPath: startHubId={}, consumerId={}, lon={}, lat={}, time={}",
                  startHubId, consumerId, consumerLongitude, consumerLatitude, departureTime);
 
         Hub startHub = hubRepository.findById(startHubId)
                                     .orElseThrow(LocationNotExistException::new);
-        log.info(" Start hub found: {}", startHub.getName());
 
-        Set<UUID> visitedHubIds = new HashSet<>();
-        List<RouteResponseDto> fullRoute = new ArrayList<>();
+        List<Hub> allHubs = hubRepository.findAllWithIntervals();
 
-        // 1 출발 허브 추가 (맨 처음)
-        fullRoute.add(RouteResponseDto.builder()
-                                      .hubId(startHub.getHubId())
-                                      .hubName(startHub.getName())
-                                      .previousHubId(null)
-                                      .estimateDistance(0.0)
-                                      .estimateDurationTime(Duration.ofSeconds(0L))
-                                      .arrivalTime(departureTime)
-                                      .build());
-        visitedHubIds.add(startHub.getHubId());
+        Hub nearestToConsumer = allHubs.stream()
+                                       .min(Comparator.comparingDouble(hub ->
+                                           hubIntervalInfoRepository.findDistanceBetweenHubs(hub.getHubId(), startHubId).orElse(Double.MAX_VALUE) +
+                                           calculateDistance(hub.getLocation(), consumerLongitude, consumerLatitude)))
+                                       .orElseThrow(LocationNotExistException::new);
 
-        //  소비자 위치에서 가장 가까운 중앙 허브 찾기
-        Hub nearestCentralHub = findNearestCentralHub(consumerLongitude, consumerLatitude)
-                .orElseThrow(LocationNotExistException::new);
-        log.info(" Nearest central hub found: {}", nearestCentralHub.getName());
+        // 최단 허브 간 경로 (1개 또는 다중 허브 경유 가능)
+        List<RouteResponseDto> fullRoute = hubPathFinder.findShortestPath(startHub, nearestToConsumer, departureTime);
 
-        //  출발 허브가 스포크 허브라면 중앙 허브를 경유
-        if (startHub.getParentHub() != null) {
-            log.info(" Finding first leg path: {} → {}", startHub.getName(), nearestCentralHub.getName());
-            List<RouteResponseDto> firstLeg = hubPathFinder.findShortestPath(
-                    startHub,
-                    nearestCentralHub,
-                    departureTime
-            );
+        // 마지막 허브 → 소비자 위치 도착 경로
+        RouteResponseDto toConsumer = findPathToConsumer(
+                nearestToConsumer,
+                consumerLongitude,
+                consumerLatitude,
+                fullRoute.get(fullRoute.size() - 1).getArrivalTime()
+        );
+        fullRoute.add(toConsumer);
 
-            for (RouteResponseDto dto : firstLeg) {
-                if (!visitedHubIds.contains(dto.getHubId())) {
-                    fullRoute.add(dto);
-                    visitedHubIds.add(dto.getHubId());
-                }
-            }
-
-            log.info(" Finding second leg path: {} → Consumer ({}, {})", nearestCentralHub.getName(), consumerLongitude, consumerLatitude);
-            RouteResponseDto consumerLeg = findPathToConsumer(nearestCentralHub, consumerLongitude, consumerLatitude,
-                                                              fullRoute.get(fullRoute.size() - 1).getArrivalTime());
-
-            // 소비자 위치를 마지막으로 추가
-            if (!visitedHubIds.contains(consumerLeg.getHubId())) {
-                fullRoute.add(consumerLeg);
-                visitedHubIds.add(consumerLeg.getHubId());
-            }
-
-        } else {
-            //  출발 허브에서 소비자 위치까지 직접 최적 경로 찾기
-            log.info(" Finding direct path from {} to Consumer ({}, {})", startHub.getName(), consumerLongitude, consumerLatitude);
-            RouteResponseDto directConsumerLeg = findPathToConsumer(startHub, consumerLongitude, consumerLatitude, departureTime);
-
-            // 소비자 위치를 마지막으로 추가
-            if (!visitedHubIds.contains(directConsumerLeg.getHubId())) {
-                fullRoute.add(directConsumerLeg);
-                visitedHubIds.add(directConsumerLeg.getHubId());
-            }
-        }
-        //  거리와 예상 시간을 하나씩 앞으로 이동
-        for (int i = 0; i < fullRoute.size()-1; i++) { // 마지막 요소는 처리 대상 아님
-            RouteResponseDto next = fullRoute.get(i + 1);
-            RouteResponseDto current = fullRoute.get(i);
-
-            // 다음 허브의 거리와 예상 시간을 현재 허브로 이동
-            fullRoute.set(i, RouteResponseDto.builder()
-                                             .hubId(current.getHubId())
-                                             .hubName(current.getHubName())
-                                             .previousHubId(current.getPreviousHubId())
-                                             .estimateDistance(i==fullRoute.size()-1 ? 0 :next.getEstimateDistance()) //  다음 허브의 거리로 업데이트
-                                             .estimateDurationTime(i==fullRoute.size()-1 ? (Duration.ofSeconds(0L)) :next.getEstimateDurationTime()) //  다음 허브의 예상 시간으로 업데이트
-                                             .arrivalTime(current.getArrivalTime()) // 도착 시간은 그대로 유지
-                                             .build());
-        }
-        // 마지막 요소(CONSUMER)는 원래 그대로 유지하되, 거리 및 시간을 0으로 설정
-        int lastIndex = fullRoute.size() - 1;
-        RouteResponseDto lastElement = fullRoute.get(lastIndex);
-        fullRoute.set(lastIndex, RouteResponseDto.builder()
-                                                 .hubId(lastElement.getHubId())
-                                                 .hubName(lastElement.getHubName())
-                                                 .previousHubId(lastElement.getPreviousHubId())
-                                                 .estimateDistance(0.0) //  거리 0 설정
-                                                 .estimateDurationTime(Duration.ofSeconds(0L))  //  예상 시간 0 설정
-                                                 .arrivalTime(lastElement.getArrivalTime())
-                                                 .build());
-
-        log.info(" Full route calculated, total segments: {}", fullRoute.size());
         return fullRoute;
     }
 
@@ -233,13 +169,6 @@ public class HubDistanceService {
                                .estimateDurationTime(Duration.ofSeconds(duration))
                                .arrivalTime(arrivalTime)
                                .build();
-    }
-
-    private Optional<Hub> findNearestCentralHub(Double consumerLongitude, Double consumerLatitude) {
-        return hubRepository.findAllCentralHub()
-                .stream()
-                .filter(Objects::nonNull)
-                .min(Comparator.comparingDouble(hub -> calculateDistance(hub.getLocation(), consumerLongitude, consumerLatitude)));
     }
     private double calculateDistance(Point hubLocation, Double consumerLongitude, Double consumerLatitude) {
         if (hubLocation == null) return Double.MAX_VALUE;
