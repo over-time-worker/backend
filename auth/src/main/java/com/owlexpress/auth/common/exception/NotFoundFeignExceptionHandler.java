@@ -1,6 +1,6 @@
-package com.owlexpress.auth.common;
+package com.owlexpress.auth.common.exception;
 
-import com.owlexpress.auth.presentation.dto.CommonDto;
+import com.owlexpress.auth.application.dto.CommonDto;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

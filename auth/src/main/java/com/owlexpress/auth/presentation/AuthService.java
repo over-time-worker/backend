@@ -1,7 +1,6 @@
-package com.owlexpress.auth.application;
+package com.owlexpress.auth.presentation;
 
 import com.owlexpress.auth.application.dto.request.UserLoginRequestDto;
-import com.owlexpress.auth.presentation.dto.request.LoginRequestDto;
 
 public interface AuthService {
 

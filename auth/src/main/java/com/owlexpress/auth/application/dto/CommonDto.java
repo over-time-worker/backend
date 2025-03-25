@@ -1,4 +1,4 @@
-package com.owlexpress.auth.presentation.dto;
+package com.owlexpress.auth.application.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;
