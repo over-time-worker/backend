@@ -179,7 +179,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.updateDeliveryHistoryActualInfo(deliveryHistory ,DeliveryStatus.COMPLETE, requestDto ,userId);
 
         int currentIndex = deliveryHistoryList.indexOf(deliveryHistory);
-        boolean isLastHub = (currentIndex == deliveryHistoryList.size() - 2);
+        boolean isLastHub = (currentIndex == deliveryHistoryList.size() - 3);
         DeliveryHistory nextHistory = deliveryHistoryList.get(currentIndex + 1);
 
         DeliveryManagerRequestDto deliveryManagerRequestDto = DeliveryManagerRequestDto.toDeliveryManagerRequestDto(
