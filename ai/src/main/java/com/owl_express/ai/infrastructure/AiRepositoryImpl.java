@@ -1,6 +1,6 @@
 package com.owl_express.ai.infrastructure;
 
-import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
+import com.owl_express.ai.common.dto.response.MessageFindResponseDto;
 import com.owl_express.ai.domain.entity.Ai;
 import com.owl_express.ai.domain.repository.AiRepository;
 import java.util.Optional;
@@ -8,7 +8,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Repository;
 
 @Repository

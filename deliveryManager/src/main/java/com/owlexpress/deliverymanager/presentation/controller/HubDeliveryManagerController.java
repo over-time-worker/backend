@@ -1,13 +1,13 @@
 package com.owlexpress.deliverymanager.presentation.controller;
 
-import com.owlexpress.deliverymanager.application.dto.response.AlarmCreateResponseDto;
-import com.owlexpress.deliverymanager.application.usecase.HubDeliveryManagerUsecase;
+import com.owlexpress.deliverymanager.presentation.usecase.HubDeliveryManagerUsecase;
+import com.owlexpress.deliverymanager.common.dto.response.AlarmCreateResponseDto;
 import com.owlexpress.deliverymanager.common.exception.HubDeliveryManagerException;
-import com.owlexpress.deliverymanager.infrastructure.CommonDto;
-import com.owlexpress.deliverymanager.presentation.dto.request.CreateHubDeliveryManagerRequestDto;
-import com.owlexpress.deliverymanager.presentation.dto.request.DeliveryManagerRequestDto;
-import com.owlexpress.deliverymanager.presentation.dto.request.UpdateHubDeliveryManagerRequestDto;
-import com.owlexpress.deliverymanager.presentation.dto.response.FindHubDeliveryResponseDto;
+import com.owlexpress.deliverymanager.common.dto.CommonDto;
+import com.owlexpress.deliverymanager.common.dto.request.CreateHubDeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.common.dto.request.DeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.common.dto.request.UpdateHubDeliveryManagerRequestDto;
+import com.owlexpress.deliverymanager.common.dto.response.FindHubDeliveryResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -138,7 +138,7 @@ public class HubDeliveryManagerController {
                              .body(commonDto);
     }
 
-    @PostMapping("/return-hub/{deliveryManagerId}")
+    @PutMapping("/return-hub/{deliveryManagerId}")
     public ResponseEntity<CommonDto<Void>> returnHub(
             @PathVariable UUID deliveryManagerId
     ) {

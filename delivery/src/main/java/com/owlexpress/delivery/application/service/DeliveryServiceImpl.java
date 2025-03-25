@@ -7,16 +7,16 @@ import static com.owlexpress.delivery.common.exception.ExceptionMessage.DELIVERY
 import static com.owlexpress.delivery.infrastructure.config.RedissonConfig.DELIVERY_IDLE_HOURS;
 import static com.owlexpress.delivery.infrastructure.config.RedissonConfig.DELIVERY_TTL_HOURS;
 
-import com.owlexpress.delivery.application.dtos.DeliveryCacheDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto.HubListDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
-import com.owlexpress.delivery.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
-import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
+import com.owlexpress.delivery.common.dto.DeliveryCacheDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCompleteRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCreateRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCreateRequestDto.HubListDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryManagerRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryUpdateRequestDto;
+import com.owlexpress.delivery.common.dto.request.HubDeliverFallbackMessageCreateRequestDto;
+import com.owlexpress.delivery.common.dto.response.AlarmCreateResponseDto;
+import com.owlexpress.delivery.common.dto.response.DeliveryCreateResponseDto;
+import com.owlexpress.delivery.common.dto.response.DeliveryFindResponseDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliverReturnFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;
@@ -24,9 +24,10 @@ import com.owlexpress.delivery.application.exceptions.DeliveryException.Delivery
 import com.owlexpress.delivery.common.helper.PassportHelper;
 import com.owlexpress.delivery.common.util.PageUtil;
 import com.owlexpress.delivery.domain.entity.Delivery;
-import com.owlexpress.delivery.domain.entity.Delivery.DeliveryStatus;
 import com.owlexpress.delivery.domain.entity.DeliveryHistory;
+import com.owlexpress.delivery.domain.entity.constant.DeliveryStatus;
 import com.owlexpress.delivery.domain.repository.DeliveryRepository;
+import com.owlexpress.delivery.presentation.DeliveryService;
 import feign.FeignException;
 import java.util.List;
 import java.util.UUID;

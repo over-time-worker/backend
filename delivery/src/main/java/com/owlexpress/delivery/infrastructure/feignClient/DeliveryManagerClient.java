@@ -1,8 +1,8 @@
 package com.owlexpress.delivery.infrastructure.feignClient;
 
-import com.owlexpress.delivery.application.dtos.CommonDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryManagerRequestDto;
-import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
+import com.owlexpress.delivery.common.dto.CommonDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryManagerRequestDto;
+import com.owlexpress.delivery.common.dto.response.AlarmCreateResponseDto;
 import java.util.UUID;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;

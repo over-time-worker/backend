@@ -1,6 +1,6 @@
 package com.owl_express.ai.common.advice;
 
-import com.owl_express.ai.application.dtos.CommonDto;
+import com.owl_express.ai.common.dto.CommonDto;
 import com.owl_express.ai.application.exceptions.AiException.MessageNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;

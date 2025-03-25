@@ -7,13 +7,12 @@ import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEAR
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEND_FALLBACK_MESSAGE_SUCCESS;
 import static com.owl_express.alarm.presentation.ApiResponseMessageConstant.SEND_MESSAGE_SUCCESS;
 
-import com.owl_express.alarm.application.dtos.CommonDto;
-import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
-import com.owl_express.alarm.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
-import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
-import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
-import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
-import com.owl_express.alarm.application.service.AlarmService;
+import com.owl_express.alarm.common.dto.CommonDto;
+import com.owl_express.alarm.common.dto.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.common.dto.request.HubDeliverFallbackMessageCreateRequestDto;
+import com.owl_express.alarm.common.dto.response.AlarmCreateResponseDto;
+import com.owl_express.alarm.common.dto.response.AlarmFindResponseDto;
+import com.owl_express.alarm.common.dto.response.AlarmSearchResponseDto;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

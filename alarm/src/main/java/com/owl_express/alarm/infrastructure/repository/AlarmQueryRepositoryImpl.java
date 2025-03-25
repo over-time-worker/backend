@@ -2,11 +2,10 @@ package com.owl_express.alarm.infrastructure.repository;
 
 import static com.owl_express.alarm.domain.entity.QAlarm.alarm;
 
-import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
-import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
+import com.owl_express.alarm.common.dto.response.AlarmSearchResponseDto;
 import com.owl_express.alarm.common.util.CommonUtil;
 import com.owl_express.alarm.common.util.QueryUtil;
-import com.owl_express.alarm.domain.entity.Alarm.PlatformType;
+import com.owl_express.alarm.domain.entity.constant.PlatformType;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;

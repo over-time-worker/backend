@@ -1,6 +1,6 @@
 package com.owl_express.ai.domain.repository;
 
-import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
+import com.owl_express.ai.common.dto.response.MessageFindResponseDto;
 import com.owl_express.ai.domain.entity.Ai;
 import java.util.Optional;
 import java.util.UUID;

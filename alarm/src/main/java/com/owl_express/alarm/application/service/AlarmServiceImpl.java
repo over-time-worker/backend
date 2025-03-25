@@ -7,20 +7,21 @@ import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_NO
 import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_RESERVATION_FAIL_MESSAGE;
 import static com.owl_express.alarm.common.exception.ExceptionMessage.MESSAGE_SEND_FAIL_MESSAGE;
 
-import com.owl_express.alarm.application.dtos.request.AlarmCreateRequestDto;
-import com.owl_express.alarm.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
-import com.owl_express.alarm.application.dtos.response.AlarmCreateResponseDto;
-import com.owl_express.alarm.application.dtos.response.AlarmFindResponseDto;
-import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
-import com.owl_express.alarm.application.dtos.response.MessageCreateResponseDto;
+import com.owl_express.alarm.common.dto.request.AlarmCreateRequestDto;
+import com.owl_express.alarm.common.dto.request.HubDeliverFallbackMessageCreateRequestDto;
+import com.owl_express.alarm.common.dto.response.AlarmCreateResponseDto;
+import com.owl_express.alarm.common.dto.response.AlarmFindResponseDto;
+import com.owl_express.alarm.common.dto.response.AlarmSearchResponseDto;
+import com.owl_express.alarm.common.dto.response.MessageCreateResponseDto;
 import com.owl_express.alarm.application.exceptions.AlarmException.AlarmNotFoundException;
 import com.owl_express.alarm.application.exceptions.AlarmException.SlackException;
 import com.owl_express.alarm.common.helper.PassportHelper;
 import com.owl_express.alarm.common.util.PageUtil;
 import com.owl_express.alarm.domain.entity.Alarm;
-import com.owl_express.alarm.domain.entity.Alarm.MessageType;
-import com.owl_express.alarm.domain.entity.Alarm.PlatformType;
+import com.owl_express.alarm.domain.entity.constant.MessageType;
+import com.owl_express.alarm.domain.entity.constant.PlatformType;
 import com.owl_express.alarm.domain.repository.AlarmRepository;
+import com.owl_express.alarm.presentation.AlarmService;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
@@ -52,7 +53,7 @@ public class AlarmServiceImpl implements AlarmService {
     public static final String KOREA_ZONE_ID = "Asia/Seoul";
 
     private final AlarmRepository alarmRepository;
-    private final AlarmUsecase alarmUsecase;
+    private final AlarmUsecaseImpl alarmUsecaseImpl;
     private final PassportHelper passportHelper;
 
     @Value("${slack.token}")
@@ -67,7 +68,7 @@ public class AlarmServiceImpl implements AlarmService {
             AlarmCreateRequestDto requestDto,
             String passport
     ) {
-        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getHubDeliverMessageFromAi(requestDto, passport);
+        MessageCreateResponseDto messageCreateResponseDto = alarmUsecaseImpl.getHubDeliverMessageFromAi(requestDto, passport);
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
@@ -103,7 +104,7 @@ public class AlarmServiceImpl implements AlarmService {
             AlarmCreateRequestDto requestDto,
             String passport
     ) {
-        MessageCreateResponseDto messageCreateResponseDto = alarmUsecase.getCompanyDeliverMessageFromAi(requestDto, passport);
+        MessageCreateResponseDto messageCreateResponseDto = alarmUsecaseImpl.getCompanyDeliverMessageFromAi(requestDto, passport);
 
         //slack 전송
         PlatformType platformType = PlatformType.getType(requestDto.getPlatformName());
@@ -145,7 +146,7 @@ public class AlarmServiceImpl implements AlarmService {
         Alarm alarm = alarmRepository.findByMessageId(messageId).orElseThrow(
                 () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
-        alarmUsecase.deleteMessageToAi(alarm.getAiId(), passport);
+        alarmUsecaseImpl.deleteMessageToAi(alarm.getAiId(), passport);
 
         alarm.deleteEntity(passportHelper.getPassportDto(passport).getUserId());
     }
@@ -186,7 +187,7 @@ public class AlarmServiceImpl implements AlarmService {
         Alarm alarm = alarmRepository.findByAiId(requestDto.getAiId()).orElseThrow(
                 () -> new AlarmNotFoundException(ALARM_NOT_FOUND_MESSAGE));
 
-        alarmUsecase.deleteMessageToAi(alarm.getAiId(), passport);
+        alarmUsecaseImpl.deleteMessageToAi(alarm.getAiId(), passport);
 
         alarm.deleteEntity(passportHelper.getPassportDto(passport).getUserId());
 

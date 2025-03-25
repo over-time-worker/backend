@@ -1,6 +1,6 @@
 package com.owl_express.alarm.domain.repository;
 
-import com.owl_express.alarm.application.dtos.response.AlarmSearchResponseDto;
+import com.owl_express.alarm.common.dto.response.AlarmSearchResponseDto;
 import com.owl_express.alarm.domain.entity.Alarm;
 import java.util.Optional;
 import java.util.UUID;

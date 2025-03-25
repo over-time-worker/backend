@@ -1,6 +1,6 @@
 package com.owlexpress.consumer.infrastructure.feignClient;
 
-import com.owlexpress.consumer.common.CommonDto;
+import com.owlexpress.consumer.common.dto.CommonDto;
 import com.owlexpress.consumer.common.dto.response.GetUserInfoResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

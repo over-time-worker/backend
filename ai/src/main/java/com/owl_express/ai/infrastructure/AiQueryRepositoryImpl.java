@@ -2,8 +2,7 @@ package com.owl_express.ai.infrastructure;
 
 import static com.owl_express.ai.domain.entity.QAi.ai;
 
-import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
-import com.owl_express.ai.common.util.CommonUtil;
+import com.owl_express.ai.common.dto.response.MessageFindResponseDto;
 import com.owl_express.ai.common.util.QueryUtil;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 @Repository
 @RequiredArgsConstructor

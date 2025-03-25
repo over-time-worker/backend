@@ -1,6 +1,6 @@
 package com.owlexpress.delivery.common.advice;
 
-import com.owlexpress.delivery.application.dtos.CommonDto;
+import com.owlexpress.delivery.common.dto.CommonDto;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliverReturnFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryDeleteFailException;
 import com.owlexpress.delivery.application.exceptions.DeliveryException.DeliveryHistoryNotFoundException;

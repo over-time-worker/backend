@@ -1,13 +1,11 @@
 package com.owlexpress.delivery.presentation;
 
-import com.owlexpress.delivery.application.dtos.CommonDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryUpdateRequestDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryCreateResponseDto;
-import com.owlexpress.delivery.application.dtos.response.DeliveryFindResponseDto;
-import com.owlexpress.delivery.application.service.DeliveryService;
-import com.owlexpress.delivery.common.helper.PassportHelper;
+import com.owlexpress.delivery.common.dto.CommonDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCompleteRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCreateRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryUpdateRequestDto;
+import com.owlexpress.delivery.common.dto.response.DeliveryCreateResponseDto;
+import com.owlexpress.delivery.common.dto.response.DeliveryFindResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;

@@ -5,12 +5,11 @@ import static com.owl_express.ai.presentation.ApiResponseMessageConstant.DELETE_
 import static com.owl_express.ai.presentation.ApiResponseMessageConstant.FIND_MESSAGE_SUCCESS;
 import static com.owl_express.ai.presentation.ApiResponseMessageConstant.SEARCH_MESSAGE_SUCCESS;
 
-import com.owl_express.ai.application.dtos.CommonDto;
-import com.owl_express.ai.application.dtos.request.CompanyDeliverMessageCreateRequestDto;
-import com.owl_express.ai.application.dtos.request.HubDeliverMessageCreateRequestDto;
-import com.owl_express.ai.application.dtos.response.MessageCreateResponseDto;
-import com.owl_express.ai.application.dtos.response.MessageFindResponseDto;
-import com.owl_express.ai.application.service.AiService;
+import com.owl_express.ai.common.dto.CommonDto;
+import com.owl_express.ai.common.dto.request.CompanyDeliverMessageCreateRequestDto;
+import com.owl_express.ai.common.dto.request.HubDeliverMessageCreateRequestDto;
+import com.owl_express.ai.common.dto.response.MessageCreateResponseDto;
+import com.owl_express.ai.common.dto.response.MessageFindResponseDto;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

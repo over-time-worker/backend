@@ -21,8 +21,6 @@ public class CreateConsumerRequestDto {
     /**
      *  Consumer(Entity) Info
      */
-    @Column
-    @Enumerated(EnumType.STRING)
     private CompanyType companyType;
 
     @Size(min = 1, max = 50)

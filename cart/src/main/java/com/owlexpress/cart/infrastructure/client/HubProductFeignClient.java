@@ -1,8 +1,8 @@
 package com.owlexpress.cart.infrastructure.client;
 
-import com.owlexpress.cart.application.dto.request.HubProductIsEnoughRequestDto;
-import com.owlexpress.cart.application.dto.response.HubProductIsEnoughResponseDto;
-import com.owlexpress.cart.common.CommonDto;
+import com.owlexpress.cart.common.dto.request.HubProductIsEnoughRequestDto;
+import com.owlexpress.cart.common.dto.response.HubProductIsEnoughResponseDto;
+import com.owlexpress.cart.common.dto.CommonDto;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

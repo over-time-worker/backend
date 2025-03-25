@@ -1,12 +1,11 @@
 package com.owlexpress.delivery.infrastructure.feignClient;
 
-import com.owlexpress.delivery.application.dtos.CommonDto;
-import com.owlexpress.delivery.application.dtos.request.HubDeliverFallbackMessageCreateRequestDto;
+import com.owlexpress.delivery.common.dto.CommonDto;
+import com.owlexpress.delivery.common.dto.request.HubDeliverFallbackMessageCreateRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name="alarm-service")

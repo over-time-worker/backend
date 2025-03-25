@@ -1,16 +1,11 @@
 package com.owlexpress.delivery.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.DurationDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.DurationSerializer;
-import com.owlexpress.delivery.application.dtos.DeliveryCacheDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCompleteRequestDto;
-import com.owlexpress.delivery.application.dtos.request.DeliveryCreateRequestDto;
-import com.owlexpress.delivery.application.dtos.response.AlarmCreateResponseDto;
-import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedDeliveryStatusException;
-import com.owlexpress.delivery.application.exceptions.DeliveryException.NotSupportedOrderTypeException;
+import com.owlexpress.delivery.common.dto.DeliveryCacheDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCompleteRequestDto;
+import com.owlexpress.delivery.common.dto.request.DeliveryCreateRequestDto;
+import com.owlexpress.delivery.common.dto.response.AlarmCreateResponseDto;
+import com.owlexpress.delivery.domain.entity.constant.DeliveryStatus;
+import com.owlexpress.delivery.domain.entity.constant.OrderType;
 import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -265,53 +260,5 @@ public class Delivery extends BaseEntity implements Serializable {
         this.consumerDeliverId = alarmCreateResponseDto.getDeliverId();
         deliveryHistory.updateDeliverInfo(alarmCreateResponseDto, userId);
         modifiedEntity(userId);
-    }
-
-    @RequiredArgsConstructor
-    public enum OrderType {
-        ROCKET("ROCKET"),
-        NORMAL("NORMAL");
-
-        private final String name;
-
-        @JsonCreator
-        public static OrderType getType(String type) {
-            for(OrderType ot : OrderType.values()) {
-                if(ot.name.equalsIgnoreCase(type)) {
-                    return ot;
-                }
-            }
-            throw new NotSupportedOrderTypeException("지원하지 않는 주문 상태 입니다." + type);
-        }
-    }
-
-    @RequiredArgsConstructor
-    public enum DeliveryStatus {
-        PENDING_AT_HUB("PENDING_AT_HUB"),
-        SHIPPING_TO_HUB("SHIPPING_TO_HUB"),
-        ARRIVED_AT_HUB("ARRIVED_AT_HUB"),
-        SHIPPING_TO_COMPANY("SHIPPING_TO_COMPANY"),
-        COMPLETE("COMPLETE");
-
-        private final String name;
-
-        @JsonCreator
-        public static DeliveryStatus getStatus(String status) {
-            for(DeliveryStatus ds : DeliveryStatus.values()) {
-                if(ds.name.equalsIgnoreCase(status)) {
-                    return ds;
-                }
-            }
-            throw new NotSupportedDeliveryStatusException("지원하지 않는 배송 상태 입니다." + status);
-        }
-
-        public static String validateStatus(String status) {
-            for(DeliveryStatus ds : DeliveryStatus.values()) {
-                if(ds.name.equalsIgnoreCase(status)) {
-                    return ds.name;
-                }
-            }
-            throw new NotSupportedDeliveryStatusException("지원하지 않는 배송 상태 입니다." + status);
-        }
     }
 }

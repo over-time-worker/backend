@@ -1,12 +1,11 @@
 package com.owlexpress.consumer.domain.service;
 
-import com.owlexpress.consumer.common.exceptions.ConsumerException;
 import com.owlexpress.consumer.common.util.ConsumerHelper;
 import com.owlexpress.consumer.domain.entity.Consumer;
 import com.owlexpress.consumer.domain.repository.ConsumerRepository;
 import com.owlexpress.consumer.infrastructure.config.ConsumerSearchConfig;
-import com.owlexpress.consumer.presentation.dto.response.ConsumerResponseDto;
-import com.owlexpress.consumer.presentation.dto.response.SearchConsumerResponseDto;
+import com.owlexpress.consumer.common.dto.response.ConsumerResponseDto;
+import com.owlexpress.consumer.common.dto.response.SearchConsumerResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
