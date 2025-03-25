@@ -1,0 +1,91 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: payment-service
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2500
+            read-timeout: 2500
+            logger-level: basic
+  datasource:
+#    hikari:
+#      maximum-pool-size: 1000
+#      minimum-idle: 10
+#      connection-timeout: 300
+#      idle-timeout: 300
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+
+  # JPA 설정
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+logging:
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
+api:
+  connection-timeout: 5000
+  read-timeout: 5000
+  max-buffer-size-MB: 500
+
+toss:
+  client-key: ${TOSS_CLIENT_KEY}
+  secret-key: ${TOSS_SECRET_KEY}
+  authorization-key: ${TOSS_AUTH_KEY}
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: prometheus
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
+eureka:
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "${server.port}"
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka
+
+
+server:
+  port: ${PAYMENT_SERVER_PORT}
+  tomcat:
+    mbeanregistry:
+      enabled: true
+    threads:
+      max: 500
+    accept-count: 1000
+    max-connections: 1000
+    connection-timeout: 5s

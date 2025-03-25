@@ -60,16 +60,19 @@ services:
 
   redis:
     image: redis:latest
-    networks:
-      - overtime_network
+    container_name: redis
     ports:
       - "6378:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - overtime_network
     restart: always
+    platform: linux/amd64
 
   zipkin:
     image: openzipkin/zipkin
+    container_name: owlexpress-zipkin
     networks:
       - overtime_network
     ports:
@@ -78,6 +81,7 @@ services:
 
   prometheus:
     image: prom/prometheus
+    container_name: owlexpress-prometheus
     networks:
       - overtime_network
     ports:
@@ -88,6 +92,7 @@ services:
 
   grafana:
     image: grafana/grafana
+    container_name: owlexpress-grafana
     networks:
       - overtime_network
     ports:
@@ -95,6 +100,432 @@ services:
     depends_on:
       - prometheus
     restart: always
+
+  eureka:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: eureka
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+    depends_on:
+      - postgres
+      - redis
+      - logstash
+    ports:
+      - "19080:19080"
+    networks:
+      - overtime_network
+
+  gateway-service:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    environment:
+      - GATEWAY_SERVER_PORT=${GATEWAY_SERVER_PORT}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19081:19081"
+    networks:
+      - overtime_network
+
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth
+    environment:
+      - AUTH_SERVER_PORT=${AUTH_SERVER_PORT}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - AUTH_JWT_ACCESS_EXP=${AUTH_JWT_ACCESS_EXP}
+      - AUTH_JWT_REFRESH_EXP=${AUTH_JWT_REFRESH_EXP}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19082:19082"
+    networks:
+      - overtime_network
+
+  user-service:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+    container_name: user
+    environment:
+      - USER_SERVER_PORT=${USER_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19083:19083"
+    networks:
+      - overtime_network
+
+  ai-service:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    container_name: ai
+    environment:
+      - AI_SERVER_PORT=${AI_SERVER_PORT}
+      - AI_URL=${AI_URL}
+      - AI_KEY=${AI_KEY}
+      - AI_HUB_REQUEST_BASE=${AI_HUB_REQUEST_BASE}
+      - AI_HUB_REQUEST_FORMAT=${AI_HUB_REQUEST_FORMAT}
+      - AI_COMPANY_REQUEST_BASE=${AI_COMPANY_REQUEST_BASE}
+      - AI_COMPANY_REQUEST_FORMAT=${AI_COMPANY_REQUEST_FORMAT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19084:19084"
+    networks:
+      - overtime_network
+
+  alarm-service:
+    build:
+      context: ./alarm
+      dockerfile: Dockerfile
+    container_name: alarm
+    environment:
+      - ALARM_SERVER_PORT=${ALARM_SERVER_PORT}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - SLACK_TOKEN=${SLACK_TOKEN}
+      - SLACK_FALLBACK_MESSAGE=${SLACK_FALLBACK_MESSAGE}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19085:19085"
+    networks:
+      - overtime_network
+
+  product-service:
+    build:
+      context: ./product
+      dockerfile: Dockerfile
+    container_name: product
+    environment:
+      - PRODUCT_SERVER_PORT=${PRODUCT_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19086:19086"
+    networks:
+      - overtime_network
+
+  producer-service:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: producer
+    environment:
+      - PRODUCER_SERVER_PORT=${PRODUCER_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19087:19087"
+    networks:
+      - overtime_network
+
+  hub-service:
+    build:
+      context: ./hub
+      dockerfile: Dockerfile
+    container_name: hub
+    environment:
+      - HUB_SERVER_PORT=${HUB_SERVER_PORT}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19088:19088"
+    networks:
+      - overtime_network
+
+  consumer-service:
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
+    container_name: consumer
+    environment:
+      - CONSUMER_SERVER_PORT=${CONSUMER_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19089:19089"
+    networks:
+      - overtime_network
+
+  order-service:
+    build:
+      context: ./order
+      dockerfile: Dockerfile
+    container_name: order
+    environment:
+      - ORDER_SERVER_PORT=${ORDER_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19090:19090"
+    networks:
+      - overtime_network
+
+  payment-service:
+    build:
+      context: ./payment
+      dockerfile: Dockerfile
+    container_name: payment
+    environment:
+      - PAYMENT_SERVER_PORT=${PAYMENT_SERVER_PORT}
+      - TOSS_CLIENT_KEY=${TOSS_CLIENT_KEY}
+      - TOSS_SECRET_KEY=${TOSS_SECRET_KEY}
+      - TOSS_AUTH_KEY=${TOSS_AUTH_KEY}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19091:19091"
+    networks:
+      - overtime_network
+
+  delivery-service:
+    build:
+      context: ./delivery
+      dockerfile: Dockerfile
+    container_name: delivery
+    environment:
+      - DELIVERY_SERVER_PORT=${DELIVERY_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19092:19092"
+    networks:
+      - overtime_network
+
+  cart-service:
+    build:
+      context: ./cart
+      dockerfile: Dockerfile
+    container_name: cart
+    environment:
+      - CART_SERVER_PORT=${CART_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19093:19093"
+    networks:
+      - overtime_network
+
+  delivery-manager-service:
+    build:
+      context: ./deliveryManager
+      dockerfile: Dockerfile
+    container_name: delivery-manager
+    environment:
+      - DELIVERY_MANAGER_SERVER_PORT=${DELIVERY_MANAGER_SERVER_PORT}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - ZIPKIN_PORT=${ZIPKIN_PORT}
+      - ZIPKIN_SAMPLING_PROBABILITY=${ZIPKIN_SAMPLING_PROBABILITY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+    depends_on:
+      - eureka
+      - redis
+      - logstash
+    ports:
+      - "19094:19094"
+    networks:
+      - overtime_network
+
 networks:
   overtime_network:
     driver: bridge

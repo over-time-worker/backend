@@ -1,0 +1,124 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 60s
+        pool:
+          max-connections: 5000
+          acquire-timeout: 6000
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: user-service # ✅
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**, /api/master/**
+
+        - id: product-service # ✅
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/** # 상품, products/hub-info
+
+        - id: ai-service # ✅
+          uri: lb://ai-service
+          predicates:
+            - Path=/api/ai/**
+
+        - id: payment-service # ✅
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+
+        - id: delivery-service # ✅
+          uri: lb://delivery-service
+          predicates:
+            - Path=/api/delivery/**
+
+        - id: alarm-service # ✅
+          uri: lb://alarm-service
+          predicates:
+            - Path=/api/alarms/**
+
+        - id: order-service # ✅
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+
+        - id: deliverManger-service # ✅
+          uri: lb://deliveryManager-service
+          predicates:
+            - Path=/api/hub/delivery/**, /api/consumer/delivery/**
+        - id: hub-service # ✅
+          uri: lb://hub-service
+          predicates:
+            - Path=/api/hub-interval-info/**, /api/hub/**, /api/hub/product/** # 허브간 이동정보 + 허브, 허브 상품 포함
+
+        - id: producer-service # ✅
+          uri: lb://producer-service
+          predicates:
+            - Path=/api/producers/** # 공급업체, 상품 포함
+
+        - id: consumer-service # ✅
+          uri: lb://consumer-service
+          predicates:
+            - Path=/api/consumers/**
+
+        - id: cart-service # ✅
+          uri: lb://cart-service
+          predicates:
+            - Path=/api/carts/**
+
+        - id: auth-service # ✅
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+
+eureka:
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "${server.port}"
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka
+
+server:
+  port: ${GATEWAY_SERVER_PORT}
+  netty:
+    connection-timeout: 5s
+  jetty:
+    max-connections: 500
+  tomcat:
+    threads:
+      max: 500
+      min-spare: 500
+    max-connections: 1000
+    accept-count: 500
+
+jwt:
+  secret: ${AUTH_JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
+logging:
+  level:
+    org:
+      springframework:
+        security: trace # 필요에 따라 제거하셔도 됩니다!
