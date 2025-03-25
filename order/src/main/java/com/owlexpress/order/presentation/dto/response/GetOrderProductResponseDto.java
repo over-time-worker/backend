@@ -1,6 +1,6 @@
 package com.owlexpress.order.presentation.dto.response;
 
-import com.owlexpress.order.domain.constant.ProductType;
+import com.owlexpress.order.common.constant.ProductType;
 import com.owlexpress.order.domain.entity.OrderProduct;
 import java.math.BigDecimal;
 import java.util.UUID;

@@ -1,13 +1,13 @@
-package com.owlexpress.order.domain.constant;
+package com.owlexpress.order.common.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
-public enum ProductType {
+@Getter
+public enum OrderType {
     NORMAL("NORMAL"),
-    FRESH("FRESH");
+    ROCKET("ROCKET");
 
     private final String value;
 }

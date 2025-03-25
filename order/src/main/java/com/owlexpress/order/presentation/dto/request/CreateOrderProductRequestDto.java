@@ -1,6 +1,6 @@
 package com.owlexpress.order.presentation.dto.request;
 
-import com.owlexpress.order.domain.constant.ProductType;
+import com.owlexpress.order.common.constant.ProductType;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.Builder;

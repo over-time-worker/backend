@@ -1,4 +1,4 @@
-package com.owlexpress.order.common.entity;
+package com.owlexpress.order.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

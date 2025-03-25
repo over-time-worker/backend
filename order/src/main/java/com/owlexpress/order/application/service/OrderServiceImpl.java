@@ -12,7 +12,7 @@ import com.owlexpress.order.common.dto.CommonDto;
 import com.owlexpress.order.common.dto.PassportDto;
 import com.owlexpress.order.common.helper.PassportHelper;
 import com.owlexpress.order.common.util.PageUtil;
-import com.owlexpress.order.domain.constant.OrderStatus;
+import com.owlexpress.order.common.constant.OrderStatus;
 import com.owlexpress.order.domain.entity.Order;
 import com.owlexpress.order.domain.entity.OrderProduct;
 import com.owlexpress.order.domain.repository.OrderRepository;

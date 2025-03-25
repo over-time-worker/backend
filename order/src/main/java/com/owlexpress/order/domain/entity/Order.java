@@ -1,8 +1,8 @@
 package com.owlexpress.order.domain.entity;
 
-import com.owlexpress.order.common.entity.BaseEntity;
-import com.owlexpress.order.domain.constant.OrderStatus;
-import com.owlexpress.order.domain.constant.OrderType;
+import com.owlexpress.order.common.BaseEntity;
+import com.owlexpress.order.common.constant.OrderStatus;
+import com.owlexpress.order.common.constant.OrderType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

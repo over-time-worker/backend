@@ -1,6 +1,6 @@
 package com.owlexpress.order.application.dto.response;
 
-import com.owlexpress.order.domain.constant.ProductType;
+import com.owlexpress.order.common.constant.ProductType;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;

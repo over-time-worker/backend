@@ -1,7 +1,7 @@
 package com.owlexpress.order.application.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.owlexpress.order.domain.constant.OrderType;
+import com.owlexpress.order.common.constant.OrderType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;

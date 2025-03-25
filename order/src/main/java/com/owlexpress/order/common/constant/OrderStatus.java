@@ -1,4 +1,4 @@
-package com.owlexpress.order.domain.constant;
+package com.owlexpress.order.common.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
