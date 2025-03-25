@@ -1,7 +1,7 @@
 package com.owlexpress.producer.domain.entity;
 
 import com.owlexpress.producer.common.BaseEntity;
-import com.owlexpress.producer.domain.entity.constant.ProductType;
+import com.owlexpress.producer.common.constant.ProductType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;

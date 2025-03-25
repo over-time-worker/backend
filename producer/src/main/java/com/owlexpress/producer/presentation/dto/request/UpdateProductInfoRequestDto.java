@@ -1,6 +1,6 @@
 package com.owlexpress.producer.presentation.dto.request;
 
-import com.owlexpress.producer.domain.entity.constant.ProductType;
+import com.owlexpress.producer.common.constant.ProductType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;

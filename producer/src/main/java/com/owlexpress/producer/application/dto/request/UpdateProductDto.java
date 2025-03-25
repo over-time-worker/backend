@@ -1,6 +1,6 @@
 package com.owlexpress.producer.application.dto.request;
 
-import com.owlexpress.producer.domain.entity.constant.ProductType;
+import com.owlexpress.producer.common.constant.ProductType;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;

@@ -1,13 +1,12 @@
-package com.owlexpress.producer.domain.entity.constant;
+package com.owlexpress.producer.common.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ProductType {
-
-    NORMAL("NORMAL"), FRESH("FRESH");
+public enum CompanyType {
+    PRODUCER("Producer");
 
     private final String value;
 }

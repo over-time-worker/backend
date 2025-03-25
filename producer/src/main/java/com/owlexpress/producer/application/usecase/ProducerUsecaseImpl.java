@@ -13,6 +13,7 @@ import com.owlexpress.producer.domain.entity.Producer;
 import com.owlexpress.producer.domain.repository.ProducerRepository;
 import com.owlexpress.producer.infrastructure.feignClient.ProductClient;
 import com.owlexpress.producer.infrastructure.feignClient.UserFeignClient;
+import com.owlexpress.producer.presentation.ProducerUsecase;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,8 @@ import static com.owlexpress.producer.common.exception.ProducerException.Produce
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProducerUsecase {
+public class ProducerUsecaseImpl implements ProducerUsecase {
+
     private final UserFeignClient userFeignClient;
     private final ProducerRepository producerRepository;
     private final ProducerHelper producerHelper;
@@ -38,6 +40,7 @@ public class ProducerUsecase {
     private final PassportHelper passportHelper;
 
     @Transactional
+    @Override
     public void create(
             CreateProducerRequestDto createProducerRequestDto,
             String passport
@@ -45,14 +48,15 @@ public class ProducerUsecase {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
 
         GetUserInfoResponseDto getUserInfoResponseDto = userFeignClient.get(passport)
-                                                                       .getData();
+                .getData();
 
         producerRepository.findByCompanyName(createProducerRequestDto.getCompanyName())
-                          .ifPresent(producer -> {
-                              throw new ProducerNameDuplicateException(PRODUCER_DUPLICATE_NAME_MESSAGE);
-                          });
+                .ifPresent(producer -> {
+                    throw new ProducerNameDuplicateException(PRODUCER_DUPLICATE_NAME_MESSAGE);
+                });
 
-        Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto, getUserInfoResponseDto);
+        Producer producer = CreateProducerRequestDto.toEntity(createProducerRequestDto,
+                getUserInfoResponseDto);
         producer.updateCreateData(passportDto.getUserId());
 
         producerRepository.save(producer);
@@ -60,6 +64,7 @@ public class ProducerUsecase {
     }
 
     @Transactional
+    @Override
     public void update(
             UpdateProducerRequestDto updateProducerRequestDto,
             UUID producerId,
@@ -68,24 +73,27 @@ public class ProducerUsecase {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         Producer producer = producerHelper.getProducer(producerId);
         if (!producer.getUserId()
-                     .equals(passportDto.getUserId())) {
-            throw new ProducerException.NotAuthorizedException(PRODUCER_NOT_AUTHORIZED_UPDATE_MESSAGE);
+                .equals(passportDto.getUserId())) {
+            throw new ProducerException.NotAuthorizedException(
+                    PRODUCER_NOT_AUTHORIZED_UPDATE_MESSAGE);
         }
 
         updateProducer(producer, updateProducerRequestDto);
         producer.updateModifiedData(passportDto.getUserId());
 
         // 상품 전파 (업체 관련 정보 변동시에만)
-        if (updateProducerRequestDto.getCompanyName() != null || updateProducerRequestDto.getCompanyType() != null || updateProducerRequestDto.getCompanyAddress() != null) {
+        if (updateProducerRequestDto.getCompanyName() != null
+                || updateProducerRequestDto.getCompanyType() != null
+                || updateProducerRequestDto.getCompanyAddress() != null) {
             UpdateProductDto updateProductDto = UpdateProductDto.builder()
-                                                                .producerName(producer.getUserName())
-                                                                .producerAddress(producer.getCompanyAddress())
-                                                                .producerId(producerId)
-                                                                .build();
+                    .producerName(producer.getUserName())
+                    .producerAddress(producer.getCompanyAddress())
+                    .producerId(producerId)
+                    .build();
 
             producer.getProductInfos()
                     .forEach(productInfo -> productClient.update(passport, updateProductDto,
-                                                                 productInfo.getProductId()
+                            productInfo.getProductId()
                     ));
         }
 
@@ -93,6 +101,7 @@ public class ProducerUsecase {
     }
 
 
+    @Override
     public void updateProducer(
             Producer producer,
             UpdateProducerRequestDto dto
@@ -106,8 +115,8 @@ public class ProducerUsecase {
         Optional.ofNullable(dto.getCompanyAddress())
                 .ifPresent(producer::setCompanyAddress);
         if (Optional.ofNullable(dto.getLatitude())
-                    .isPresent() && Optional.ofNullable(dto.getLongitude())
-                                            .isPresent()) {
+                .isPresent() && Optional.ofNullable(dto.getLongitude())
+                .isPresent()) {
             Point point = GeoUtil.createPoint(dto.getLatitude(), dto.getLongitude());
             producer.setLocation(point);
         }
@@ -116,6 +125,7 @@ public class ProducerUsecase {
     }
 
     @Transactional
+    @Override
     public void delete(
             UUID producerId,
             String passport
@@ -125,7 +135,7 @@ public class ProducerUsecase {
 
         try {
             if (productClient.delete(passport, producerId)
-                             .getData()) {
+                    .getData()) {
                 producer.softDeleteData(passportDto.getUserId());
             }
         } catch (FeignException.BadRequest badRequest) {

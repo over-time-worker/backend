@@ -1,7 +1,7 @@
 package com.owlexpress.producer.domain.entity;
 
 import com.owlexpress.producer.common.BaseEntity;
-import com.owlexpress.producer.domain.entity.constant.CompanyType;
+import com.owlexpress.producer.common.constant.CompanyType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
