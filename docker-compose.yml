@@ -1,20 +1,4 @@
 services:
-  # PostgreSQL + PostGIS
-  postgres:
-    image: postgis/postgis:latest
-    container_name: postgres
-    platform: linux/amd64
-    ports:
-      - "5431:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: overtime
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - overtime_network
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
     container_name: elasticsearch
@@ -22,7 +6,7 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g  # 💡 heap 사이즈 지정
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g  # heap 사이즈 지정
     ports:
       - "9200:9200"
     networks:
@@ -526,10 +510,211 @@ services:
     networks:
       - overtime_network
 
+  # PostgreSQL + PostGIS
+  user-postgres:
+    image: postgis/postgis:latest
+    container_name: user-postgres
+    platform: linux/amd64
+    ports:
+      - "5430:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  ai-postgres:
+    image: postgis/postgis:latest
+    container_name: ai-postgres
+    platform: linux/amd64
+    ports:
+      - "5429:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - ai_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  alarm-postgres:
+    image: postgis/postgis:latest
+    container_name: alarm-postgres
+    platform: linux/amd64
+    ports:
+      - "5428:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - alarm_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  product-postgres:
+    image: postgis/postgis:latest
+    container_name: product-postgres
+    platform: linux/amd64
+    ports:
+      - "5427:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - product_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  producer-postgres:
+    image: postgis/postgis:latest
+    container_name: producer-postgres
+    platform: linux/amd64
+    ports:
+      - "5426:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - producer_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+  # PostgreSQL + PostGIS
+  hub-postgres:
+    image: postgis/postgis:latest
+    container_name: hub-postgres
+    platform: linux/amd64
+    ports:
+      - "5425:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - hub_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  consumer-postgres:
+    image: postgis/postgis:latest
+    container_name: consumer-postgres
+    platform: linux/amd64
+    ports:
+      - "5424:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - consumer_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  order-postgres:
+    image: postgis/postgis:latest
+    container_name: order-postgres
+    platform: linux/amd64
+    ports:
+      - "5423:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - order_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+  # PostgreSQL + PostGIS
+  payment-postgres:
+    image: postgis/postgis:latest
+    container_name: payment-postgres
+    platform: linux/amd64
+    ports:
+      - "5422:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - payment_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  delivery-postgres:
+    image: postgis/postgis:latest
+    container_name: delivery-postgres
+    platform: linux/amd64
+    ports:
+      - "5421:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - delivery_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  cart-postgres:
+    image: postgis/postgis:latest
+    container_name: cart-postgres
+    platform: linux/amd64
+    ports:
+      - "5420:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - cart_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  # PostgreSQL + PostGIS
+  delivery-manager-postgres:
+    image: postgis/postgis:latest
+    container_name: delivery-manager-postgres
+    platform: linux/amd64
+    ports:
+      - "5419:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - delivery_manager_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
 networks:
   overtime_network:
     driver: bridge
 
 volumes:
-  postgres_data:  # 볼륨 추가하여 데이터 유지
+  user_postgres_data:
+  ai_postgres_data:
+  alarm_postgres_data:
+  product_postgres_data:
+  producer_postgres_data:
+  hub_postgres_data:
+  consumer_postgres_data:
+  order_postgres_data:
+  payment_postgres_data:
+  delivery_postgres_data:
+  cart_postgres_data:
+  delivery_manager_postgres_data:
   redis_data:
