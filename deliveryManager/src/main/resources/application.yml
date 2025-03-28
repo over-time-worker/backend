@@ -25,7 +25,8 @@ spring:
       connection-timeout: 30000
 #    url: jdbc:postgresql://localhost:5431/overtime
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+#    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${DELIVERY_MANAGER_POSTGRES_PORT:5432}/${POSTGRES_DB}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
 
