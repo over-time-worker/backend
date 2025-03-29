@@ -77,4 +77,8 @@ public class HubProduct extends BaseEntity {
     public void reduceStock(long quantity) {
         this.productStock -= quantity;
     }
+
+    public void addStock(Long quantity) {
+        this.productStock += quantity;
+    }
 }

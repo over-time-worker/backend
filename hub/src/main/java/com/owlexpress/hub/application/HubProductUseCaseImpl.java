@@ -1,5 +1,7 @@
 package com.owlexpress.hub.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
@@ -28,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -46,7 +50,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class HubProductUseCaseImpl implements HubProductUseCase {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String REDISSON_LOCK_PREFIX = "LOCK:CONFIRM_ORDER:";
+    private static final String REDISSON_LOCK_PREFIX = "LOCK:HUB_PRODUCT:CONFIRM_ORDER:";
+    private static final String REDUCED_PRODUCTS_CACHE_PREFIX = "HUB_PRODUCT:CONFIRM_ORDER";
     private static final int MAX_RETRY = 3;
 
     private final HubRepository hubRepository;
@@ -56,6 +61,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
     private final HubProductRepository hubProductRepository;
     private final RedissonClient redissonClient; // 분산 락 적용
     private final TransactionTemplate transactionTemplate; // 트랜잭션 경계 설정
+    private final RedisTemplate<String, Object> reducedProducts; // 주문 ID : [{허브 상품 ID : 개수}, ...]
 
     @Override
     public HubProduct create(
@@ -144,7 +150,6 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 // TODO: fallback 전략 추가 => RedisStream
                 log.info("{} - fallback 발생!", threadName);
                 throw new HubProductNotFoundException.LockAcquisitionFailedException();
-
             }
 
             log.info("{}, 락 획득 성공", threadName);
@@ -156,6 +161,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                                 return confirmOrderWithResponse(
                                         requestDto, orderProducts, productIds);
                             } catch (Exception e) {
+                                log.error(e.getMessage());
                                 status.setRollbackOnly();
                                 return null;
                             }
@@ -172,7 +178,109 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             }
             log.info("{} 모든 락 해제 완료", threadName);
         }
+
+        // 재고 감소 성공 했다면 -> 롤백 대비해서 캐싱
+        List<ConfirmedHubProductResponseDto> products = null;
+        if (confirmResponseDto != null && (products = confirmResponseDto.getProducts()) != null) {
+            log.info("{} - 재고 감소 성공, 캐싱 진행", threadName);
+            cacheReducedProducts(requestDto.getOrderId(), products);
+        }
+
         return confirmResponseDto;
+    }
+
+    public void rollbackConfirmOrder(UUID orderId) {
+        String threadName = Thread.currentThread().getName();
+        log.info("{} - 재고 롤백 시도", threadName);
+        // 레디스에서 키값으로 롤백 준비
+        List<ConfirmedHubProductResponseDto> reducedHubProducts = getReducedHubProducts(orderId);
+
+        List<RLock> rollbackLocks = reducedHubProducts.stream()
+                .map(dto -> redissonClient.getLock(REDISSON_LOCK_PREFIX + dto.getHubProductId()))
+                .toList();
+
+        RLock rollbackOrderLock = redissonClient.getMultiLock(
+                rollbackLocks.toArray(new RLock[0]));
+
+        boolean available = false;
+
+        try {
+            for (int attempts = 0; attempts < MAX_RETRY; attempts++) {
+                // 락 획득 시도
+                log.info("{} - 재고 롤백 락 획득 시도", threadName);
+                available = rollbackOrderLock.tryLock(9L, 9L, TimeUnit.SECONDS);
+
+                if (available) {
+                    break;
+                }
+
+                // 지수 백오프 적용
+                long expBackOffMillis = (long) Math.pow(2, attempts) * 100
+                        + ThreadLocalRandom.current().nextInt(100);
+                Thread.sleep(expBackOffMillis);
+            }
+
+            // 락 획득 실패 -> fallback
+            if (!available) {
+                log.info("{} - 재고 롤백 중 fallback 발생!", threadName);
+                throw new HubProductNotFoundException.LockAcquisitionFailedException();
+            }
+
+            log.info("{} - 재고 롤백 시도", threadName);
+            List<UUID> hubProductIds = reducedHubProducts.stream()
+                    .map(ConfirmedHubProductResponseDto::getHubProductId)
+                    .toList();
+
+            // 허브 상품 ID 별로 상품 개수를 가지는 맵
+            Map<UUID, Long> byHubProductId = new HashMap<>();
+
+            // 맵에 삽입
+            reducedHubProducts.forEach(
+                    hubProduct -> byHubProductId.put(
+                            hubProduct.getHubProductId(),
+                            hubProduct.getQuantity()
+                    )
+            );
+
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    try {
+
+                        List<HubProduct> hubProductStocks = hubRepository.findHubProductStocks(
+                                hubProductIds);
+
+                        for (HubProduct hubProduct : hubProductStocks) {
+                            UUID hubProductId = hubProduct.getHubProductId();
+
+                            Long quantity = byHubProductId.getOrDefault(hubProductId, null);
+
+                            if (quantity == null) {
+                                return;
+                            }
+                            hubProduct.addStock(quantity);
+                        }
+
+                    } catch (IllegalMonitorStateException e) {
+                        log.error("{} - 재고 롤백 도중 실패", threadName);
+                        status.setRollbackOnly();
+                    }
+                }
+            });
+            log.info("{} - 롤백 수행 완료", threadName);
+
+        } catch (InterruptedException e) {
+            throw new LockAcquisitionFailedException();
+        } finally {
+            // 락 가지고 있을 때만 방출
+            try {
+                rollbackOrderLock.unlock();
+                log.info("{} - 재고 롤백 락 해제 완료", threadName);
+            } catch (Exception e) {
+                log.warn("{} - 재고 롤백, 락 미보유 혹은 이미 반환완료", threadName);
+            }
+        }
+
     }
 
     protected HubProductOrderConfirmResponseDto confirmOrderWithResponse(
@@ -182,6 +290,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 requestDto.getLatitude(),
                 requestDto.getLongitude()
         );
+        String threadName = Thread.currentThread().getName();
 
         // 상품 재고 파악용
         Map<UUID, Product> productByProductId = new HashMap<>();
@@ -190,7 +299,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 product -> productByProductId.put(product.getProductId(), product)
         );
 
-        log.info("모든 허브에서 상품들 조회");
+        log.info("{} - 상품을 가진 허브 조회", threadName);
         Map<UUID, List<HubProductInfoResponseDto>> hubProductSetByHub =
                 findHubProductsGroupByHubId(productIds);
 
@@ -213,36 +322,59 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 continue;
             }
 
-            List<HubProductInfoResponseDto> toBeApply = new ArrayList<>();
+            String currentHubName = currentHub.get(0).getHubName();
+            UUID currentHubId = currentHub.get(0).getHubId();
 
-            // O(N)
-            for (HubProductInfoResponseDto hubProductInfo : currentHub) {
+            log.info("{} - 구매하려는 상품 항목 모두 {}에 존재", threadName, currentHubName);
+
+            List<UUID> hubProductsInCurrentHub = currentHub.stream()
+                    .map(HubProductInfoResponseDto::getHubProductId)
+                    .toList();
+
+            // TODO: 락 시작
+            // TODO: 트랜잭션 경계 시작
+
+            log.info("{} - {}에서 상품 재고 조회", threadName, currentHubId);
+            List<HubProduct> hubProductStocks = hubRepository.findHubProductStocks(
+                    hubProductsInCurrentHub);
+
+            boolean isAllProductEnough = true;
+
+            for (HubProduct hubProductStock : hubProductStocks) {
 
                 Product orderProduct = productByProductId.getOrDefault(
-                        hubProductInfo.getProductId(),
+                        hubProductStock.getProductId(),
                         null
                 );
 
-                // 상품 ID가 다르거나 재고가 안맞으면 넘어감
+                // 상품 ID가 다르거나 재고가 안맞으면 더이상 탐색 X
                 if (
                         orderProduct == null
-                                || orderProduct.getQuantity()
-                                > hubProductInfo.getProductStock()) {
-                    continue;
+                                || orderProduct.getQuantity() > hubProductStock.getProductStock()) {
+                    isAllProductEnough = false;
+                    break;
                 }
-                // 재고 미리 감소 시켜봄. -> 엔티티가 아니므로 저장 시점이전까지 반영 X
-                toBeApply.add(hubProductInfo); // 반영시킬 DTO 일단 넣어봄.
+
+            }
+
+            // 모든 재고가 충분치 않으면 다음 허브 탐색
+            if (!isAllProductEnough) {
+                continue;
             }
 
             // 감소시킬 재고가 모두 있으면
-            if (toBeApply.size() == orderProducts.size()) {
+            if (hubProductStocks.size() == orderProducts.size()) {
 
                 return reduceStock(
-                        toBeApply,
-                        productByProductId
+                        hubProductStocks,
+                        productByProductId,
+                        currentHubId,
+                        currentHubName,
+                        requestDto.getOrderId()
                 );
             }
-
+            // TODO: 트랜잭션 경계 종료
+            // TODO: 락 해제
         }
 
         throw new HubProductException.HubProductStockNotEnoughException();
@@ -266,8 +398,11 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
 
     // 명시적으로 트랜잭션 종료 시켜 변경 내역 커밋
     protected HubProductOrderConfirmResponseDto reduceStock(
-            List<HubProductInfoResponseDto> toBeApply,
-            Map<UUID, Product> productByProductId
+            List<HubProduct> toBeApply,
+            Map<UUID, Product> productByProductId,
+            UUID hubId,
+            String hubName,
+            UUID orderId
     ) {
 
         // 트랜잭션 추적
@@ -279,26 +414,15 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                     }
                 });
 
-        List<UUID> hubProductIds =
-                toBeApply.stream()
-                        .map(HubProductInfoResponseDto::getHubProductId)
-                        .toList();
-
-        /*
-        허브에서 아이디 바탕으로 조회(영속성 컨텍스트에 저장) 후 변경 감지 기능 사용
-         */
-        List<HubProduct> hubProducts = hubProductRepository.findAllHubProductsIn(
-                hubProductIds);
-
         // 반환할 DTO 객체 준비
         HubProductOrderConfirmResponseDto confirmResponseDto =
                 HubProductOrderConfirmResponseDto.builder()
-                        .hubId(toBeApply.get(0).getHubId())
-                        .hubName(toBeApply.get(0).getHubName())
+                        .hubId(hubId)
+                        .hubName(hubName)
                         .products(new ArrayList<>())
                         .build();
 
-        for (HubProduct hubProduct : hubProducts) {
+        for (HubProduct hubProduct : toBeApply) {
             // 상품 ID로 요청 수량 찾아오기
             Product product =
                     productByProductId.getOrDefault(hubProduct.getProductId(), null);
@@ -322,4 +446,30 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
         }
         return confirmResponseDto;
     }
+
+    private void cacheReducedProducts(UUID orderId, List<ConfirmedHubProductResponseDto> products) {
+        String cacheKey = REDUCED_PRODUCTS_CACHE_PREFIX + orderId;
+        try {
+            String values = objectMapper.writeValueAsString(products);
+            reducedProducts.opsForValue().set(cacheKey, values);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<ConfirmedHubProductResponseDto> getReducedHubProducts(UUID orderId) {
+        String cacheKey = REDUCED_PRODUCTS_CACHE_PREFIX + orderId;
+        try {
+            String json = (String) reducedProducts.opsForValue().get(cacheKey);
+            if (json == null) {
+                return Collections.emptyList();
+            }
+            JavaType type = objectMapper.getTypeFactory()
+                    .constructCollectionType(List.class, ConfirmedHubProductResponseDto.class);
+            return objectMapper.readValue(json, type);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to deserialize list", e);
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { SharedArray } from 'k6/data';
+import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
 // 테스트 설정
 export const options = {
@@ -23,6 +24,7 @@ const BASE_URL = 'http://localhost:19081/api';
 
 // 모든 가상 사용자가 동일한 요청 본문 사용
 const ORDER_PAYLOAD = {
+  "orderId": uuidv4(),
   "consumerId": "b63d1145-2ff9-4dcb-a387-ebdd435113d2",
   "latitude": 37.123456,
   "longitude": 127.987654,
@@ -43,7 +45,7 @@ const ORDER_PAYLOAD = {
 };
 const headers = {
   'Content-Type': 'application/json',
-  'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiYXV0aCI6Ik1BU1RFUiIsImlzcyI6Ik92TyIsImlhdCI6MTc0MjQ2OTg0NywiZXhwIjoxNzQzMDc0NjQ3fQ.6s1NGmWkBEF5AbYbOgwkzI0uMiLuC7zqXVsbkLPkhWRR_OWx9XcdwppZcS64w02I3v8wg_xKXKns_GcU-twkAg'
+  'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiYXV0aCI6Ik1BU1RFUiIsImlzcyI6Ik92TyIsImlhdCI6MTc0MzI0NzY0MiwiZXhwIjoxNzQzODUyNDQyfQ.EMflSs_h58eGlks_kSomugD8X0_QUVQCO6O8_2HtO72WNq4rfrSZ0Riky7OAXTgIm_N1DKpM0vn42d-m1do3OQ'
 };
 
 
