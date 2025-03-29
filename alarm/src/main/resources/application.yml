@@ -82,5 +82,6 @@ slack :
 logging:
   logstash:
     host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5044}
 massage :
   fallback : ${SLACK_FALLBACK_MESSAGE}

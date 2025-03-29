@@ -36,6 +36,7 @@ server:
 logging:
   logstash:
     host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5044}
 management:
   endpoints:
     jmx:
