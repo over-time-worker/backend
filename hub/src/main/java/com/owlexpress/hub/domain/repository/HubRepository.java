@@ -1,7 +1,6 @@
 package com.owlexpress.hub.domain.repository;
 
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
-import com.owlexpress.hub.application.dto.response.HubProductStockResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
@@ -38,7 +37,7 @@ public interface HubRepository {
 
     List<Hub> findAllByParentHub(Hub parentHubId);
 
-    List<HubProductStockResponseDto> findHubProductStocks(List<UUID> products);
+    List<HubProduct> findHubProductStocks(List<UUID> hubProductsIds);
 
     List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds);
 }
