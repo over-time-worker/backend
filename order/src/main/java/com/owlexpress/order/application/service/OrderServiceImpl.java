@@ -7,6 +7,7 @@ import com.owlexpress.order.application.dto.request.CreatePaymentRequestDto;
 import com.owlexpress.order.application.dto.response.ConfirmHubStockResponseDto;
 import com.owlexpress.order.application.dto.response.CreatePaymentResponseDto;
 import com.owlexpress.order.application.dto.response.GetConsumerInfoResponseDto;
+import com.owlexpress.order.application.exception.OrderFailedException;
 import com.owlexpress.order.application.exception.OrderNotFoundException;
 import com.owlexpress.order.common.dto.CommonDto;
 import com.owlexpress.order.common.dto.PassportDto;
@@ -27,8 +28,10 @@ import com.owlexpress.order.presentation.dto.request.UpdateOrderStatusRequestDto
 import com.owlexpress.order.presentation.dto.response.CreateOrderResponseDto;
 import com.owlexpress.order.presentation.dto.response.GetOrderResponseDto;
 import com.owlexpress.order.presentation.dto.response.OrderSearchResponseDto;
+import feign.FeignException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -54,94 +57,102 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public CreateOrderResponseDto createOrder(String passport, CreateOrderRequestDto request) {
+
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         UUID orderId = UUID.randomUUID();
-        log.info("consumerId : {}", request.getConsumerId());
-        // 1. consumer 업체 정보 조회 feign request
-        CommonDto<GetConsumerInfoResponseDto> consumerInfo = consumerFeignClient.getConsumerInfo(
-                passport, request.getConsumerId());
 
-        log.info("업체 통과");
-        // 2. 허브로 재고 확인 요청
-        ConfirmHubStockRequestDto dtos = ConfirmHubStockRequestDto.builder()
-                .orderId(orderId)
-                .consumerId(request.getConsumerId())
+        try {
+            log.info("consumerId : {}", request.getConsumerId());
+            // 1. consumer 업체 정보 조회 feign request
+            CommonDto<GetConsumerInfoResponseDto> consumerInfo = consumerFeignClient.getConsumerInfo(
+                    passport, request.getConsumerId());
+
+            log.info("업체 통과");
+            // 2. 허브로 재고 확인 요청
+            ConfirmHubStockRequestDto dtos = ConfirmHubStockRequestDto.builder()
+                    .orderId(orderId)
+                    .consumerId(request.getConsumerId())
 //                .latitude(consumerInfo.getData().getLongitude())
-                .latitude(consumerInfo.getData().getLatitude())
+                    .latitude(consumerInfo.getData().getLatitude())
 //                .longitude(consumerInfo.getData().getLatitude())
-                .longitude(consumerInfo.getData().getLongitude())
-                .orderProducts(
-                        request.getProducts().stream()
-                                .map(hubProduct ->
-                                        ConfirmHubStockRequestDto.HubProduct.builder()
-                                                .productId(hubProduct.getProductId())
-                                                .quantity(hubProduct.getQuantity())
-                                                .build()
-                                )
-                                .collect(Collectors.toList())
-                )
-                .build();
-        CommonDto<ConfirmHubStockResponseDto> hubProductStock = hubFeignClient
-                .findHubProductStock(
-                        passport, dtos
-                );
+                    .longitude(consumerInfo.getData().getLongitude())
+                    .orderProducts(
+                            request.getProducts().stream()
+                                    .map(hubProduct ->
+                                            ConfirmHubStockRequestDto.HubProduct.builder()
+                                                    .productId(hubProduct.getProductId())
+                                                    .quantity(hubProduct.getQuantity())
+                                                    .build()
+                                    )
+                                    .collect(Collectors.toList())
+                    )
+                    .build();
+            CommonDto<ConfirmHubStockResponseDto> hubProductStock = hubFeignClient
+                    .findHubProductStock(
+                            passport, dtos
+                    );
 
-        log.info("허브 통과");
-        // 5. 주문 저장
+            log.info("허브 통과");
+            // 5. 주문 저장
 
-        BigDecimal calcTotalPrice = calculateTotalPrice(request.getProducts());
+            BigDecimal calcTotalPrice = calculateTotalPrice(request.getProducts());
 
-        StringBuilder sb = new StringBuilder();
-        if (request.getProducts().size() > 1) {
-            sb.append(request.getProducts().get(0).getProductName())
-                    .append("외 ").append(request.getProducts().size() - 1).append("건");
-        } else {
-            sb.append(request.getProducts().get(0).getProductName());
-        }
+            StringBuilder sb = new StringBuilder();
+            if (request.getProducts().size() > 1) {
+                sb.append(request.getProducts().get(0).getProductName())
+                        .append("외 ").append(request.getProducts().size() - 1).append("건");
+            } else {
+                sb.append(request.getProducts().get(0).getProductName());
+            }
 
-        Order savedOrder = buildOrder(
-                orderId,
-                passportDto.getUserId(),
-                request,
-                calcTotalPrice,
-                sb.toString(),
-                consumerInfo.getData()
-        );
+            Order savedOrder = buildOrder(
+                    orderId,
+                    passportDto.getUserId(),
+                    request,
+                    calcTotalPrice,
+                    sb.toString(),
+                    consumerInfo.getData()
+            );
 
-        addOrderProducts(savedOrder, request.getProducts());
+            addOrderProducts(savedOrder, request.getProducts());
 
-        Order save = orderRepository.save(savedOrder);
-        save.updateCreateData(passportDto.getUserId());
+            Order save = orderRepository.save(savedOrder);
+            save.updateCreateData(passportDto.getUserId());
 
-        // 4. payment service에 모든 정보를 담아 전달
-        CreatePaymentRequestDto paymentRequestDto = CreatePaymentRequestDto.builder()
-                .orderId(save.getOrderId())
-                .price(calculateTotalPrice(request.getProducts()))
-                .transactionId(UUID.randomUUID().toString())
-                .productInfo(savedOrder.getProductInfo())
-                .startHubId(hubProductStock.getData().getHubId())
-                .startHubName(hubProductStock.getData().getHubName())
-                .orderType(request.getOrderType())
-                .shippingAddress(request.getConsumerAddress())
-                .description(request.getDescription())
-                .requestArrivalTime(request.getRequestArrivalTime())
-                .consumerCompanyId(request.getConsumerId())
-                .consumerLatitude(consumerInfo.getData().getLatitude())
-                .consumerLongitude(consumerInfo.getData().getLongitude())
-                .consumerPhoneNumber(consumerInfo.getData().getUserPhoneNumber())
-                .consumerName(consumerInfo.getData().getUserName())
-                .build();
-        CommonDto<CreatePaymentResponseDto> createPaymentResponseDtoCommonDto = paymentFeignClient.sendPaymentRequest(
-                passport, paymentRequestDto);
+            // 4. payment service에 모든 정보를 담아 전달
+            CreatePaymentRequestDto paymentRequestDto = CreatePaymentRequestDto.builder()
+                    .orderId(save.getOrderId())
+                    .price(calculateTotalPrice(request.getProducts()))
+                    .transactionId(UUID.randomUUID().toString())
+                    .productInfo(savedOrder.getProductInfo())
+                    .startHubId(hubProductStock.getData().getHubId())
+                    .startHubName(hubProductStock.getData().getHubName())
+                    .orderType(request.getOrderType())
+                    .shippingAddress(request.getConsumerAddress())
+                    .description(request.getDescription())
+                    .requestArrivalTime(request.getRequestArrivalTime())
+                    .consumerCompanyId(request.getConsumerId())
+                    .consumerLatitude(consumerInfo.getData().getLatitude())
+                    .consumerLongitude(consumerInfo.getData().getLongitude())
+                    .consumerPhoneNumber(consumerInfo.getData().getUserPhoneNumber())
+                    .consumerName(consumerInfo.getData().getUserName())
+                    .build();
+            CommonDto<CreatePaymentResponseDto> createPaymentResponseDtoCommonDto = paymentFeignClient.sendPaymentRequest(
+                    passport, paymentRequestDto);
 
-        log.info("결제 통과");
-        UUID deliveryId = createPaymentResponseDtoCommonDto.getData().getDeliveryId();
-        savedOrder.setDeliveryId(deliveryId);
+            log.info("결제 통과");
+            UUID deliveryId = createPaymentResponseDtoCommonDto.getData().getDeliveryId();
+            savedOrder.setDeliveryId(deliveryId);
+            return CreateOrderResponseDto.toDto(save);
 
-        // TODO 장바구니 상품 List 삭제 feign
+            // TODO 장바구니 상품 List 삭제 feign
 //        cartFeignClient.deleteCartProductsFromOrder();
-
-        return CreateOrderResponseDto.toDto(save);
+        } catch (FeignException e) {
+            Map<String, UUID> rollbackDto = Map.of("orderId", orderId);
+            log.error("주문 실패");
+            hubFeignClient.rollbackOrder(rollbackDto);
+            throw new OrderFailedException();
+        }
     }
 
     @Override
