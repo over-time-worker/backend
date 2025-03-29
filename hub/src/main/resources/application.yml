@@ -26,6 +26,8 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${HUB_POSTGRES_PORT:5432}/${POSTGRES_DB}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
+  kafka:
+    bootstrap-servers: localhost:29092
 
   # JPA 설정
   jpa:

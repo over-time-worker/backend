@@ -25,6 +25,9 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  kafka:
+    bootstrap-servers: localhost:29092
+
 product:
   search:
     default-page-size: 10
