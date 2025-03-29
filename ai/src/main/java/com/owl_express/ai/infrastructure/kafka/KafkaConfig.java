@@ -15,8 +15,13 @@ public class KafkaConfig {
 
 
     @Bean
-    public NewTopic aiSuccessTopic(){
-        return new NewTopic("ai.success", 3, (short) 1);
+    public NewTopic HubAiSuccessTopic(){
+        return new NewTopic("ai.success-hub", 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic CompanyAiSuccessTopic(){
+        return new NewTopic("ai.success-company", 3, (short) 1);
     }
 
     @Bean
