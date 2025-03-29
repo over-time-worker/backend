@@ -75,6 +75,7 @@ management:
 logging:
   logstash:
     host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5044}
 api :
   connection-timeout: 3000
   read-timeout: 120000
