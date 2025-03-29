@@ -23,4 +23,6 @@ public interface HubProductUseCase {
     HubProductOrderConfirmResponseDto confirmOrder(
             OrderConfirmRequestDto requestDto
     );
+
+    void rollbackConfirmOrder(UUID orderId);
 }

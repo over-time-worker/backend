@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "p_order")
 public class Order extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+//    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "order_id")
     private UUID orderId;
 
@@ -75,6 +75,7 @@ public class Order extends BaseEntity {
 
     @Builder
     public Order(
+            UUID orderId,
             Long userId,
             UUID consumerId,
             UUID hubId,
@@ -87,6 +88,7 @@ public class Order extends BaseEntity {
             OrderStatus orderStatus,
             String productInfo
     ) {
+        this.orderId = orderId;
         this.userId = userId;
         this.consumerId = consumerId;
         this.hubId = hubId;
