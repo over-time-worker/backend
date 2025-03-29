@@ -42,7 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService{
+public class OrderServiceImpl implements OrderService {
+
     private final OrderRepository orderRepository;
     private final PassportHelper passportHelper;
     private final ConsumerFeignClient consumerFeignClient;
@@ -54,7 +55,7 @@ public class OrderServiceImpl implements OrderService{
     @Override
     public CreateOrderResponseDto createOrder(String passport, CreateOrderRequestDto request) {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
-
+        UUID orderId = UUID.randomUUID();
         log.info("consumerId : {}", request.getConsumerId());
         // 1. consumer 업체 정보 조회 feign request
         CommonDto<GetConsumerInfoResponseDto> consumerInfo = consumerFeignClient.getConsumerInfo(
@@ -63,6 +64,7 @@ public class OrderServiceImpl implements OrderService{
         log.info("업체 통과");
         // 2. 허브로 재고 확인 요청
         ConfirmHubStockRequestDto dtos = ConfirmHubStockRequestDto.builder()
+                .orderId(orderId)
                 .consumerId(request.getConsumerId())
 //                .latitude(consumerInfo.getData().getLongitude())
                 .latitude(consumerInfo.getData().getLatitude())
@@ -81,7 +83,7 @@ public class OrderServiceImpl implements OrderService{
                 .build();
         CommonDto<ConfirmHubStockResponseDto> hubProductStock = hubFeignClient
                 .findHubProductStock(
-                    passport, dtos
+                        passport, dtos
                 );
 
         log.info("허브 통과");
@@ -90,14 +92,15 @@ public class OrderServiceImpl implements OrderService{
         BigDecimal calcTotalPrice = calculateTotalPrice(request.getProducts());
 
         StringBuilder sb = new StringBuilder();
-        if (request.getProducts().size() > 1){
+        if (request.getProducts().size() > 1) {
             sb.append(request.getProducts().get(0).getProductName())
                     .append("외 ").append(request.getProducts().size() - 1).append("건");
-        } else{
+        } else {
             sb.append(request.getProducts().get(0).getProductName());
         }
 
         Order savedOrder = buildOrder(
+                orderId,
                 passportDto.getUserId(),
                 request,
                 calcTotalPrice,
@@ -204,7 +207,7 @@ public class OrderServiceImpl implements OrderService{
 
     private Order findByOrderId(UUID orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(()-> new OrderNotFoundException(ORDER_NOT_FOUND_EXCEPTION_MESSAGE));
+                .orElseThrow(() -> new OrderNotFoundException(ORDER_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 
     private BigDecimal calculateTotalPrice(List<CreateOrderProductRequestDto> orderProducts) {
@@ -215,6 +218,7 @@ public class OrderServiceImpl implements OrderService{
     }
 
     private Order buildOrder(
+            UUID orderId,
             Long userId,
             CreateOrderRequestDto request,
             BigDecimal totalPrice,
@@ -222,6 +226,7 @@ public class OrderServiceImpl implements OrderService{
             GetConsumerInfoResponseDto dto
     ) {
         return Order.builder()
+                .orderId(orderId)
                 .userId(userId)
                 .consumerId(request.getConsumerId())
                 .hubId(dto.getHubId())

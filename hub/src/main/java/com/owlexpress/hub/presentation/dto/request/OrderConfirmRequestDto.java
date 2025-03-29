@@ -11,13 +11,20 @@ import lombok.NoArgsConstructor;
 public class
 OrderConfirmRequestDto {
 
+    private UUID orderId;
     private UUID consumerId;
     private Double latitude;
     private Double longitude;
     private List<Product> orderProducts;
 
     public OrderConfirmRequestDto(
-            UUID consumerId, Double latitude, Double longitude, List<Product> orderProducts) {
+            UUID orderId,
+            UUID consumerId,
+            Double latitude,
+            Double longitude,
+            List<Product> orderProducts
+    ) {
+        this.orderId = orderId;
         this.consumerId = consumerId;
         this.latitude = latitude;
         this.longitude = longitude;

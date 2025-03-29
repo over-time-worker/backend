@@ -10,14 +10,21 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ConfirmHubStockRequestDto {
-
+    private UUID orderId;
     private UUID consumerId;
     private Double latitude;
     private Double longitude;
     private List<HubProduct> orderProducts;
 
     @Builder
-    public ConfirmHubStockRequestDto(UUID consumerId, Double latitude, Double longitude, List<HubProduct> orderProducts) {
+    public ConfirmHubStockRequestDto(
+            UUID orderId,
+            UUID consumerId,
+            Double latitude,
+            Double longitude,
+            List<HubProduct> orderProducts
+    ) {
+        this.orderId = orderId;
         this.consumerId = consumerId;
         this.latitude = latitude;
         this.longitude = longitude;

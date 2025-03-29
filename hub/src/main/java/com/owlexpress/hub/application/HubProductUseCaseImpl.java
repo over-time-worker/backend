@@ -1,5 +1,6 @@
 package com.owlexpress.hub.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
@@ -28,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +49,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class HubProductUseCaseImpl implements HubProductUseCase {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String REDISSON_LOCK_PREFIX = "LOCK:CONFIRM_ORDER:";
+    private static final String REDISSON_LOCK_PREFIX = "LOCK:HUB:CONFIRM_ORDER:";
+    private static final String REDUCED_PRODUCTS_CACHE_PREFIX = "HUB:CONFIRM_ORDER:";
     private static final int MAX_RETRY = 3;
 
     private final HubRepository hubRepository;
@@ -56,6 +60,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
     private final HubProductRepository hubProductRepository;
     private final RedissonClient redissonClient; // 분산 락 적용
     private final TransactionTemplate transactionTemplate; // 트랜잭션 경계 설정
+    private final RedisTemplate<String, Object> reducedProducts; // 주문 ID : [{허브 상품 ID : 개수}, ...]
 
     @Override
     public HubProduct create(
@@ -144,7 +149,6 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 // TODO: fallback 전략 추가 => RedisStream
                 log.info("{} - fallback 발생!", threadName);
                 throw new HubProductNotFoundException.LockAcquisitionFailedException();
-
             }
 
             log.info("{}, 락 획득 성공", threadName);
@@ -173,6 +177,14 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             }
             log.info("{} 모든 락 해제 완료", threadName);
         }
+
+        // 재고 감소 성공 했다면 -> 롤백 대비해서 캐싱
+        List<ConfirmedHubProductResponseDto> products = null;
+        if (confirmResponseDto != null && (products = confirmResponseDto.getProducts()) != null) {
+            log.info("{} - 재고 감소 성공, 캐싱 진행", threadName);
+            cacheReducedProducts(requestDto.getOrderId(), products);
+        }
+
         return confirmResponseDto;
     }
 
@@ -262,7 +274,8 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                         hubProductStocks,
                         productByProductId,
                         currentHubId,
-                        currentHubName
+                        currentHubName,
+                        requestDto.getOrderId()
                 );
             }
             // TODO: 트랜잭션 경계 종료
@@ -293,7 +306,8 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             List<HubProduct> toBeApply,
             Map<UUID, Product> productByProductId,
             UUID hubId,
-            String hubName
+            String hubName,
+            UUID orderId
     ) {
 
         // 트랜잭션 추적
@@ -336,5 +350,15 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             confirmResponseDto.addConfirmedProduct(confirmed);
         }
         return confirmResponseDto;
+    }
+
+    private void cacheReducedProducts(UUID orderId, List<ConfirmedHubProductResponseDto> products) {
+        String cacheKey = REDUCED_PRODUCTS_CACHE_PREFIX + orderId;
+        try {
+            String values = objectMapper.writeValueAsString(products);
+            reducedProducts.opsForValue().set(cacheKey, values);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
