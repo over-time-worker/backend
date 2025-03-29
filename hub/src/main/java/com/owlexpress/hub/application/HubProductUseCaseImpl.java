@@ -1,6 +1,7 @@
 package com.owlexpress.hub.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
 import com.owlexpress.hub.common.dto.response.PassportDto;
@@ -30,7 +31,6 @@ import org.locationtech.jts.geom.Point;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -49,8 +50,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class HubProductUseCaseImpl implements HubProductUseCase {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String REDISSON_LOCK_PREFIX = "LOCK:HUB:CONFIRM_ORDER:";
-    private static final String REDUCED_PRODUCTS_CACHE_PREFIX = "HUB:CONFIRM_ORDER:";
+    private static final String REDISSON_LOCK_PREFIX = "LOCK:HUB_PRODUCT:CONFIRM_ORDER:";
+    private static final String REDUCED_PRODUCTS_CACHE_PREFIX = "HUB_PRODUCT:CONFIRM_ORDER";
     private static final int MAX_RETRY = 3;
 
     private final HubRepository hubRepository;
@@ -186,6 +187,100 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
         }
 
         return confirmResponseDto;
+    }
+
+    public void rollbackConfirmOrder(UUID orderId) {
+        String threadName = Thread.currentThread().getName();
+        log.info("{} - 재고 롤백 시도", threadName);
+        // 레디스에서 키값으로 롤백 준비
+        List<ConfirmedHubProductResponseDto> reducedHubProducts = getReducedHubProducts(orderId);
+
+        List<RLock> rollbackLocks = reducedHubProducts.stream()
+                .map(dto -> redissonClient.getLock(REDISSON_LOCK_PREFIX + dto.getHubProductId()))
+                .toList();
+
+        RLock rollbackOrderLock = redissonClient.getMultiLock(
+                rollbackLocks.toArray(new RLock[0]));
+
+        boolean available = false;
+
+        try {
+            for (int attempts = 0; attempts < MAX_RETRY; attempts++) {
+                // 락 획득 시도
+                log.info("{} - 재고 롤백 락 획득 시도", threadName);
+                available = rollbackOrderLock.tryLock(9L, 9L, TimeUnit.SECONDS);
+
+                if (available) {
+                    break;
+                }
+
+                // 지수 백오프 적용
+                long expBackOffMillis = (long) Math.pow(2, attempts) * 100
+                        + ThreadLocalRandom.current().nextInt(100);
+                Thread.sleep(expBackOffMillis);
+            }
+
+            // 락 획득 실패 -> fallback
+            if (!available) {
+                log.info("{} - 재고 롤백 중 fallback 발생!", threadName);
+                throw new HubProductNotFoundException.LockAcquisitionFailedException();
+            }
+
+            log.info("{} - 재고 롤백 시도", threadName);
+            List<UUID> hubProductIds = reducedHubProducts.stream()
+                    .map(ConfirmedHubProductResponseDto::getHubProductId)
+                    .toList();
+
+            // 허브 상품 ID 별로 상품 개수를 가지는 맵
+            Map<UUID, Long> byHubProductId = new HashMap<>();
+
+            // 맵에 삽입
+            reducedHubProducts.forEach(
+                    hubProduct -> byHubProductId.put(
+                            hubProduct.getHubProductId(),
+                            hubProduct.getQuantity()
+                    )
+            );
+
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    try {
+
+                        List<HubProduct> hubProductStocks = hubRepository.findHubProductStocks(
+                                hubProductIds);
+
+                        for (HubProduct hubProduct : hubProductStocks) {
+                            UUID hubProductId = hubProduct.getHubProductId();
+
+                            Long quantity = byHubProductId.getOrDefault(hubProductId, null);
+
+                            if (quantity == null) {
+                                return;
+                            }
+                            hubProduct.addStock(quantity);
+                        }
+
+                    } catch (IllegalMonitorStateException e) {
+                        log.error("{} - 재고 롤백 도중 실패", threadName);
+                        status.setRollbackOnly();
+                    }
+                }
+            });
+            log.info("{} - 롤백 수행 완료", threadName);
+
+        } catch (InterruptedException e) {
+            throw new LockAcquisitionFailedException();
+        } finally {
+            // 락 가지고 있을 때만 방출
+            try {
+                rollbackOrderLock.unlock();
+                log.info("{} - 재고 롤백 락 해제 완료", threadName);
+            } catch (Exception e) {
+                log.warn("{} - 재고 롤백, 락 미보유 혹은 이미 반환완료", threadName);
+            }
+        }
+
     }
 
     protected HubProductOrderConfirmResponseDto confirmOrderWithResponse(
@@ -361,4 +456,20 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             throw new RuntimeException(e);
         }
     }
+
+    private List<ConfirmedHubProductResponseDto> getReducedHubProducts(UUID orderId) {
+        String cacheKey = REDUCED_PRODUCTS_CACHE_PREFIX + orderId;
+        try {
+            String json = (String) reducedProducts.opsForValue().get(cacheKey);
+            if (json == null) {
+                return Collections.emptyList();
+            }
+            JavaType type = objectMapper.getTypeFactory()
+                    .constructCollectionType(List.class, ConfirmedHubProductResponseDto.class);
+            return objectMapper.readValue(json, type);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to deserialize list", e);
+        }
+    }
+
 }

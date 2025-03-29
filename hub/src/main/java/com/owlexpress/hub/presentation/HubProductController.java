@@ -13,6 +13,7 @@ import com.owlexpress.hub.presentation.dto.response.HubProductFindResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductOrderConfirmResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.web.PagedModel;
@@ -171,5 +172,19 @@ public class HubProductController {
                         .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(found);
+    }
+
+    @PostMapping("/rollback-stock")
+    public ResponseEntity<CommonDto<Void>> rollbackOrder(Map<String, UUID> orderId) {
+        hubProductUseCase.rollbackConfirmOrder(orderId.get("orderId"));
+
+        CommonDto<Void> rollbacked = CommonDto.<Void>builder()
+                .status(HttpStatus.ACCEPTED)
+                .code(HttpStatus.ACCEPTED.value())
+                .message("롤백 완료")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(rollbacked);
+
     }
 }
