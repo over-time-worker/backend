@@ -13,7 +13,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableKafka
 public class KafkaConfig {
 
-
     @Bean
     public NewTopic HubAiSuccessTopic(){
         return new NewTopic("ai.success-hub", 3, (short) 1);
