@@ -36,6 +36,8 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+  kafka:
+    bootstrap-servers: localhost:29092
 
 logging:
   logstash:
