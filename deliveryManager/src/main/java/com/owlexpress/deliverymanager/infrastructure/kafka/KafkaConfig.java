@@ -14,31 +14,46 @@ import org.springframework.kafka.annotation.EnableKafka;
 public class KafkaConfig {
 
 
-     //할당 성공
+     //hub 매니저 할당 성공
     @Bean
-    public NewTopic deliverySuccessTopic(){
-        return new NewTopic("manager.success", 3, (short) 1);
+    public NewTopic hubDeliverySuccessTopic(){
+        return new NewTopic("manager.success-hub", 3, (short) 1);
     }
 
-    //할당 실패
+    // company 매니저 할당 성공
     @Bean
-    public NewTopic deliveryErrorTopic(){
-        return new NewTopic("manager.error", 3, (short) 1);
+    public NewTopic companyDeliverySuccessTopic(){
+        return new NewTopic("manager.success-hub", 3, (short) 1);
     }
 
-
-    //알람 요청
+    //hub 매니저 할당 실패
     @Bean
-    public NewTopic alarmRequestTopic(){
-        return new NewTopic("manager.send-alarm", 3, (short) 1);
+    public NewTopic hubDeliveryErrorTopic(){
+        return new NewTopic("manager.error-hub", 3, (short) 1);
+    }
+
+    //company 매니저 할당 실패
+    @Bean
+    public NewTopic companyDeliveryErrorTopic(){
+        return new NewTopic("manager.error-company", 3, (short) 1);
+    }
+
+    //허브 배송 담당자용 알람 요청
+    @Bean
+    public NewTopic hubAlarmRequestTopic(){
+        return new NewTopic("manager.send-alarm-hub", 3, (short) 1);
+    }
+
+    //업체 배송 담당자용 알람 요청
+    @Bean
+    public NewTopic companyAlarmRequestTopic(){
+        return new NewTopic("manager.send-alarm-company", 3, (short) 1);
     }
 
     //락 획득 실패시 재시도 요청
     @Bean
-    public NewTopic assingLockRetryTopic(){
+    public NewTopic assignLockRetryTopic(){
         return new NewTopic("manager.retry", 3, (short) 1);
     }
-
-
 
 }

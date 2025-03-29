@@ -26,7 +26,6 @@ public class KafkaConfig {
         return new NewTopic("delivery.error", 3, (short) 1);
     }
 
-
     //재고 롤백 요청
     @Bean
     public NewTopic hubProductRequestTopic(){
@@ -35,15 +34,36 @@ public class KafkaConfig {
 
     //허브 배송 담당 매니저 할당 요청
     @Bean
-    public NewTopic hubDeliveryManagerRequestTopic(){
+    public NewTopic hubDeliveryManagerAssignRequestTopic(){
         return new NewTopic("delivery.hub-assign-manager", 3, (short) 1);
     }
     //업체 배송 담당 매니저 할당 요청
     @Bean
-    public NewTopic consumerDeliveryManagerRequestTopic(){
+    public NewTopic consumerDeliveryManagerAssignRequestTopic(){
         return new NewTopic("delivery.consumer-assign-manager", 3, (short) 1);
     }
 
+    //허브 배송 담당 매니저 반환 요청
+    @Bean
+    public NewTopic hubDeliveryManagerReturnRequestTopic(){
+        return new NewTopic("delivery.hub-return-manager", 3, (short) 1);
+    }
+    //업체 배송 담당 매니저 반환 요청
+    @Bean
+    public NewTopic consumerDeliveryManagerReturnRequestTopic(){
+        return new NewTopic("delivery.consumer-return-manager", 3, (short) 1);
+    }
 
+    //허브 배송 담당자 배정 취소 알람 요청 (fallback)
+    @Bean
+    public NewTopic hubDeliveryCancelRequestTopic(){
+        return new NewTopic("delivery.error-hub-cancel", 3, (short) 1);
+    }
+
+    //업체 배송 담당자 배정 취소 알람 요청 (fallback)
+    @Bean
+    public NewTopic consumerDeliveryCancelRequestTopic(){
+        return new NewTopic("delivery.error-consumer-cancel", 3, (short) 1);
+    }
 
 }
