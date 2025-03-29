@@ -56,16 +56,4 @@ public class KafkaConfig {
         return new NewTopic("manager.retry", 3, (short) 1);
     }
 
-    //허브 배송 담당자 배정 취소 요청 (fallback)
-    @Bean
-    public NewTopic hubDeliveryCancelRequestTopic(){
-        return new NewTopic("delivery.error-hub-cancel", 3, (short) 1);
-    }
-
-    //업체 배송 담당자 배정 취소 요청 (fallback)
-    @Bean
-    public NewTopic consumerDeliveryCancelRequestTopic(){
-        return new NewTopic("delivery.error-consumer-cancel", 3, (short) 1);
-    }
-
 }
