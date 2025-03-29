@@ -22,6 +22,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+  kafka:
+    bootstrap-servers: localhost:29092
+
 server:
   tomcat:
     mbeanregistry:
@@ -36,6 +39,7 @@ server:
 logging:
   logstash:
     host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5044}
 management:
   endpoints:
     jmx:

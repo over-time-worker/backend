@@ -36,10 +36,13 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+  kafka:
+    bootstrap-servers: localhost:29092
 
 logging:
   logstash:
     host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5044}
 api:
   connection-timeout: 5000
   read-timeout: 5000

@@ -49,7 +49,8 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${ALARM_POSTGRES_PORT:5432}/${POSTGRES_DB}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
-
+  kafka:
+    bootstrap-servers: localhost:29092
 api :
   connection-timeout: 3000
   read-timeout: 120000
@@ -82,5 +83,6 @@ slack :
 logging:
   logstash:
     host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5044}
 massage :
   fallback : ${SLACK_FALLBACK_MESSAGE}
