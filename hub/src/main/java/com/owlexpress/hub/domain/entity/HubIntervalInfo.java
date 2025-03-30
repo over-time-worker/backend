@@ -1,9 +1,11 @@
 package com.owlexpress.hub.domain.entity;
 
 import com.owlexpress.hub.common.BaseEntity;
+import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Type;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ public class HubIntervalInfo extends BaseEntity {
     private Hub endHub;
 
     @Column(name = "duration_of_time",columnDefinition = "INTERVAL")
+    @Type(PostgreSQLIntervalType.class)
     private Duration durationOfTime;
 
     @Column(name = "estimate_distance")
