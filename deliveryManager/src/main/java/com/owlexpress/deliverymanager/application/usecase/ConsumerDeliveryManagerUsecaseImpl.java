@@ -182,7 +182,7 @@ public class ConsumerDeliveryManagerUsecaseImpl implements ConsumerDeliveryManag
     }
 
     @Override
-    @Transactional
+//    @Transactional
     @CacheEvict(value = {"unassignedDeliveryManagers", "searchConsumerDeliveryManagers"}, allEntries = true)
     public AlarmCreateResponseDto assign(
             DeliveryManagerRequestDto deliveryManagerRequestDto,
@@ -191,19 +191,29 @@ public class ConsumerDeliveryManagerUsecaseImpl implements ConsumerDeliveryManag
         //허브별 단위 격리하기
         RLock lock = redissonClient.getLock("assignDeliveryManagerLock:" + deliveryManagerRequestDto.getCurrentHubId());
         boolean isLocked = false;
-        int retryCount = 3;
-        int attempts = 0;
+        int maxAttempts = 3;
+        int baseDelayMs = 500; // Initial delay
+        int maxDelayMs = 5000; // Maximum delay limit
+        int attempt = 0;
+        Random random = new Random();
+
         try {
-            while (attempts < retryCount) {//3번정도 시도
+            while (attempt < maxAttempts) {
                 isLocked = lock.tryLock(5, 3, TimeUnit.SECONDS);
-                if (isLocked)
+                if (isLocked) {
                     break;
-                attempts++;
-                Thread.sleep(500);  // optional backoff
+                }
+                attempt++;
+                //지수 백오프 + Jitter 적용
+                int backoffTime = Math.min(baseDelayMs * (1 << attempt), maxDelayMs);
+                int jitter = random.nextInt(200);
+                log.warn("Lock attempt {} failed, retrying in {} ms...", attempt, backoffTime + jitter);
+                Thread.sleep(backoffTime + jitter);
             }
 
+            //락을 획득하지 못한경우
             if (!isLocked) {
-                //Redis Stream
+                //Redis Stream에 재시도할 내용을 기록
                 try {
                     Map<String, String> streamMessage = new HashMap<>();
                     streamMessage.put(
@@ -229,24 +239,31 @@ public class ConsumerDeliveryManagerUsecaseImpl implements ConsumerDeliveryManag
                     deliveryManagerRequestDto.getCurrentHubId());
 
             // 허브가 존재하는지 확인
+            // TODO::실패 시 롤백시켜야함
             if (hubFindResponseDtoCommonDto == null || hubFindResponseDtoCommonDto.getData() == null) {
+                log.error("hub가 존재하지 않습니다.");
                 throw new HubNotFoundException(ExceptionMessage.HUB_NOT_FOUND);
             }
 
             // 가장 낮은 assignNumber를 가진 isAvailable = true인 담당자 조회
             UUID hubId = hubFindResponseDtoCommonDto.getData()
                                                     .getHubId();
+            log.info("assigned hubId = {} ", hubId);
 
             Optional<ConsumerDeliveryManager> optionalManager = consumerDeliveryManagerRepository.findFirstByHubIdAndIsAvaliableTrueOrderByAssignNumberAsc(
                     hubId);
 
+
             // 담당자가 없는 경우 예외 처리 또는 기본 응답
             if (optionalManager.isEmpty()) {
+                log.info("optionalManager is empty ={}", optionalManager.isEmpty());
                 throw new ConsumerDeliveryManagerException.ConsumerEmptyException(
                         ExceptionMessage.CONSUMER_NOT_ENOUGH + hubId);
             }
 
             ConsumerDeliveryManager manager = optionalManager.get();
+            log.info("optionalManager is exist ={}", manager.getAssignNumber());
+            log.info("optionalManager is exist ={}", manager.getHubId());
 
             AlarmCreateRequestDto alarmCreateRequestDto = AlarmCreateRequestDto.toDto(
                     deliveryManagerRequestDto, manager);

@@ -74,7 +74,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
 
     // ✅ PostgreSQL
-    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.postgresql:postgresql'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.5'
+
 
     // ✅ for PostGIS
     implementation 'org.hibernate.orm:hibernate-spatial:6.6.11.Final'
