@@ -51,7 +51,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String REDISSON_LOCK_PREFIX = "LOCK:HUB_PRODUCT:CONFIRM_ORDER:";
-    private static final String REDUCED_PRODUCTS_CACHE_PREFIX = "HUB_PRODUCT:CONFIRM_ORDER";
+    private static final String REDUCED_PRODUCTS_CACHE_PREFIX = "HUB_PRODUCT:CONFIRM_ORDER:";
     private static final int MAX_RETRY = 3;
 
     private final HubRepository hubRepository;
@@ -135,7 +135,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
         try {
             // 최대 3번까지 실행
             for (int attempts = 0; attempts < MAX_RETRY; attempts++) {
-                available = orderLock.tryLock(9L, 6L, TimeUnit.SECONDS);
+                available = orderLock.tryLock(6L, 6L, TimeUnit.SECONDS);
                 if (available) {
                     break;
                 }
@@ -148,8 +148,8 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             // 락 획득 실패 시 예외
             if (!available) {
                 // TODO: fallback 전략 추가 => RedisStream
-                log.info("{} - fallback 발생!", threadName);
-                throw new HubProductNotFoundException.LockAcquisitionFailedException();
+                log.error("{} - fallback 발생!", threadName);
+                throw new HubProductNotFoundException.LockAcquisitionFailedException(threadName);
             }
 
             log.info("{}, 락 획득 성공", threadName);
@@ -161,29 +161,29 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                                 return confirmOrderWithResponse(
                                         requestDto, orderProducts, productIds);
                             } catch (Exception e) {
-                                log.error(e.getMessage());
+                                log.error("{} - 재고 감소 중 문제 발생 : {}", threadName, e.getMessage());
                                 status.setRollbackOnly();
                                 return null;
                             }
                         }
                     });
-
+            log.info("{} - 작업 수행 완료", threadName);
         } catch (InterruptedException e) {
-            throw new LockAcquisitionFailedException();
+            throw new LockAcquisitionFailedException(threadName);
         } finally {
-            log.info("작업 수행 완료");
-            // 락 가지고 있을 때만 방출
-            if (available) {
+            try {
                 orderLock.unlock();
+                log.info("{} - 모든 락 해제 완료", threadName);
+                // 재고 감소 성공 했다면 -> 롤백 대비해서 캐싱
+                List<ConfirmedHubProductResponseDto> products = null;
+                if (confirmResponseDto != null
+                        && (products = confirmResponseDto.getProducts()) != null) {
+                    log.info("{} - 재고 감소 성공, 캐싱 진행", threadName);
+                    cacheReducedProducts(requestDto.getOrderId(), products);
+                }
+            } catch (IllegalMonitorStateException e) {
+                log.warn("{} - 락 미보유 또는 이미 해제됨", threadName);
             }
-            log.info("{} 모든 락 해제 완료", threadName);
-        }
-
-        // 재고 감소 성공 했다면 -> 롤백 대비해서 캐싱
-        List<ConfirmedHubProductResponseDto> products = null;
-        if (confirmResponseDto != null && (products = confirmResponseDto.getProducts()) != null) {
-            log.info("{} - 재고 감소 성공, 캐싱 진행", threadName);
-            cacheReducedProducts(requestDto.getOrderId(), products);
         }
 
         return confirmResponseDto;
@@ -208,7 +208,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             for (int attempts = 0; attempts < MAX_RETRY; attempts++) {
                 // 락 획득 시도
                 log.info("{} - 재고 롤백 락 획득 시도", threadName);
-                available = rollbackOrderLock.tryLock(9L, 9L, TimeUnit.SECONDS);
+                available = rollbackOrderLock.tryLock(4L, 6L, TimeUnit.SECONDS);
 
                 if (available) {
                     break;
@@ -222,8 +222,8 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
 
             // 락 획득 실패 -> fallback
             if (!available) {
-                log.info("{} - 재고 롤백 중 fallback 발생!", threadName);
-                throw new HubProductNotFoundException.LockAcquisitionFailedException();
+                log.error("{} - 재고 롤백 중 fallback 발생!", threadName);
+                throw new HubProductNotFoundException.LockAcquisitionFailedException(threadName);
             }
 
             log.info("{} - 재고 롤백 시도", threadName);
@@ -270,7 +270,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             log.info("{} - 롤백 수행 완료", threadName);
 
         } catch (InterruptedException e) {
-            throw new LockAcquisitionFailedException();
+            throw new LockAcquisitionFailedException(threadName);
         } finally {
             // 락 가지고 있을 때만 방출
             try {
@@ -452,6 +452,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
         try {
             String values = objectMapper.writeValueAsString(products);
             reducedProducts.opsForValue().set(cacheKey, values);
+            log.info("{} - 캐싱 성공", Thread.currentThread().getName());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -61,40 +61,39 @@ public class OrderServiceImpl implements OrderService {
         PassportDto passportDto = passportHelper.getPassportDto(passport);
         UUID orderId = UUID.randomUUID();
 
-        try {
-            log.info("consumerId : {}", request.getConsumerId());
-            // 1. consumer 업체 정보 조회 feign request
-            CommonDto<GetConsumerInfoResponseDto> consumerInfo = consumerFeignClient.getConsumerInfo(
-                    passport, request.getConsumerId());
+        log.info("consumerId : {}", request.getConsumerId());
+        // 1. consumer 업체 정보 조회 feign request
+        CommonDto<GetConsumerInfoResponseDto> consumerInfo = consumerFeignClient.getConsumerInfo(
+                passport, request.getConsumerId());
 
-            log.info("업체 통과");
-            // 2. 허브로 재고 확인 요청
-            ConfirmHubStockRequestDto dtos = ConfirmHubStockRequestDto.builder()
-                    .orderId(orderId)
-                    .consumerId(request.getConsumerId())
+        log.info("업체 통과");
+        // 2. 허브로 재고 확인 요청
+        ConfirmHubStockRequestDto dtos = ConfirmHubStockRequestDto.builder()
+                .orderId(orderId)
+                .consumerId(request.getConsumerId())
 //                .latitude(consumerInfo.getData().getLongitude())
-                    .latitude(consumerInfo.getData().getLatitude())
+                .latitude(consumerInfo.getData().getLatitude())
 //                .longitude(consumerInfo.getData().getLatitude())
-                    .longitude(consumerInfo.getData().getLongitude())
-                    .orderProducts(
-                            request.getProducts().stream()
-                                    .map(hubProduct ->
-                                            ConfirmHubStockRequestDto.HubProduct.builder()
-                                                    .productId(hubProduct.getProductId())
-                                                    .quantity(hubProduct.getQuantity())
-                                                    .build()
-                                    )
-                                    .collect(Collectors.toList())
-                    )
-                    .build();
-            CommonDto<ConfirmHubStockResponseDto> hubProductStock = hubFeignClient
-                    .findHubProductStock(
-                            passport, dtos
-                    );
+                .longitude(consumerInfo.getData().getLongitude())
+                .orderProducts(
+                        request.getProducts().stream()
+                                .map(hubProduct ->
+                                        ConfirmHubStockRequestDto.HubProduct.builder()
+                                                .productId(hubProduct.getProductId())
+                                                .quantity(hubProduct.getQuantity())
+                                                .build()
+                                )
+                                .collect(Collectors.toList())
+                )
+                .build();
+        CommonDto<ConfirmHubStockResponseDto> hubProductStock = hubFeignClient
+                .findHubProductStock(
+                        passport, dtos
+                );
 
-            log.info("허브 통과");
-            // 5. 주문 저장
-
+        log.info("허브 통과");
+        // 5. 주문 저장
+        try {
             BigDecimal calcTotalPrice = calculateTotalPrice(request.getProducts());
 
             StringBuilder sb = new StringBuilder();

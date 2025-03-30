@@ -11,7 +11,7 @@ public class TransactionConfig {
     @Bean
     public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
         TransactionTemplate template = new TransactionTemplate(transactionManager);
-        template.setTimeout(30);
+        template.setTimeout(60);
         return template;
     }
 }

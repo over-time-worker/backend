@@ -11,8 +11,8 @@ public class HubProductException {
 
         public static class LockAcquisitionFailedException extends RuntimeException {
 
-            public LockAcquisitionFailedException() {
-                super("상품 재고 락 획득 실패");
+            public LockAcquisitionFailedException(String threadName) {
+                super(String.format("%s - 상품 재고 락 획득 실패", threadName));
             }
         }
     }
