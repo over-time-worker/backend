@@ -94,7 +94,7 @@ public class HubDistanceServiceImpl implements HubDistanceService {
     @Transactional
     @Cacheable(
             value = "shortestRoutes",
-            key = "'from:' + #startHubId + ':to:' + #consumerId + ':lon:' + #consumerLongitude + ':lat:' + #consumerLatitude + ':depart:' + #departureTime"
+            key = "'from:' + #startHubId + ':to:' + #consumerId + ':lon:' + #consumerLongitude + ':lat:' + #consumerLatitude"
     )
     @Override
     public List<RouteResponseDto> findShortestPath(
