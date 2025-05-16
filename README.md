@@ -89,9 +89,14 @@ java -Xms256M -Xmx256M -jar user-service-1.0.0.jar --spring.profiles.active=prod
 )
 <br />
 
-## 👨‍👩‍👧‍👦 팀 Notion (API 명세서 / 인프라 설계 / 서비스 간 통신 구조)
-<a href="" target="_blank">👉🏻클릭 !  [팀노션] </a>
+## 👨‍👩‍👧‍👦 API 명세서
+[API 명세서](https://www.notion.so/API-Docs-1b4591a8d44080e2a65be0dd2c81d11a)
+
 <br />
+
+### Jmeter 테스트 결과
+![image](https://github.com/user-attachments/assets/8fd46d6f-65cb-46f6-9bf1-4b52b2e2011a)
+
 
 ## ⚙ 기술 스택
 ### Back-end
@@ -125,4 +130,5 @@ java -Xms256M -Xmx256M -jar user-service-1.0.0.jar --spring.profiles.active=prod
 <br />
 
 ## 🛠️ 프로젝트 아키텍처
-![MSA 아키텍처](https://github.com/user-attachments/assets/placeholder-architecture.png)
+![image](https://github.com/user-attachments/assets/070c9229-daa2-46eb-b42b-7c6fea501b0f)
+
