@@ -1,0 +1,34 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    monitor: 'my-service-monitor'
+
+scrape_configs:
+  - job_name: 'eureka'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:19080' ]
+
+  - job_name: 'gateway-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:19081' ]
+
+  - job_name: 'hub-service-1'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:19088' ]
+
+  - job_name: 'hub-service-2'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:12345' ]
+
+  - job_name: 'hub-service-3'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:5678' ]
+
+  - job_name: 'node'
+    static_configs:
+      - targets: [ 'node-exporter:9100' ]

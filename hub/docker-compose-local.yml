@@ -1,0 +1,103 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6378:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - overtime_network
+    restart: always
+    platform: linux/amd64
+
+  # PostgreSQL + PostGIS
+  user-postgres:
+    image: postgis/postgis:latest
+    container_name: user-postgres
+    platform: linux/amd64
+    ports:
+      - "5430:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  hub-postgres:
+    image: postgis/postgis:latest
+    container_name: hub-postgres
+    platform: linux/amd64
+    ports:
+      - "5425:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: overtime
+    volumes:
+      - hub_postgres_data:/var/lib/postgresql/data
+    networks:
+      - overtime_network
+
+  prometheus:
+    image: prom/prometheus
+    platform: linux/arm64
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - overtime_network
+
+  grafana:
+    image: grafana/grafana
+    platform: linux/arm64
+    ports:
+      - "3000:3000"
+    networks:
+      - overtime_network
+    depends_on:
+      - prometheus
+    volumes:
+      - ../grafana/provisioning:/etc/grafana/provisioning
+      - ../grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - overtime_network
+
+networks:
+  overtime_network:
+    driver: bridge
+
+volumes:
+  user_postgres_data:
+  ai_postgres_data:
+  alarm_postgres_data:
+  product_postgres_data:
+  producer_postgres_data:
+  hub_postgres_data:
+  consumer_postgres_data:
+  order_postgres_data:
+  payment_postgres_data:
+  delivery_postgres_data:
+  cart_postgres_data:
+  delivery_manager_postgres_data:
+  redis_data:
+  grafana_data:
