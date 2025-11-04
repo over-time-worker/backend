@@ -1,6 +1,9 @@
 package com.owlexpress.hub.infrastructure.repository.hub;
 
-import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
+import static com.owlexpress.hub.domain.entity.QHub.hub;
+import static com.owlexpress.hub.domain.entity.QHubProduct.hubProduct;
+
+import com.owlexpress.hub.application.dto.response.HubProductInfoPreProcessResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.querydsl.core.BooleanBuilder;
@@ -8,17 +11,13 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-
-import static com.owlexpress.hub.domain.entity.QHub.hub;
-import static com.owlexpress.hub.domain.entity.QHubProduct.hubProduct;
 
 @Repository
 @RequiredArgsConstructor
@@ -48,18 +47,18 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
 
         // QueryDSL을 사용하여 검색 및 페이징 처리
         List<Hub> results = queryFactory
-                .selectFrom(hub)
-                .where(builder) // 검색 조건 추가
-                .orderBy(orderSpecifier) // 정렬 적용
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+            .selectFrom(hub)
+            .where(builder) // 검색 조건 추가
+            .orderBy(orderSpecifier) // 정렬 적용
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
 
         // 총 검색 결과 개수 계산
         long total = queryFactory
-                .selectFrom(hub)
-                .where(builder)
-                .fetch().size(); // 전체 개수 조회 , fetchOne Deprecated
+            .selectFrom(hub)
+            .where(builder)
+            .fetch().size(); // 전체 개수 조회 , fetchOne Deprecated
 
         // Page 객체로 변환하여 반환
         return new PageImpl<>(results, pageable, total);
@@ -67,7 +66,7 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
 
     @Override
     public Page<HubProduct> searchHubProduct(Pageable pageable, String keyword, String orderBy,
-            String sort) {
+        String sort) {
         // BooleanBuilder를 사용하여 동적 검색 조건을 생성
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -86,42 +85,49 @@ public class HubQueryRepositoryImpl implements HubQueryRepository {
         };
 
         List<HubProduct> hubProducts = queryFactory
-                .selectDistinct(hubProduct)
-                .from(hub)
-                .orderBy(orderSpecifier)
-                .join(hub.hubProduct, hubProduct)
-                .where(builder) // 특정 이름의 제품이 있는 허브만 조회
-                .fetch();
+            .selectDistinct(hubProduct)
+            .from(hub)
+            .orderBy(orderSpecifier)
+            .join(hub.hubProduct, hubProduct)
+            .where(builder) // 특정 이름의 제품이 있는 허브만 조회
+            .fetch();
 
         long count = queryFactory.select(hubProduct.count())
-                .from(hubProduct)
-                .where(builder)
-                .fetchOne().longValue();
+            .from(hubProduct)
+            .where(builder)
+            .fetchOne().longValue();
 
         return new PageImpl<>(hubProducts, pageable, count);
     }
 
-    public List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds) {
+    public List<HubProductInfoPreProcessResponseDto> findAllHubProductsInOrders(
+        List<UUID> productIds) {
+
+        // 모든 상품이 있는 허브 아이디 조회
+        List<UUID> hubIds = queryFactory.select(hubProduct.hub.hubId)
+            .from(hubProduct)
+            .where(hubProduct.productId.in(productIds))
+            .groupBy(hubProduct.hub)
+            .having(hubProduct.productId.countDistinct().eq((long) productIds.size()))
+            .fetch();
 
         return queryFactory.select(
-                        Projections.constructor(
-                                HubProductInfoResponseDto.class,
-                                hubProduct.hub.hubId,
-                                hubProduct.hub.name,
-                                hubProduct.hub.location,
-                                hubProduct.hubProductId,
-                                hubProduct.productId,
-                                hubProduct.productName,
-                                hubProduct.productStock,
-                                hubProduct.productType
-
-                        )
+                Projections.constructor(
+                    HubProductInfoPreProcessResponseDto.class,
+                    hubProduct.hub.hubId,
+                    hubProduct.hub.name,
+                    hubProduct.hub.location,
+                    hubProduct.hubProductId,
+                    hubProduct.productId,
+                    hubProduct.productName,
+                    hubProduct.productStock,
+                    hubProduct.productType
                 )
-                .from(hubProduct)
-                .innerJoin(hubProduct.hub, hub)
-                .where(hubProduct.productId.in(productIds))
-//                .groupBy(hub.hubId)
-                .fetch();
-
+            )
+            .from(hubProduct)
+            .innerJoin(hubProduct.hub, hub)
+            .where(hubProduct.hub.hubId.in(hubIds)
+                .and(hubProduct.productId.in(productIds)))
+            .fetch();
     }
 }

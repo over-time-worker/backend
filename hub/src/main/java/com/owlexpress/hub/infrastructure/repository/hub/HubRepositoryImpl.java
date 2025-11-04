@@ -1,20 +1,19 @@
 package com.owlexpress.hub.infrastructure.repository.hub;
 
-import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
+import com.owlexpress.hub.application.dto.response.HubProductInfoPreProcessResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.domain.repository.HubRepository;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class HubRepositoryImpl implements HubRepository {
 
     @Override
     public PagedModel<HubSearchResponseDto> searchHub(Pageable pageable, String keyword,
-            String orderBy, String sort) {
+        String orderBy, String sort) {
         Page<Hub> hubs = hubQueryRepository.searchHub(pageable, keyword, orderBy, sort);
         Page<HubSearchResponseDto> results = hubs.map(HubSearchResponseDto::fromEntity);
         return new PagedModel<>(results);
@@ -47,10 +46,10 @@ public class HubRepositoryImpl implements HubRepository {
      */
     @Override
     public PagedModel<HubProductSearchResponseDto> searchHubProduct(Pageable pageable,
-            String keyword, String orderBy, String sort) {
+        String keyword, String orderBy, String sort) {
         Page<HubProductSearchResponseDto> products =
-                hubQueryRepository.searchHubProduct(pageable, keyword, orderBy, sort)
-                        .map(HubProductSearchResponseDto::fromEntity);
+            hubQueryRepository.searchHubProduct(pageable, keyword, orderBy, sort)
+                .map(HubProductSearchResponseDto::fromEntity);
 
         return new PagedModel<>(products);
     }
@@ -86,7 +85,8 @@ public class HubRepositoryImpl implements HubRepository {
     }
 
     @Override
-    public List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds) {
+    public List<HubProductInfoPreProcessResponseDto> findAllHubProductsInOrders(
+        List<UUID> productIds) {
         return hubQueryRepository.findAllHubProductsInOrders(productIds);
     }
 

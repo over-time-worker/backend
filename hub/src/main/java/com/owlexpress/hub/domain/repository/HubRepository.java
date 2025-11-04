@@ -1,16 +1,15 @@
 package com.owlexpress.hub.domain.repository;
 
-import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
+import com.owlexpress.hub.application.dto.response.HubProductInfoPreProcessResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import com.owlexpress.hub.presentation.dto.response.HubProductSearchResponseDto;
 import com.owlexpress.hub.presentation.dto.response.HubSearchResponseDto;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 
 public interface HubRepository {
 
@@ -19,13 +18,13 @@ public interface HubRepository {
     Optional<Hub> findByHubId(UUID hubId);
 
     PagedModel<HubSearchResponseDto> searchHub(Pageable pageable, String keyword, String orderBy,
-            String sort);
+        String sort);
 
     /*
     허브 상품
      */
     PagedModel<HubProductSearchResponseDto> searchHubProduct(Pageable pageable, String keyword,
-            String orderBy, String sort);
+        String orderBy, String sort);
 
     Optional<HubProduct> findByHubProductId(UUID hubProductId);
 
@@ -39,5 +38,5 @@ public interface HubRepository {
 
     List<HubProduct> findHubProductStocks(List<UUID> hubProductsIds);
 
-    List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds);
+    List<HubProductInfoPreProcessResponseDto> findAllHubProductsInOrders(List<UUID> productIds);
 }

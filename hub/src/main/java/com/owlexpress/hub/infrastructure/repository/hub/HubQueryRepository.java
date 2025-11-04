@@ -1,6 +1,6 @@
 package com.owlexpress.hub.infrastructure.repository.hub;
 
-import com.owlexpress.hub.application.dto.response.HubProductInfoResponseDto;
+import com.owlexpress.hub.application.dto.response.HubProductInfoPreProcessResponseDto;
 import com.owlexpress.hub.domain.entity.Hub;
 import com.owlexpress.hub.domain.entity.HubProduct;
 import java.util.List;
@@ -13,7 +13,7 @@ public interface HubQueryRepository {
     Page<Hub> searchHub(Pageable pageable, String keyword, String orderBy, String sort);
 
     Page<HubProduct> searchHubProduct(Pageable pageable, String keyword, String orderBy,
-            String sort);
+        String sort);
 
-    List<HubProductInfoResponseDto> findAllHubProductsInOrders(List<UUID> productIds);
+    List<HubProductInfoPreProcessResponseDto> findAllHubProductsInOrders(List<UUID> productIds);
 }
