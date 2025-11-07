@@ -7,3 +7,5 @@ datasources:
     url: http://host.docker.internal:9090
     isDefault: true
     uid: prometheus-main
+    jsonData:
+      timeInterval: 5s
