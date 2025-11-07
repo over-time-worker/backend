@@ -41,14 +41,4 @@ public class HubProductInfoPreProcessResponseDto {
         this.productStock = productStock;
         this.productType = productType;
     }
-
-    public HubProductInfoResponseDtoV2.HubProductInfo toHubProductInfoResponseDtoV2() {
-        return HubProductInfoResponseDtoV2.HubProductInfo.builder()
-            .hubProductId(hubProductId)
-            .productId(productId)
-            .productName(productName)
-            .productStock(productStock)
-            .productType(productType)
-            .build();
-    }
 }

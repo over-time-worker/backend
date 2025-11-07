@@ -41,6 +41,10 @@ services:
       - hub_postgres_data:/var/lib/postgresql/data
     networks:
       - overtime_network
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
 
   prometheus:
     image: prom/prometheus

@@ -17,10 +17,12 @@ spring:
             logger-level: basic
   datasource:
     hikari:
-      maximum-pool-size: 100  # 기본은 10이라 너무 작음
-      minimum-idle: 10
-      idle-timeout: 3000
+      maximum-pool-size: 32  # 기본은 10이라 너무 작음
+      minimum-idle: 8
+      idle-timeout: 600000
       connection-timeout: 3000
+      max-lifetime: 1800000 # 30분
+
     driver-class-name: org.postgresql.Driver
     #    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${HUB_POSTGRES_PORT:5425}/${POSTGRES_DB:overtime}
@@ -34,15 +36,21 @@ spring:
     hibernate:
       ddl-auto: update
     properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
+      #      hibernate:
+      #        show_sql: true
+      #        format_sql: true
+      jdbc:
+        batch_size: 100
     database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+    open-in-view: false
 
-#logging:
-#  logstash:
-#    host: ${LOGSTASH_HOST:localhost}
-#    port: ${LOGSTASH_PORT:5044}
+  logging:
+    logstash:
+      host: ${LOGSTASH_HOST:localhost}
+      port: ${LOGSTASH_PORT:5044}
+    #  level:
+    #    org.springframework.orm.jpa: DEBUG
+    #    org.springframework.transaction.interceptor: TRACE
 management:
   endpoints:
     jmx:
@@ -78,9 +86,9 @@ server:
     mbeanregistry:
       enabled: true
     threads:
-      max: 500
-    accept-count: 1000
-    max-connections: 10000
+      max: 64
+    accept-count: 200
+    max-connections: 3000
     connection-timeout: 5s
 
 naver:

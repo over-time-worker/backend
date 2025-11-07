@@ -9,7 +9,7 @@ spring:
         connect-timeout: 5000
         response-timeout: 60s
         pool:
-          max-connections: 5000
+          max-connections: 64
           acquire-timeout: 6000
       discovery:
         locator:
@@ -94,13 +94,13 @@ server:
   netty:
     connection-timeout: 5s
   jetty:
-    max-connections: 500
+    max-connections: 64
   tomcat:
     threads:
-      max: 500
-      min-spare: 500
-    max-connections: 1000
-    accept-count: 500
+      max: 64
+      min-spare: 8
+    max-connections: 3000
+    accept-count: 200
 
 jwt:
   secret: ${AUTH_JWT_SECRET}
