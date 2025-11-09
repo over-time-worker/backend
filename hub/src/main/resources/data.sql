@@ -70,13 +70,13 @@ INSERT INTO p_hub_product (hub_product_id, hub_id, producer_id, producer_name, p
 VALUES
     -- 서울 중앙 허브 상품
     (uuid_generate_v4(), '11111111-1111-1111-1111-111111111111', uuid_generate_v4(), '삼성전자',
-     uuid_generate_v4(), '갤럭시 S24', 'NORMAL', 100, NOW(), NOW()),
+     '08bda1d6-e456-4f14-9651-f9f83d77148d', '갤럭시 S24', 'NORMAL', 1000, NOW(), NOW()),
     (uuid_generate_v4(), '11111111-1111-1111-1111-111111111111', uuid_generate_v4(), 'LG전자',
-     uuid_generate_v4(), 'LG 냉장고', 'NORMAL', 50, NOW(), NOW()),
+     '523fb2fd-57e4-400b-b063-c15e4aebcf88', 'LG 냉장고', 'NORMAL', 1000, NOW(), NOW()),
 
     -- 부산 중앙 허브 상품
-    (uuid_generate_v4(), '22222222-2222-2222-2222-222222222222', uuid_generate_v4(), '농심',
-     uuid_generate_v4(), '신라면', 'NORMAL', 500, NOW(), NOW()),
+    (uuid_generate_v4(), '11111111-1111-1111-1111-111111111111', uuid_generate_v4(), '농심',
+     '0c0ff925-0cfc-4b54-9945-f2713d1b673f', '신라면', 'NORMAL', 1000, NOW(), NOW()),
     (uuid_generate_v4(), '22222222-2222-2222-2222-222222222222', uuid_generate_v4(), '오뚜기',
      uuid_generate_v4(), '3분 카레', 'NORMAL', 300, NOW(), NOW()),
 
@@ -98,11 +98,11 @@ VALUES
 
     -- 스포크 허브 상품 (충청남도 허브)
     (uuid_generate_v4(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', uuid_generate_v4(), '삼성전자',
-     'ffef7cc6-e184-4201-bc7c-159bbf81a76a', '갤럭시 S24', 'NORMAL', 400, NOW(), NOW()),
+     '08bda1d6-e456-4f14-9651-f9f83d77148d', '갤럭시 S24', 'NORMAL', 1000, NOW(), NOW()),
     (uuid_generate_v4(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', uuid_generate_v4(), 'LG전자',
-     'f5364864-89f0-457d-a1c9-490a7e12bb76', 'LG 냉장고', 'NORMAL', 400, NOW(), NOW()),
+     '523fb2fd-57e4-400b-b063-c15e4aebcf88', 'LG 냉장고', 'NORMAL', 1000, NOW(), NOW()),
     (uuid_generate_v4(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', uuid_generate_v4(), '농심',
-     '0c0ff925-0cfc-4b54-9945-f2713d1b673f', '신라면', 'NORMAL', 400, NOW(), NOW()),
+     '0c0ff925-0cfc-4b54-9945-f2713d1b673f', '신라면', 'NORMAL', 1000, NOW(), NOW()),
 
     -- 스포크 허브 상품 (전라북도 허브)
     (uuid_generate_v4(), 'ffffffff-ffff-ffff-ffff-ffffffffffff', uuid_generate_v4(), '이케아',
