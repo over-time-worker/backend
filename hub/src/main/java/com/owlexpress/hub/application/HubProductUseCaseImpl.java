@@ -282,7 +282,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                     firstAttemptTime = System.currentTimeMillis();
                 }
                 for (int attempts = 0; attempts < MAX_RETRY; attempts++) {
-                    available = orderLock.tryLock(100L, 300L, TimeUnit.MILLISECONDS);
+                    available = orderLock.tryLock(100L, 200L, TimeUnit.MILLISECONDS);
 
                     if (available) {
                         break;
@@ -338,7 +338,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
 
                                 // 감소시킬 재고가 모두 있으면
                                 try {
-                                    reduceStock(hubProductStocks, productByProductId);
+                                    reduceStock(hubProductStocks, productByProductId, orderLock);
                                     return byHubProductsByProductId;
                                 } catch (Exception e) {
                                     log.error("{} - 재고 감소 중 문제 발생 : {}", threadName, e.getMessage());
@@ -372,30 +372,32 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 break;
             } catch (InterruptedException e) {
                 log.error("락 획득 시도 중 문제 발생 : {}", e.getCause().getMessage());
-                throw new LockAcquisitionFailedException(threadName);
-            } catch (LockAcquisitionFailedException e) {
-                log.error("락 획득 실패 -> {}, {}", threadName, Arrays.stream(lockKeys).map(RLock::getName).collect(Collectors.joining(",")));
-            }
-            finally {
-                try {
-                    orderLock.unlock();
-                    long end = System.currentTimeMillis();
-                    log.info(
-                            "락 총 대기 시간 = {}ms, 락 보유 시간 = {}ms, 총 소요 시간 = {}ms",
-                            lockAcquiredTime - firstAttemptTime,
-                            end - lockAcquiredTime,
-                            end - start_transaction);
-                    long lockHoldTime = end - lockAcquiredTime;
-                    if(lockHoldTime > 500L){
-                        log.error("락 보유 시간 초과 : {}-{}ms", threadName, lockHoldTime);
+//                throw new LockAcquisitionFailedException(threadName);
+            } catch (LockAcquisitionFailedException lae) {
+                StringBuilder sb = new StringBuilder();
+                for(RLock lockKey : lockKeys){
+                    sb.append(lockKey.getName()).append(",");
+                }
+                log.error("락 획득 실패 -> {}, {}", threadName, sb);
+            } finally {
+                for(RLock lock : lockKeys) {
+                    try{
+                        if(!lock.isHeldByCurrentThread() || !lock.isLocked()) {
+                            continue;
+                        }
+                        lock.unlock();
+                    } catch (IllegalMonitorStateException e) {
+                        log.error("{} - {} : 락 미보유 혹은 이미 반환됨.",threadName, lock.getName());
+                    } catch (Exception e) {
+                        log.error("{} - {} : 예상치 못한 예외 발생", threadName, lock.getName());
                     }
-//                    log.info("{} - 락 해제 완료", threadName);
-                } catch (IllegalMonitorStateException e) {
-                    log.error("{} - 락 미보유 혹은 이미 반환 완료", threadName);
                 }
-                catch (Exception e) {
-                    log.warn("{} - 예상치 못한 예외 발생", threadName);
-                }
+//                long end = System.currentTimeMillis();
+//                log.info(
+//                        "락 총 대기 시간 = {}ms, 락 보유 시간 = {}ms, 총 소요 시간 = {}ms",
+//                        lockAcquiredTime - firstAttemptTime,
+//                        end - lockAcquiredTime,
+//                        end - start_transaction);
             }
         }
         if (res != null) {
@@ -419,16 +421,24 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             );
     }
 
-    protected void reduceStock(List<HubProduct> toBeApply, Map<UUID, Product> productByProductId) {
-
+    protected void reduceStock(List<HubProduct> toBeApply, Map<UUID, Product> productByProductId, RLock orderLock) {
+        String threadName = Thread.currentThread().getName();
         // 트랜잭션 추적
-//        TransactionSynchronizationManager.registerSynchronization(
-//            new TransactionSynchronization() {
-//                @Override
-//                public void afterCommit() {
-//                    log.info("{} 트랜잭션 커밋 완료", Thread.currentThread().getName());
-//                }
-//            });
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        orderLock.unlock();
+                        log.info("락 해제 완료 - {}", threadName);
+                    } catch (IllegalMonitorStateException e) {
+                        log.error("{} - 락 미보유 혹은 이미 반환 완료", threadName);
+                    }
+                    catch (Exception e) {
+                        log.warn("{} - 예상치 못한 예외 발생", threadName);
+                    }
+                }
+            });
 
         // TODO : 더티 체킹 사용 하지 않게 변경
 
