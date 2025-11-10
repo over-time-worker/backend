@@ -16,4 +16,6 @@ public interface HubProductRepository {
     Optional<HubProduct> findByHubProductId(UUID hubProductId);
 
     List<HubProduct> findAllHubProductsIn(List<UUID> productIds);
+
+    int decreaseStock(int quantity, UUID hubProductId);
 }

@@ -224,8 +224,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
     }
 
     protected HubProductOrderConfirmResponseDto confirmOrderWithResponse(
-        OrderConfirmRequestDto
-            requestDto, List<Product> orderProducts, List<UUID> productIds) {
+        OrderConfirmRequestDto requestDto, List<Product> orderProducts, List<UUID> productIds) {
         HubProductOrderConfirmResponseDto res = null;
         long start_transaction = System.currentTimeMillis();
         long firstAttemptTime = 0, lockAcquiredTime = 0;
@@ -300,46 +299,42 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 }
                 lockAcquiredTime = System.currentTimeMillis();
 
-                Map<UUID, HubProduct> byProductId = transactionTemplate.execute(
-                        new TransactionCallback<Map<UUID, HubProduct>>() {
+//                 log.info("{} - {}에서 상품 재고 조회", threadName, currentHubId);
+                List<HubProduct> hubProductStocks = hubRepository.findHubProductStocks(hubProductsInCurrentHub);
+
+                Map<UUID, HubProduct> byHubProductsByProductId = hubProductStocks
+                        .stream()
+                        .collect(
+                                Collectors.toUnmodifiableMap(HubProduct::getProductId,
+                                        Function.identity())
+                        );
+
+                boolean isAllProductEnough = true;
+
+                for (OrderConfirmRequestDto.Product desiredProduct : requestDto.getOrderProducts()) {
+
+                    HubProduct real = byHubProductsByProductId.get(desiredProduct.getProductId());
+
+                    // 재고가 부족하면 탐색 X.
+                    if (desiredProduct.getQuantity() > real.getProductStock()) {
+                        isAllProductEnough = false;
+                        break;
+                    }
+
+                }
+
+                // 모든 재고가 충분치 않으면 다음 허브 탐색
+                if (!isAllProductEnough) {
+                    continue;
+                }
+
+                Long updatedCount = transactionTemplate.execute(
+                        new TransactionCallback<Long>() {
                             @Override
-                            public Map<UUID, HubProduct> doInTransaction(TransactionStatus status) {
-
-//                            log.info("{} - {}에서 상품 재고 조회", threadName, currentHubId);
-
-                                List<HubProduct> hubProductStocks = hubRepository.findHubProductStocks(
-                                        hubProductsInCurrentHub);
-                                Map<UUID, HubProduct> byHubProductsByProductId = hubProductStocks
-                                        .stream()
-                                        .collect(
-                                                Collectors.toUnmodifiableMap(HubProduct::getProductId,
-                                                        Function.identity())
-                                        );
-
-                                boolean isAllProductEnough = true;
-
-                                for (OrderConfirmRequestDto.Product desiredProduct : requestDto.getOrderProducts()) {
-
-                                    HubProduct real = byHubProductsByProductId.get(
-                                            desiredProduct.getProductId());
-
-                                    // 재고가 부족하면 탐색 X.
-                                    if (desiredProduct.getQuantity() > real.getProductStock()) {
-                                        isAllProductEnough = false;
-                                        break;
-                                    }
-
-                                }
-
-                                // 모든 재고가 충분치 않으면 다음 허브 탐색
-                                if (!isAllProductEnough) {
-                                    return Collections.emptyMap();
-                                }
-
+                            public Long doInTransaction(TransactionStatus status) {
                                 // 감소시킬 재고가 모두 있으면
                                 try {
-                                    reduceStock(hubProductStocks, productByProductId, orderLock);
-                                    return byHubProductsByProductId;
+                                    return reduceStock(hubProductStocks, productByProductId, orderLock);
                                 } catch (Exception e) {
                                     log.error("{} - 재고 감소 중 문제 발생 : {}", threadName, e.getMessage());
                                     throw e;
@@ -347,7 +342,8 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                             }
                         });
 
-                if (byProductId.isEmpty()) {
+                // 주문한 상품만큼 안되면
+                if (updatedCount == null || updatedCount != byHubProductsByProductId.size()) {
                     continue;
                 }
                 // 반환할 DTO 준비
@@ -359,7 +355,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
 
                 // 반환 DTO에 넣기
                 for (OrderConfirmRequestDto.Product desired : requestDto.getOrderProducts()) {
-                    HubProduct real = byProductId.get(desired.getProductId());
+                    HubProduct real = byHubProductsByProductId.get(desired.getProductId());
                     ConfirmedHubProductResponseDto confirmed = ConfirmedHubProductResponseDto.builder()
                             .hubProductId(real.getHubProductId())
                             .productName(real.getProductName())
@@ -421,7 +417,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             );
     }
 
-    protected void reduceStock(List<HubProduct> toBeApply, Map<UUID, Product> productByProductId, RLock orderLock) {
+    protected Long reduceStock(List<HubProduct> toBeApply, Map<UUID, Product> productByProductId, RLock orderLock) {
         String threadName = Thread.currentThread().getName();
         // 트랜잭션 추적
         TransactionSynchronizationManager.registerSynchronization(
@@ -439,20 +435,16 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                     }
                 }
             });
-
-        // TODO : 더티 체킹 사용 하지 않게 변경
-
+        long res = 0;
         for (HubProduct hubProduct : toBeApply) {
             // 상품 ID로 요청 수량 찾아오기
-            Product product =
-                productByProductId.getOrDefault(hubProduct.getProductId(), null);
+            Product product = productByProductId.get(hubProduct.getProductId());
 
-            if (product == null) {
-                continue;
-            }
             // 요청 수량만큼 재고 감소시킴
-            hubProduct.reduceStock(product.getQuantity());
+//            hubProduct.reduceStock(product.getQuantity());
+            res += hubProductRepository.decreaseStock(product.getQuantity(), hubProduct.getHubProductId());
         }
+        return res;
     }
 
     private void cacheReducedProducts(UUID

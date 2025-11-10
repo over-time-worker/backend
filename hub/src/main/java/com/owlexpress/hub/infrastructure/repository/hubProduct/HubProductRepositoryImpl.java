@@ -39,4 +39,9 @@ public class HubProductRepositoryImpl implements HubProductRepository {
     public List<HubProduct> findAllHubProductsIn(List<UUID> productIds) {
         return hubProductJpaRepository.findAllByHubProductIdIn(productIds);
     }
+
+    @Override
+    public int decreaseStock(int quantity, UUID hubProductId){
+        return hubProductJpaRepository.decreaseStock(quantity, hubProductId);
+    }
 }
