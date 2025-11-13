@@ -29,6 +29,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -62,6 +64,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
     private final RedissonClient redissonClient; // 분산 락 적용
     private final TransactionTemplate transactionTemplate; // 트랜잭션 경계 설정
     private final RedisTemplate<String, Object> reducedProducts; // 주문 ID : [{허브 상품 ID : 개수}, ...]
+    private final MeterRegistry meterRegistry;
 
     @Override
     public HubProduct create(
@@ -233,7 +236,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             requestDto.getLongitude()
         );
         String threadName = Thread.currentThread().getName();
-
+        StringBuilder sb = new StringBuilder();
         // 상품 재고 파악용
         Map<UUID, Product> productByProductId = orderProducts
             .stream()
@@ -281,7 +284,7 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                     firstAttemptTime = System.currentTimeMillis();
                 }
                 for (int attempts = 0; attempts < MAX_RETRY; attempts++) {
-                    available = orderLock.tryLock(100L, 200L, TimeUnit.MILLISECONDS);
+                    available = orderLock.tryLock(50L, 200L, TimeUnit.MILLISECONDS);
 
                     if (available) {
                         break;
@@ -291,6 +294,10 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                     Thread.sleep(backOfMillis);
                 }
 
+                sb = new StringBuilder();
+                for(RLock lockKey : lockKeys){
+                    sb.append(lockKey.getName()).append(",");
+                }
                 // 락 획득 실패 시 예외
                 if (!available) {
                     // TODO: fallback 전략 추가 => RedisStream
@@ -328,13 +335,14 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                     continue;
                 }
 
+                long finalLockAcquiredTime = lockAcquiredTime;
                 Long updatedCount = transactionTemplate.execute(
                         new TransactionCallback<Long>() {
                             @Override
                             public Long doInTransaction(TransactionStatus status) {
                                 // 감소시킬 재고가 모두 있으면
                                 try {
-                                    return reduceStock(hubProductStocks, productByProductId, orderLock);
+                                    return reduceStock(hubProductStocks, productByProductId, lockKeys, finalLockAcquiredTime);
                                 } catch (Exception e) {
                                     log.error("{} - 재고 감소 중 문제 발생 : {}", threadName, e.getMessage());
                                     throw e;
@@ -370,11 +378,8 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                 log.error("락 획득 시도 중 문제 발생 : {}", e.getCause().getMessage());
 //                throw new LockAcquisitionFailedException(threadName);
             } catch (LockAcquisitionFailedException lae) {
-                StringBuilder sb = new StringBuilder();
-                for(RLock lockKey : lockKeys){
-                    sb.append(lockKey.getName()).append(",");
-                }
-                log.error("락 획득 실패 -> {}, {}", threadName, sb);
+//                log.error("락 획득 실패 -> {}, {}", threadName, sb);
+                meterRegistry.counter("lockAcquisitionFailed"+ sb).increment();
             } finally {
                 for(RLock lock : lockKeys) {
                     try{
@@ -388,7 +393,12 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
                         log.error("{} - {} : 예상치 못한 예외 발생", threadName, lock.getName());
                     }
                 }
-//                long end = System.currentTimeMillis();
+
+                long end = System.currentTimeMillis();
+                meterRegistry.timer("lock_acquired_time_millis", "key", sb.toString())
+                        .record(lockAcquiredTime - firstAttemptTime, TimeUnit.MILLISECONDS);
+                meterRegistry.timer("total_response_time_millis", "key", sb.toString())
+                        .record(end - start_transaction, TimeUnit.MILLISECONDS);
 //                log.info(
 //                        "락 총 대기 시간 = {}ms, 락 보유 시간 = {}ms, 총 소요 시간 = {}ms",
 //                        lockAcquiredTime - firstAttemptTime,
@@ -417,21 +427,26 @@ public class HubProductUseCaseImpl implements HubProductUseCase {
             );
     }
 
-    protected Long reduceStock(List<HubProduct> toBeApply, Map<UUID, Product> productByProductId, RLock orderLock) {
+    protected Long reduceStock(List<HubProduct> toBeApply, Map<UUID, Product> productByProductId, RLock[] lockKeys, long lockAcquiredTime){
         String threadName = Thread.currentThread().getName();
         // 트랜잭션 추적
         TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    try {
-                        orderLock.unlock();
-                        log.info("락 해제 완료 - {}", threadName);
-                    } catch (IllegalMonitorStateException e) {
-                        log.error("{} - 락 미보유 혹은 이미 반환 완료", threadName);
-                    }
-                    catch (Exception e) {
-                        log.warn("{} - 예상치 못한 예외 발생", threadName);
+                    for(RLock lock : lockKeys) {
+                        try{
+                            if(!lock.isHeldByCurrentThread() || !lock.isLocked()) {
+                                continue;
+                            }
+                            lock.unlock();
+                            meterRegistry.timer("lock_hold_time_millis", "key", lock.getName())
+                                    .record(System.currentTimeMillis() - lockAcquiredTime, TimeUnit.MILLISECONDS);
+                        } catch (IllegalMonitorStateException e) {
+                            log.error("{} - {} : 락 미보유 혹은 이미 반환됨.",threadName, lock.getName());
+                        } catch (Exception e) {
+                            log.error("{} - {} : 예상치 못한 예외 발생", threadName, lock.getName());
+                        }
                     }
                 }
             });
