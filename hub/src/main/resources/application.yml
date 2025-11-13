@@ -6,7 +6,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6378}
+      port: ${REDIS_PORT:6509}
   cloud:
     openfeign:
       client:
@@ -34,20 +34,21 @@ spring:
   # JPA 설정
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
-      #      hibernate:
+      hibernate:
+        order_updates: true
       #        show_sql: true
-      #        format_sql: true
+#        format_sql: true
       jdbc:
-        batch_size: 100
+        batch_size: 50
     database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
     open-in-view: false
 
-  logging:
-    logstash:
-      host: ${LOGSTASH_HOST:localhost}
-      port: ${LOGSTASH_PORT:5044}
+#  logging:
+#    logstash:
+#      host: ${LOGSTASH_HOST:localhost}
+#      port: ${LOGSTASH_PORT:5044}
     #  level:
     #    org.springframework.orm.jpa: DEBUG
     #    org.springframework.transaction.interceptor: TRACE
@@ -66,9 +67,9 @@ management:
   #  zipkin:
   #    tracing:
   #      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
-  tracing:
-    sampling:
-      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+#  tracing:
+#    sampling:
+#      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
 
 eureka:
   instance:
@@ -86,10 +87,12 @@ server:
     mbeanregistry:
       enabled: true
     threads:
-      max: 64
+      max: 32
+      min-spare: 8
     accept-count: 200
     max-connections: 3000
     connection-timeout: 5s
+    keep-alive-timeout: 5s
 
 naver:
   client-id: ${NAVER_CLIENT_ID}

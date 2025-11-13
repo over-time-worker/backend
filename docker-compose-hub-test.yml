@@ -1,0 +1,40 @@
+services:
+  grafana:
+    image: grafana/grafana
+    platform: linux/arm64
+    ports:
+      - "3000:3000"
+    networks:
+      - overtime_network
+    environment:
+      PROMETHEUS_HOST: ${PROMETHEUS_HOST}
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+
+  influxdb:
+    image: influxdb:2
+    platform: linux/arm64
+    ports:
+      - '8086:8086'
+    networks:
+      - overtime_network
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: test
+      DOCKER_INFLUXDB_INIT_PASSWORD: test-password
+      DOCKER_INFLUXDB_INIT_ORG: test-org
+      DOCKER_INFLUXDB_INIT_BUCKET: test-bucket
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: MY-TEST-ADMIN-TOKEN
+    volumes:
+      - ./data:/var/lib/influxdb2
+      - ./config:/etc/influxdb2
+
+
+networks:
+  overtime_network:
+    driver: bridge
+
+  grafana_data:
+  influxdb_data:

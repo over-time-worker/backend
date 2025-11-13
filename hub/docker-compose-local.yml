@@ -3,7 +3,7 @@ services:
     image: redis:latest
     container_name: redis
     ports:
-      - "6378:6379"
+      - "6509:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -50,30 +50,17 @@ services:
     image: prom/prometheus
     platform: linux/arm64
     ports:
-      - "9090:9090"
+      - "39090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - overtime_network
 
-  grafana:
-    image: grafana/grafana
-    platform: linux/arm64
-    ports:
-      - "3000:3000"
-    networks:
-      - overtime_network
-    depends_on:
-      - prometheus
-    volumes:
-      - ../grafana/provisioning:/etc/grafana/provisioning
-      - ../grafana/provisioning/dashboards:/var/lib/grafana/dashboards
-
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
     ports:
-      - "9100:9100"
+      - "39100:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro

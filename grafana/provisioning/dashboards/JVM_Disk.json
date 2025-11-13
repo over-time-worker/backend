@@ -3751,10 +3751,6 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "host.docker.internal:19081",
-          "value": "host.docker.internal:19081"
-        },
         "datasource": "prometheus-main",
         "includeAll": false,
         "label": "Instance",

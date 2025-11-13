@@ -4,8 +4,22 @@ datasources:
   - name: OwlExpress-prometheus
     type: prometheus
     access: proxy
-    url: http://host.docker.internal:9090
+    url: http://${PROMETHEUS_HOST}:39090
     isDefault: true
     uid: prometheus-main
     jsonData:
       timeInterval: 5s
+  
+  - name: OwlExpress-influxDB
+    type: influxdb
+    url: http://host.docker.internal:8086
+    basicAuth: true
+    basicAuthUser: test
+    secureJsonData:
+      token: ${INFLUXDB_TOKEN}
+      basicAuthPassword: test-password
+    uid: influxdb-main
+    jsonData:
+      version: Flux
+      organization: test-org
+      defaultBucket: test-bucket
