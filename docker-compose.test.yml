@@ -1,0 +1,79 @@
+services:
+  server:
+    image: owl-express-registry.kr.ncr.ntruss.com/server:260216-f35896
+    platform: linux/amd64
+    container_name: eureka
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+    ports:
+      - "19080:19080"
+    restart: on-failure:3
+    networks:
+      - overtime_network
+
+  gateway-service:
+    image: owl-express-registry.kr.ncr.ntruss.com/gateway:260216-f35896
+    platform: linux/amd64
+    container_name: gateway
+    environment:
+      - GATEWAY_SERVER_PORT=${GATEWAY_SERVER_PORT}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+    ports:
+      - "19081:19081"
+    networks:
+      - overtime_network
+
+  hub-service:
+    image: owl-express-registry.kr.ncr.ntruss.com/hub:260216-f35896
+    platform: linux/amd64
+    container_name: hub
+    environment:
+      - HUB_SERVER_PORT=${HUB_SERVER_PORT}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - HUB_POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+      - LOGSTASH_PORT=${LOGSTASH_PORT}
+    ports:
+      - "19088:19088"
+    volumes:
+      - ./owl-log/logs:/workspace/owl-log/logs
+    networks:
+      - overtime_network
+
+  prometheus:
+    image: prom/prometheus
+    platform: linux/amd64
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./hub/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus-data:/prometheus
+    networks:
+      - overtime_network
+
+  grafana:
+    image: grafana/grafana
+    platform: linux/amd64
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - overtime_network
+
+networks:
+  overtime_network:
+    driver: bridge

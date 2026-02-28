@@ -8,4 +8,4 @@ datasources:
     isDefault: true
     uid: prometheus-main
     jsonData:
-      timeInterval: 5s
+      timeInterval: 15s

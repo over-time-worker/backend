@@ -81,6 +81,10 @@ spring:
 
 eureka:
   instance:
+    prefer-ip-address: true
+    ip-address: ${IP_ADDRESS}
+    instance-id:
+      ${eureka.instance.ip-address}:${spring.application.name}:${server.port}
     metadataMap:
       prometheus.scrape: "true"
       prometheus.path: "/actuator/prometheus"

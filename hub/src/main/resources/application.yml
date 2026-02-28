@@ -36,7 +36,8 @@ spring:
     hibernate:
       ddl-auto: update
     properties:
-      #      hibernate:
+      hibernate:
+        generate_statistics: true
       #        show_sql: true
       #        format_sql: true
       jdbc:
@@ -63,6 +64,10 @@ management:
     distribution:
       percentiles-histogram:
         all: true
+    enable:
+      hibernate: true # 하이버네이트 메트릭 노출 허용
+    tags:
+      application: hub # 대시 보드 쿼리 쉽게
   #  zipkin:
   #    tracing:
   #      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
@@ -72,6 +77,10 @@ management:
 
 eureka:
   instance:
+    prefer-ip-address: true
+    ip-address: ${IP_ADDRESS}
+    instance-id:
+      ${eureka.instance.ip-address}:${spring.application.name}:${server.port}
     metadataMap:
       prometheus.scrape: "true"
       prometheus.path: "/actuator/prometheus"
@@ -86,7 +95,7 @@ server:
     mbeanregistry:
       enabled: true
     threads:
-      max: 64
+      max: 200
     accept-count: 200
     max-connections: 3000
     connection-timeout: 5s
